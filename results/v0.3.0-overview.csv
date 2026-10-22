@@ -1,0 +1,9 @@
+algorithm,late_95_miss_mean_probes,exact_p99_update_pair_mean_probes,worst_update_pair_observed_probes,mean_rebuilds_per_seed
+robin_hood,10.33643,1552.66667,4245,0
+linear_backshift,162.00322,1563.16667,4227,0
+linear_tombstone,4096,4448.16667,5376,0
+linear_rebuild_2pct,216.33593,1554.83333,107188,365.5
+linear_rebuild_8pct,4096,4448.16667,5376,0
+linear_rebuild_half_slack,234.62226,1589.16667,105272,250.66667
+bounded_repair_8,4096,4445.33333,5309,0
+bounded_repair_32,4096,4419.33333,5426,0
