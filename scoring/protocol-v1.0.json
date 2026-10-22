@@ -1,0 +1,26 @@
+{
+  "score_version": "HF-Score/1.0",
+  "track": "cpu_dynamic",
+  "dataset_kind": "measurement",
+  "hardware_id": "PINNED_HARDWARE_ID_REQUIRED_BEFORE_FORMAL_RUN",
+  "reference": "robin_hood",
+  "algorithms": ["robin_hood", "zombie_hashing", "tpht", "bubble_up_cuckoo"],
+  "metric_unit_policy": "positive_lower_is_better",
+  "metric_weights": {
+    "build_ns_per_key": 0.15,
+    "hit_ns_per_op": 0.20,
+    "miss_ns_per_op": 0.15,
+    "insert_ns_per_op": 0.15,
+    "delete_ns_per_op": 0.10,
+    "update_p99_ns": 0.10,
+    "bytes_per_key": 0.15
+  },
+  "stability_lambda": 0.25,
+  "scenarios": [
+    {"id": "uniform_load_70_read95", "weight": 0.25},
+    {"id": "uniform_load_95_churn50", "weight": 0.25},
+    {"id": "zipf_load_85_read95", "weight": 0.25},
+    {"id": "hotshift_load_95_churn50", "weight": 0.25}
+  ],
+  "seeds": [101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130]
+}

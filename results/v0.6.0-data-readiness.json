@@ -1,0 +1,97 @@
+{
+  "report_version": "HF-Score/1.0-readiness",
+  "report_date": "2026-10-22",
+  "formal_cross_paper_scores_available": false,
+  "reason": "Historical CSVs are not a complete seven-metric CPU-dynamic cross-paper, matched-trace 30-seed matrix. No missing metrics inferred.",
+  "sampled_existing_data": [
+    {
+      "version": "v0.1.0",
+      "file": "results/v0.1.0-local.csv",
+      "records": 810,
+      "available_columns": [
+        "algorithm",
+        "pattern",
+        "seed",
+        "load",
+        "capacity",
+        "size",
+        "phase",
+        "operations",
+        "elapsed_ns",
+        "ns_per_op",
+        "probes_per_op",
+        "moves_per_op",
+        "allocated_bytes"
+      ],
+      "missing_canonical_metrics": [
+        "build_ns_per_key",
+        "hit_ns_per_op",
+        "miss_ns_per_op",
+        "insert_ns_per_op",
+        "delete_ns_per_op",
+        "update_p99_ns",
+        "bytes_per_key"
+      ],
+      "formal_hf_score_eligible": false
+    },
+    {
+      "version": "v0.2.0",
+      "file": "results/v0.2.0-churn.csv",
+      "records": 1080,
+      "available_columns": [
+        "algorithm",
+        "load_pct",
+        "seed",
+        "cycle",
+        "capacity",
+        "size",
+        "update_pairs",
+        "hit_probes_per_op",
+        "miss_probes_per_op",
+        "update_probes_per_pair",
+        "p99_update_probes",
+        "max_update_probes",
+        "pair_mean_ns",
+        "p99_pair_ns",
+        "max_pair_ns",
+        "moves",
+        "rebuilds",
+        "steady_slot_bytes"
+      ],
+      "missing_canonical_metrics": [
+        "build_ns_per_key",
+        "hit_ns_per_op",
+        "miss_ns_per_op",
+        "insert_ns_per_op",
+        "delete_ns_per_op",
+        "update_p99_ns",
+        "bytes_per_key"
+      ],
+      "formal_hf_score_eligible": false
+    },
+    {
+      "version": "v0.5.0",
+      "file": "results/v0.5.0-v04-incident.csv",
+      "records": 16,
+      "available_columns": [
+        "load",
+        "repeat",
+        "variant",
+        "status",
+        "completed_cycles",
+        "phase_rows"
+      ],
+      "missing_canonical_metrics": [
+        "build_ns_per_key",
+        "hit_ns_per_op",
+        "miss_ns_per_op",
+        "insert_ns_per_op",
+        "delete_ns_per_op",
+        "update_p99_ns",
+        "bytes_per_key"
+      ],
+      "formal_hf_score_eligible": false
+    }
+  ],
+  "next_data_requirement": "Preregister hardware, unified operation-trace artifacts and complete all seven metric measurements for every method×scenario×seed."
+}

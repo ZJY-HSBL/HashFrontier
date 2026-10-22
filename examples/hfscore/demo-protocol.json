@@ -1,0 +1,37 @@
+{
+  "score_version": "HF-Score/1.0",
+  "track": "cpu_dynamic",
+  "dataset_kind": "synthetic_fixture",
+  "hardware_id": "synthetic-demo-not-hardware",
+  "reference": "robin_hood",
+  "algorithms": [
+    "robin_hood",
+    "candidate_demo"
+  ],
+  "metric_unit_policy": "positive_lower_is_better",
+  "metric_weights": {
+    "build_ns_per_key": 0.15,
+    "hit_ns_per_op": 0.2,
+    "miss_ns_per_op": 0.15,
+    "insert_ns_per_op": 0.15,
+    "delete_ns_per_op": 0.1,
+    "update_p99_ns": 0.1,
+    "bytes_per_key": 0.15
+  },
+  "stability_lambda": 0.25,
+  "scenarios": [
+    {
+      "id": "demo_uniform",
+      "weight": 0.5
+    },
+    {
+      "id": "demo_skew",
+      "weight": 0.5
+    }
+  ],
+  "seeds": [
+    1,
+    2,
+    3
+  ]
+}

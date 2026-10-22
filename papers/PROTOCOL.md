@@ -23,3 +23,7 @@ Dynamic sequential set tables, concurrent tables, static minimal-perfect hash fu
 ## Next screening actions
 
 Expand proceedings scans across 2025/2026 STOC/FOCS/SODA/SIGMOD/VLDB (and Q1/Q2 verified venues), log inclusion/exclusion and DOI. Start Zombie Hashing with authors' available reference implementation if license and behavior permit; reproduce its own published test conditions before any cross-method comparisons.
+
+## Fixed composite-score method
+
+HF-Score v1.0 is defined by [`scoring/PROTOCOL.md`](../scoring/PROTOCOL.md). Formal ranking is prohibited until all seven canonical metrics, preregistered scenarios and 30 paired seeds are present, after oracle correctness gates. Classic baselines and paper reproductions remain explicitly distinguished.

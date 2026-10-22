@@ -19,6 +19,12 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_native_audit.py" -v
       - name: Paired trace instrumentation and audit regressions
         run: python3 -m unittest discover -s tests -p "test_paired_native.py" -v
+      - name: HF-Score strict scoring regressions
+        run: python3 -m unittest discover -s tests -p "test_hf_score.py" -v
+      - name: Verify synthetic demonstration cannot claim measured evidence
+        run: |
+          python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json --observations examples/hfscore/demo-input.csv --output hfscore-ci.json --csv-output hfscore-ci.csv
+          python3 -c "import json; d=json.load(open('hfscore-ci.json')); assert d['evidence_level']=='synthetic_fixture_not_evidence' and d['results'][0]['score']==100"
       - name: Small benchmark smoke
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows

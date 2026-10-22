@@ -17,6 +17,7 @@ jobs:
           ctest --test-dir build --output-on-failure
           python3 -m unittest discover -s tests -p "test_native_audit.py" -v
           python3 -m unittest discover -s tests -p "test_paired_native.py" -v
+          python3 -m unittest discover -s tests -p "test_hf_score.py" -v
       - name: Publish tagged source and evidence
         env:
           GH_TOKEN: ${{ github.token }}
@@ -31,6 +32,7 @@ jobs:
             v0.3.0) assets=(results/v0.3.0-churn-ci.csv.gz results/v0.3.0-tail-ci.csv results/v0.3.0-tail.csv results/v0.3.0-summary.csv results/v0.3.0-paired.csv results/v0.3.0-environment.json results/v0.3.0-ci-runtime.txt); title="320-cycle bounded-repair falsification and author-native gate" ;;
             v0.4.0) assets=(results/v0.4.0-author-v03-audit/audit.csv results/v0.4.0-author-v03-audit/audit.json results/v0.4.0-author-v03-audit/native-cycles.csv results/v0.4.0-author-v03-audit/native-summary.csv figures/v0.4.0-native-insert-trends.svg figures/v0.4.0-native-phase-median.svg); title="native-paper-source completion audit and measured failure" ;;
             v0.5.0) assets=(results/v0.5.0-v04-incident.csv results/v0.5.0-v04-provenance.json figures/v0.5.0-v04-incident.svg); title="trace pairing infrastructure and high-load crash audit" ;;
+            v0.6.0) assets=(scoring/protocol-v1.0.json scoring/PROTOCOL.md results/v0.6.0-data-readiness.json examples/hfscore/demo-score.json); title="strict seven-metric HF-Score protocol and data eligibility gates" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then

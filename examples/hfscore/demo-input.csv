@@ -1,0 +1,13 @@
+algorithm,scenario,seed,track,hardware_id,trace_sha256,status,correct,build_ns_per_key,hit_ns_per_op,miss_ns_per_op,insert_ns_per_op,delete_ns_per_op,update_p99_ns,bytes_per_key
+robin_hood,demo_uniform,1,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,101,201,301,401,501,601,701
+candidate_demo,demo_uniform,1,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,81.0,161.0,241.0,321.0,401.0,481.0,561.0
+robin_hood,demo_uniform,2,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,102,202,302,402,502,602,702
+candidate_demo,demo_uniform,2,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,82.0,162.0,242.0,322.0,402.0,482.0,562.0
+robin_hood,demo_uniform,3,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,103,203,303,403,503,603,703
+candidate_demo,demo_uniform,3,cpu_dynamic,synthetic-demo-not-hardware,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,complete,true,83.0,163.0,243.0,323.0,403.0,483.0,563.0
+robin_hood,demo_skew,1,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,101,201,301,401,501,601,701
+candidate_demo,demo_skew,1,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,96.0,191.0,286.0,381.0,476.0,571.0,666.0
+robin_hood,demo_skew,2,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,102,202,302,402,502,602,702
+candidate_demo,demo_skew,2,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,97.0,192.0,287.0,382.0,477.0,572.0,667.0
+robin_hood,demo_skew,3,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,103,203,303,403,503,603,703
+candidate_demo,demo_skew,3,cpu_dynamic,synthetic-demo-not-hardware,bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,complete,true,98.0,193.0,288.0,383.0,478.0,573.0,668.0

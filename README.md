@@ -5,6 +5,36 @@
 
 [![Validate and benchmark](https://github.com/ZJY-HSBL/HashFrontier/actions/workflows/ci.yml/badge.svg)](https://github.com/ZJY-HSBL/HashFrontier/actions/workflows/ci.yml) · [Releases](https://github.com/ZJY-HSBL/HashFrontier/releases) · [Paper registry](papers/registry.csv)
 
+## HF-Score v1.0 | 统一综合评价标准（v0.6.0）
+
+**评分协议已实现并冻结基础公式，但目前没有合格的真实跨论文综合排名。** 先通过差分正确性和全部强制工作负载，再采用同硬件、同 seed、**同操作轨迹 SHA-256** 的配对测量；静态完美散列、GPU 和并发算法另设赛道。
+
+| 统一指标（均越低越好） | 权重 |
+|---|---:|
+| 构造 ns/key | 15% |
+| 成功查询 ns/op | 20% |
+| 失败查询 ns/op | 15% |
+| 插入 ns/op | 15% |
+| 删除 ns/op | 10% |
+| 单次更新延迟 P99（ns） | 10% |
+| 完整内存 bytes/key | 15% |
+
+HF-Score 首先以 `robin_hood` 为预注册参考，对七项测量取带权对数速度收益，在预注册场景间惩罚不均衡：`100 × exp(加权场景平均对数收益 − 0.25 × 场景对数收益标准差)`。基线得分 100；**分数不是正确率，也不以 100 为上限**。低于 30 个完整配对随机种子的结果只能标为探索性，权重与场景设置必须在实验前固定；完整指标缺失、算法崩溃、轨迹不一致时不予排名。
+
+- [详细定义与数学公式](scoring/PROTOCOL.md) · [预注册 JSON](scoring/protocol-v1.0.json) · [评测程序](scoring/hf_score.py) · [历史数据完整性报告](results/v0.6.0-data-readiness.json)
+- [只用于验证工具的人工合成示例（不是论文实验）](examples/hfscore/demo-score.json)
+
+```bash
+python3 -m unittest discover -s tests -p 'test_hf_score.py' -v
+python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
+  --observations examples/hfscore/demo-input.csv \
+  --output /tmp/hfscore-demo.json --csv-output /tmp/hfscore-demo.csv
+# 正式评分：将协议中的 hardware_id、scenario/seed 清单与输入 CSV
+# 替换为完成过全部正确性测试的真实统一实验数据，再运行同一程序。
+```
+
+**重要：**以往 v0.1.0—v0.5.0 的数据尚未将插入、删除、单次更新纳秒 P99 与完整内存口径全部分离，更没有多篇论文共用的完整 30-seed 矩阵，不能拼接旧 CSV 虚构综合排名。下一步仍是**忠实复现 Zombie Hashing、TPHT 和 Bubble-up Cuckoo 并使用统一操作轨迹测试**。
+
 ## 中文 | 研究目标
 
 通过 **2025-01-01—2026-10-22 高水平论文筛选 → 逐篇正确复现 → 统一负载评测 → 数据驱动机制设计 → 独立确认**，研究在构造耗时、成功/失败查询、动态插删、尾部延迟、空间开销之间具有稳健 Pareto 表现的散列表。核心方法优先不依赖机器学习。

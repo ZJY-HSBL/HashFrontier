@@ -1,0 +1,52 @@
+{
+  "score_version": "HF-Score/1.0",
+  "track": "cpu_dynamic",
+  "dataset_kind": "synthetic_fixture",
+  "evidence_level": "synthetic_fixture_not_evidence",
+  "reference": "robin_hood",
+  "hardware_id": "synthetic-demo-not-hardware",
+  "num_scenarios": 2,
+  "num_seeds": 3,
+  "expected_rows": 12,
+  "observed_rows": 12,
+  "metric_weights": {
+    "build_ns_per_key": 0.15,
+    "hit_ns_per_op": 0.2,
+    "miss_ns_per_op": 0.15,
+    "insert_ns_per_op": 0.15,
+    "delete_ns_per_op": 0.1,
+    "update_p99_ns": 0.1,
+    "bytes_per_key": 0.15
+  },
+  "stability_lambda": 0.25,
+  "results": [
+    {
+      "algorithm": "robin_hood",
+      "eligible": true,
+      "missing_or_failed_count": 0,
+      "missing_or_failed_examples": [],
+      "score": 100.0,
+      "ci95": null,
+      "mean_log_gain": 0.0,
+      "scenario_log_gain_sd": 0.0,
+      "scene_log_gains": {
+        "demo_uniform": 0.0,
+        "demo_skew": 0.0
+      }
+    },
+    {
+      "algorithm": "candidate_demo",
+      "eligible": true,
+      "missing_or_failed_count": 0,
+      "missing_or_failed_examples": [],
+      "score": 112.159315,
+      "ci95": null,
+      "mean_log_gain": 0.136039277,
+      "scenario_log_gain_sd": 0.0851565725,
+      "scene_log_gains": {
+        "demo_uniform": 0.2211958496,
+        "demo_skew": 0.0508827045
+      }
+    }
+  ]
+}
