@@ -38,6 +38,22 @@ template <typename T> void test(const char* name) {
     }
     std::cout << "PASS " << name << " (300,000 randomized operations)\n";
 }
+template <typename T> void wraparound_test() {
+    T h(8, 17);
+    std::vector<std::uint64_t> keys;
+    for (std::uint64_t key = 0; keys.size() < 8; ++key)
+        if ((hf::mix64(key ^ 17) & 7U) == 7U) keys.push_back(key);
+    for (const auto key : keys) check(h.insert(key));
+    check(!h.insert(0xffffffffffffffffULL));
+    for (const auto key : keys) check(h.contains(key));
+    for (std::size_t i = 0; i < keys.size(); i += 2) check(h.erase(keys[i]));
+    for (std::size_t i = 0; i < keys.size(); ++i) check(h.contains(keys[i]) == (i % 2 != 0));
+    for (std::size_t i = 0; i < keys.size(); i += 2) check(h.insert(keys[i]));
+    check(h.size() == 8);
+    for (const auto key : keys) check(h.contains(key));
+    for (auto key : keys) check(h.erase(key));
+    check(h.size() == 0);
+}
 int main() {
     test<hf::LinearTombstone>("linear_tombstone");
     test<hf::LinearBackshift>("linear_backshift");
@@ -45,5 +61,9 @@ int main() {
     test<hf::LinearPeriodicRebuild<2>>("linear_rebuild_2pct");
     test<hf::LinearPeriodicRebuild<8>>("linear_rebuild_8pct");
     test<hf::LinearPeriodicRebuild<50, true>>("linear_rebuild_half_slack");
-    std::cout << "All randomized differential tests passed.\n";
+    test<hf::LinearBoundedRepair<8>>("bounded_repair_8");
+    test<hf::LinearBoundedRepair<32>>("bounded_repair_32");
+    wraparound_test<hf::LinearBoundedRepair<8>>();
+    wraparound_test<hf::LinearBoundedRepair<32>>();
+    std::cout << "All randomized differential and wraparound tests passed.\n";
 }

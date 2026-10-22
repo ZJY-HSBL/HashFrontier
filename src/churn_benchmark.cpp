@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <fstream>
+#include <map>
 #include <numeric>
 #include <random>
 #include <stdexcept>
@@ -56,10 +58,22 @@ template<typename T> static double percentile(std::vector<T> vals, double q) {
     return static_cast<double>(vals[idx]);
 }
 static volatile std::uint64_t consumed = 0;
+static std::uint64_t quantile(const std::map<std::uint64_t, std::uint64_t>& hist,
+                              std::uint64_t count, std::uint64_t numerator, std::uint64_t denominator) {
+    const auto rank = (count * numerator + denominator - 1) / denominator;
+    std::uint64_t cumulative = 0;
+    for (const auto& [value, frequency] : hist) {
+        cumulative += frequency;
+        if (cumulative >= rank) return value;
+    }
+    throw std::logic_error("invalid histogram");
+}
 template <typename T>
 static void run(const char* name, const Workload& w, int load_pct, std::uint64_t seed,
-                std::size_t cap) {
+                std::size_t cap, std::ostream* tails) {
     T ht(cap, seed);
+    std::map<std::uint64_t, std::uint64_t> histogram;
+    std::uint64_t total_updates = 0, total_rebuilds = 0;
     for (const auto key : w.initial)
         if (!ht.insert(key)) throw std::logic_error("initial load failed");
     for (std::size_t cycle = 0; cycle < w.cycles.size(); ++cycle) {
@@ -75,9 +89,12 @@ static void run(const char* name, const Workload& w, int load_pct, std::uint64_t
                 throw std::logic_error("mutation correctness failed");
             const auto after = Clock::now();
             update_ns.push_back(std::chrono::duration<double, std::nano>(after - before).count());
-            update_probes.push_back(static_cast<double>(ht.stats().probes - p0));
+            const auto delta = ht.stats().probes - p0;
+            update_probes.push_back(static_cast<double>(delta));
+            if (tails) { ++histogram[delta]; ++total_updates; }
         }
         const auto update_stats = ht.stats();
+        total_rebuilds += update_stats.rebuilds;
         if (ht.size() != w.initial.size()) throw std::logic_error("load changed");
         ht.reset_stats();
         for (auto key : ops.hits) if (!ht.contains(key)) throw std::logic_error("hit failure");
@@ -96,22 +113,40 @@ static void run(const char* name, const Workload& w, int load_pct, std::uint64_t
                   << update_stats.moves << ',' << update_stats.rebuilds << ',' << ht.bytes() << '\n';
         consumed = consumed ^ static_cast<std::uint64_t>(miss + hit);
     }
+    if (tails) {
+        *tails << name << ',' << load_pct << ',' << seed << ',' << total_updates << ','
+               << quantile(histogram,total_updates,50,100) << ','
+               << quantile(histogram,total_updates,95,100) << ','
+               << quantile(histogram,total_updates,99,100) << ','
+               << quantile(histogram,total_updates,999,1000) << ','
+               << histogram.rbegin()->first << ',' << total_rebuilds << '\n';
+    }
 }
 int main(int argc, char** argv) {
     const int seeds = argc > 1 ? std::stoi(argv[1]) : 5;
     const int cycles = argc > 2 ? std::stoi(argv[2]) : 12;
     const int queries = argc > 3 ? std::stoi(argv[3]) : 256;
     if (seeds < 1 || cycles < 1 || queries < 1) return 2;
+    std::ofstream tail_file;
+    std::ostream* tails = nullptr;
+    if (argc > 4) {
+        tail_file.open(argv[4]);
+        if (!tail_file) throw std::runtime_error("cannot open tail output");
+        tails = &tail_file;
+        *tails << "algorithm,load_pct,seed,update_pairs,p50_probes,p95_probes,p99_probes,p999_probes,max_probes,total_rebuilds\n";
+    }
     constexpr std::size_t capacity = 4096;
     std::cout << "algorithm,load_pct,seed,cycle,capacity,size,update_pairs,hit_probes_per_op,miss_probes_per_op,update_probes_per_pair,p99_update_probes,max_update_probes,pair_mean_ns,p99_pair_ns,max_pair_ns,moves,rebuilds,steady_slot_bytes\n";
     for (int load : {75, 85, 95}) for (int seed = 1; seed <= seeds; ++seed) {
         const auto w = make_workload(capacity, load, static_cast<std::uint64_t>(seed), cycles, queries);
-        run<hf::LinearTombstone>("linear_tombstone", w, load, seed, capacity);
-        run<hf::LinearBackshift>("linear_backshift", w, load, seed, capacity);
-        run<hf::RobinHood>("robin_hood", w, load, seed, capacity);
-        run<hf::LinearPeriodicRebuild<2>>("linear_rebuild_2pct", w, load, seed, capacity);
-        run<hf::LinearPeriodicRebuild<8>>("linear_rebuild_8pct", w, load, seed, capacity);
-        run<hf::LinearPeriodicRebuild<50, true>>("linear_rebuild_half_slack", w, load, seed, capacity);
+        run<hf::LinearTombstone>("linear_tombstone", w, load, seed, capacity, tails);
+        run<hf::LinearBackshift>("linear_backshift", w, load, seed, capacity, tails);
+        run<hf::RobinHood>("robin_hood", w, load, seed, capacity, tails);
+        run<hf::LinearPeriodicRebuild<2>>("linear_rebuild_2pct", w, load, seed, capacity, tails);
+        run<hf::LinearPeriodicRebuild<8>>("linear_rebuild_8pct", w, load, seed, capacity, tails);
+        run<hf::LinearPeriodicRebuild<50, true>>("linear_rebuild_half_slack", w, load, seed, capacity, tails);
+        run<hf::LinearBoundedRepair<8>>("bounded_repair_8", w, load, seed, capacity, tails);
+        run<hf::LinearBoundedRepair<32>>("bounded_repair_32", w, load, seed, capacity, tails);
     }
     std::cerr << "checksum=" << consumed << '\n';
 }
