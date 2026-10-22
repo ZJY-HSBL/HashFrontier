@@ -131,6 +131,64 @@ public:
     }
 };
 
+// Exploratory bounded tombstone repair, not author ZombieHT.
+template <std::size_t Window> class LinearBoundedRepair : public TableBase {
+    static_assert(Window > 0);
+    std::size_t tombstones_ = 0;
+public:
+    using TableBase::TableBase;
+    std::size_t tombstones() const { return tombstones_; }
+    bool contains(std::uint64_t key) const {
+        auto i = this->home(key);
+        for (std::size_t step = 0; step < this->capacity(); ++step, i = (i + 1) & this->mask_) {
+            this->touch();
+            if (this->slots_[i].state == 0) return false;
+            if (this->slots_[i].state == 1 && this->slots_[i].key == key) return true;
+        }
+        return false;
+    }
+    bool insert(std::uint64_t key) {
+        auto i = this->home(key), dead = this->capacity();
+        for (std::size_t step = 0; step < this->capacity(); ++step, i = (i + 1) & this->mask_) {
+            this->touch();
+            if (this->slots_[i].state == 1 && this->slots_[i].key == key) return false;
+            if (this->slots_[i].state == 2 && dead == this->capacity()) dead = i;
+            if (this->slots_[i].state == 0) {
+                const auto dst = dead == this->capacity() ? i : dead;
+                if (dst == dead) --tombstones_;
+                this->slots_[dst] = {key, 1}; ++this->count_; return true;
+            }
+        }
+        if (dead == this->capacity()) return false;
+        this->slots_[dead] = {key, 1}; --tombstones_; ++this->count_; return true;
+    }
+    bool erase(std::uint64_t key) {
+        auto i = this->home(key);
+        for (std::size_t step = 0; step < this->capacity(); ++step, i = (i + 1) & this->mask_) {
+            this->touch();
+            if (this->slots_[i].state == 0) return false;
+            if (this->slots_[i].state != 1 || this->slots_[i].key != key) continue;
+            this->slots_[i].state = 2; --this->count_; ++tombstones_;
+            std::size_t hole = i, scan = (i + 1) & this->mask_;
+            const auto budget = std::min(Window, this->capacity() - 1);
+            for (std::size_t inspected = 0; inspected < budget; ++inspected, scan = (scan + 1) & this->mask_) {
+                this->touch();
+                const auto state = this->slots_[scan].state;
+                if (state == 0) { this->slots_[hole].state = 0; --tombstones_; return true; }
+                if (state != 1) continue;
+                const auto from = this->home(this->slots_[scan].key);
+                if (this->distance(from, hole) < this->distance(from, scan)) {
+                    this->slots_[hole] = this->slots_[scan];
+                    this->slots_[scan].state = 2;
+                    hole = scan; ++this->stats_.moves;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+};
+
 // Linear probing with backward-shift deletion, without tombstones.
 class LinearBackshift : public TableBase {
 public:
