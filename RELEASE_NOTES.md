@@ -1,14 +1,14 @@
-# HashFrontier v0.2.0 — Churn maintenance tradeoffs and ZombieHT provenance
+# HashFrontier v0.3.0 — 320-cycle exact tails and a negative algorithmic result
 
-**Date:** 2026-10-22. **Scope:** verified *classical controls and reference preparation*, **not a completed SIGMOD paper replication**.
+Published 2026-10-22. This release is an exploratory comparison, **not** a faithful implementation or confirmed reproduction of the SIGMOD Zombie Hashing paper.
 
-- 3 newly implemented tombstone periodic full-rebuild controls: 2% of capacity, 8% of capacity, 50% of available slack. They are deliberately **not** labeled Zombie Hashing.
-- Full correctness regression extended to 6 variants × 4 capacities × 6 seeds × 12,500 randomized oracle-checked operations = **1.8 million operations** (the earlier 1.5 million was before the slack control was added).
-- 1,080 real long-churn data rows: 6 variants × 3 loads (75%, 85%, 95%) × 5 paired seeds × 12 cycles; each cycle replaces 5% of live keys and executes paired hit/miss queries.
-- Records include update-pair P99 and maximum slot probes, absolute rebuild count, relocation cost and exploratory clock measurements. The figures and summary CSV are generated from raw measurements.
-- 95%-load final-four-cycle means for negative queries: Robin Hood 10.51 probes; tombstones 2593.27; 2%-capacity rebuild 225.00; 8%-capacity rebuild 2593.27; 50%-slack rebuild 263.22. The 2%-capacity variant incurred mean max update-pair probe cost ~39,031 (averaged across cycles and seeds) from full maintenance.
-- Verified original SIGMOD author repository, BSD-3 license, pinned source commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`, original `GZHM` and `TRHM` build variants, and authored a separate GitHub Actions small-scale source smoke. This is a **reproduction staging gate**, not publication-grade reproduction.
+- 8 implementations × 3 occupancies × 6 paired seeds × 320 complete churn cycles = **46,080 independent cycle records**; six seeds, not 46,080 independent statistical repetitions.
+- 2.4 million randomized differential oracle operations and adversarial full-table wraparound tests passed on the local build.
+- Two bounded-repair controls (8/32 slots) were added to test a falsifiable hypothesis. Both failed to prevent high-load tombstone saturation; long-run misses reached 4,096 probes at 95% occupancy.
+- Exact all-cycle update histograms, grouped by algorithm/load/seed (144 groups), measure P50/P95/P99/P99.9 and max probes. Rare full-table rebuilds caused a maximum recorded 107,188 probes even when the P99 was about 1,555.
+- 95%-load late-phase misses: Robin Hood 10.34; Backshift 162.00; Bounded 8 and Bounded 32 each 4,096. This is not a universal CPU time ranking.
+- Three SVG data visualizations and an auditable 95%-load overview appear in the bilingual README.
+- Release automation reruns the full deterministic C++ trace workload on the GitHub runner and attaches raw 46,080-cycle CSV.gz, 144 exact-tail groups and CI runtime metadata.
+- An isolated pinned author-native 320-cycle q=13 workflow for RHM/TRHM/GZHM/GZHM_ADAPTIVE is present, but full published q=27 paper reproduction is still pending.
 
-**Interpretation:** fixed tombstone cleanup triggers measured against total capacity can be impossible to reach at high occupancy; slack-relative cleanup lowers misses but periodic rebuilding incurs rare heavy updates. Deamortized window-locality methods warrant an author-faithful test. P99 may miss events occurring less often than 1%; retain maxima and full operation traces. Single-host microbenchmarks and five seeds do not establish universal wall-clock superiority.
-
-**Follow-up:** source-backed ZombieHT native baseline and 95%-load paper protocol, then unify operations, evaluate cycle trajectories, relocation and peak memory, and only thereafter test a new bounded-rearrangement mechanism against genuine 2025 baselines.
+**Next:** establish source-backed native invariants, and preregister independent workloads before assessing any new online deamortization strategy.

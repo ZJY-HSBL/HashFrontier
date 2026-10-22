@@ -128,3 +128,30 @@ License: [MIT](LICENSE).
 ### English | v0.2.0 update
 
 Six independently implemented classical/control variants (three basic tables plus three periodic full-rebuild policies), 1,080 paired 75/85/95%-load churn records and 1.8 million randomized differential operations have now been evaluated locally. **None of the new controls implements Zombie Hashing.** Original SIGMOD 2025 code provenance is pinned in [the reproducibility plan](papers/zombie2025/REPRODUCTION.md), with a separate upstream smoke CI workflow. At 95% occupancy, a tombstone trigger set at 8% of capacity can never activate because total vacancies are only around 5%; a slack-relative trigger works but causes rare O(n) rebuild spikes. Per-cycle P99 alone may hide such extreme maintenance events, so the benchmark records maximum per-update probes as well. CPU timings remain exploratory; no claims of statistically significant speedups or exact author-paper reproduction are made.
+
+### v0.3.0 | 320-cycle long-churn study and falsified bounded repair / 长周期实验
+
+Two **experimental** bounded tombstone-repair controls (8/32 scanned slots per deletion) are added. They are **not** Zombie Hashing implementations and **not** claimed to be novel. The 8-variant study covers 75%, 85%, and 95% occupancy, six matched independent seeds, 320 churn cycles and 64 hit + 64 miss queries per cycle: **46,080 completed cycle observations**. Each churn cycle replaces about 5% of the live keys.
+
+![Miss probe cost](figures/v0.3.0-miss-probes.svg)
+
+![Exact whole-run update P99](figures/v0.3.0-exact-p99.svg)
+
+![Worst observed update](figures/v0.3.0-max-update.svg)
+
+At 95% occupancy, final-64-cycle unsuccessful-lookup mean probes are **10.34 for Robin Hood**, 162.00 for Backshift, and **4,096 for BOTH bounded-repair candidates**. The candidates therefore **fail to prevent long-term tombstone saturation**. Whole-run exact P99 update probes average ~1,553 for Robin Hood, ~1,555 for 2%-capacity full rebuild and ~4,419/4,445 for the bounded 32/8 variants. The 2%-capacity rebuild has a largest observed single update-pair cost of **107,188 probes**, a rare spike that the P99 summary hides. These numbers count slot probes, not wall-clock nanoseconds.
+
+**中文研究结论：** 有界局部修复在长期插入、删除后仍积累大量墓碑；仅设定 8/32 槽扫描预算并不能实现稳定高负载散列表。全表清理降低平均探测，却产生超过十万次探测的单次维护峰值。下一阶段应先研究有正确性保证的去摊销墓碑分布机制，并同时约束失败查询和更新尾部成本，而不是只调整阈值。
+
+[Six-seed 95%-load summary / 六种子汇总](results/v0.3.0-overview.csv) · [v0.3.0 Release including CI-recomputed 46,080-row raw CSV.gz and 144 whole-run tail histograms](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.3.0)
+
+To repeat the exact trace-generation protocol:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+./build/hf_churn_benchmark 6 320 64 results/v0.3.0-tail.csv | gzip -9 > results/v0.3.0-churn.csv.gz
+```
+
+**Reproduction integrity:** original SIGMOD 2025 ZombieHT code is pinned in a separate GitHub Actions workflow, which attempts a *scaled* author-native 320-cycle, q=13 experiment for RHM/TRHM/GZHM/GZHM_ADAPTIVE. The published q=27 experimental scale, complete paper figures, hardware comparability and controlled author-code paired-seed evaluation are NOT yet reproduced. Native source runs must not be merged with HashFrontier's independently implemented matched-trace results as if they used identical keys. CPU microbenchmark timings and single-machine probe observations are exploratory, and paper-level reproduction remains incomplete.
