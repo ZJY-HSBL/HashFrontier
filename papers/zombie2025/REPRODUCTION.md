@@ -25,3 +25,7 @@ GitHub Action `.github/workflows/zombie-native.yml` pins the original source and
 - Verify the ordered and unordered variants against deletion/insert/query oracle tests, including maximal wraparound and long churn.
 - Reproduce per-cycle throughput and latency tables on equivalent resources; retain machine, compiler, flags, core count, seed provenance and raw traces.
 - Integrate supported algorithms into matched-operation comparison, separating CPU scalar from SIMD/AVX and GPU tracks.
+
+## v0.3.0 scaled author-native 320-cycle gate
+
+The separate GitHub Actions job pins the original author revision and attempts RHM, TRHM, GZHM and GZHM_ADAPTIVE at q=13, 95% load, 320 cycles (389 deletes, 389 inserts, 778 queries each). Author output, commit, CPU and compiler are archived. This is **not** a full q=27 paper reproduction. Original OpenSSL-random inputs are not fixed-seed paired across variants. The two new bounded-repair controls in HashFrontier are explicitly **not ZombieHT**.

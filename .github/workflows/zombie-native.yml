@@ -1,4 +1,4 @@
-name: ZombieHT upstream source smoke (not paper replication)
+name: ZombieHT author-native scaled 320-cycle churn
 on:
   push:
     branches: [main]
@@ -9,34 +9,36 @@ on:
 permissions:
   contents: read
 jobs:
-  author-source:
+  author-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 40
     steps:
-      - name: Pin and fetch official author code
+      - uses: actions/checkout@v4
+      - name: Pin original author implementation
         run: |
           set -euo pipefail
           git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT upstream
           git -C upstream checkout --detach 5064a381fd3b7a540594fadd6f7595fdcc748a6c
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git -C upstream submodule update --init --recursive
-          git -C upstream rev-parse HEAD | tee author-commit.txt
-      - name: Build and run paper-native ordered variants at small scale
+          mkdir -p native-logs
+          git -C upstream rev-parse HEAD > native-logs/author-commit.txt
+          c++ --version | head -1 > native-logs/compiler.txt
+          lscpu > native-logs/cpu.txt
+      - name: Build original variants and run 320 churn cycles each
         run: |
           set -euo pipefail
-          mkdir -p native-logs
-          for variant in TRHM GZHM; do
+          for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
             cmake -S upstream -B "build-${variant}" -DCMAKE_BUILD_TYPE=Release -DVARIANT="${variant}" -DCMAKE_CXX_STANDARD=23
             cmake --build "build-${variant}" --target hm_churn -j2
             mkdir -p "native-logs/${variant}"
-            "build-${variant}/hm_churn" -k 64 -q 13 -v 0 -i 85 -c 4 -w 150 -l 300 -s 1 -t 1 -m 0 -g 0 -d "native-logs/${variant}/"
+            echo "q=13;load=95;cycles=320;deletions=389;insertions=389;lookups=778;unpaired=true" > "native-logs/${variant}/protocol.txt"
+            "build-${variant}/hm_churn" -k 64 -q 13 -v 0 -i 95 -c 320 -w 389 -l 778 -s 1 -t 1 -m 0 -g 0 -d "native-logs/${variant}/" > "native-logs/${variant}/stdout.log" 2>&1
           done
-      - name: Upload native evidence including failures
+          find native-logs -type f -print0 | sort -z | xargs -0 sha256sum > native-logs/sha256.txt
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: zombie-native-ordered-smoke
-          path: |
-            author-commit.txt
-            native-logs/
+          name: zombie-author-native-scaled-320
+          path: native-logs/
           if-no-files-found: warn
