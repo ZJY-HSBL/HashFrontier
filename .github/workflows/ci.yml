@@ -15,6 +15,8 @@ jobs:
         run: cmake --build build -j2
       - name: Randomized differential tests
         run: ctest --test-dir build --output-on-failure
+      - name: Author-native log audit regression tests
+        run: python3 -m unittest discover -s tests -p "test_native_audit.py" -v
       - name: Small benchmark smoke
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows
@@ -23,7 +25,7 @@ jobs:
         run: |
           ./build/hf_churn_benchmark 1 2 16 > churn-smoke.csv
           test "$(wc -l < churn-smoke.csv)" -eq 49
-      - name: Verify exact-tail sidecar
+      - name: Exact tail smoke validates all 8 algorithms
         run: |
           ./build/hf_churn_benchmark 1 2 16 smoke-tail.csv > /dev/null
           test "$(wc -l < smoke-tail.csv)" -eq 25
@@ -33,3 +35,4 @@ jobs:
           path: |
             smoke.csv
             churn-smoke.csv
+            smoke-tail.csv

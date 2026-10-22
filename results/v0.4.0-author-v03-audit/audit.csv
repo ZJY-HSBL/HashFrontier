@@ -1,0 +1,5 @@
+variant,run_id,load_pct,cycles,deletions,insertions,lookups,unpaired,recorded_rows,expected_rows,completed_cycles,complete,trailing_partial_phases,stopped_during,failure_type
+GZHM,v03-native,95,320,389,389,778,true,960,960,320,True,0,,
+GZHM_ADAPTIVE,v03-native,95,320,389,389,778,true,960,960,320,True,0,,
+RHM,v03-native,95,320,389,389,778,true,960,960,320,True,0,,
+TRHM,v03-native,95,320,389,389,778,true,583,960,194,False,1,INSERT,incomplete_author_log

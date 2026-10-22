@@ -26,6 +26,21 @@ GitHub Action `.github/workflows/zombie-native.yml` pins the original source and
 - Reproduce per-cycle throughput and latency tables on equivalent resources; retain machine, compiler, flags, core count, seed provenance and raw traces.
 - Integrate supported algorithms into matched-operation comparison, separating CPU scalar from SIMD/AVX and GPU tracks.
 
-## v0.3.0 scaled author-native 320-cycle gate
 
-The separate GitHub Actions job pins the original author revision and attempts RHM, TRHM, GZHM and GZHM_ADAPTIVE at q=13, 95% load, 320 cycles (389 deletes, 389 inserts, 778 queries each). Author output, commit, CPU and compiler are archived. This is **not** a full q=27 paper reproduction. Original OpenSSL-random inputs are not fixed-seed paired across variants. The two new bounded-repair controls in HashFrontier are explicitly **not ZombieHT**.
+## v0.3.0: 320-cycle scaled author-native CI
+
+The `zombie-native.yml` workflow now fetches and pins the same upstream revision, builds **four official author variants** (`RHM`, `TRHM`, `GZHM`, `GZHM_ADAPTIVE`), and attempts **320 cycles** at 95% load, q=13 (8,192 slots), 389 deletions followed by 389 insertions and 778 lookups per cycle. It records raw author-generated files, source commit, compiler, hardware metadata, and checksums as a downloadable GitHub Actions artifact. This is explicitly **a scaled reproducibility step, not the full native paper experiment**: the author defaults include q=27, and their OpenSSL-random traces across processes are not paired or seed-stable. Successful GitHub CI confirms execution only; publication-grade figure replication and controlled multi-seed independent performance comparisons remain open.
+
+The six local HashFrontier controls and two new bounded tombstone-repair variants remain in a **separate** matched-trace C++ microbenchmark; their performance cannot be attributed to ZombieHT. A failed local hypothesis is kept in the evidence, not silently dropped.
+
+## v0.4.0 correction: author-native exit code was a false positive
+
+A source-backed post-hoc audit of [the v0.3.0 author-native artifact](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335) found 960 phase records (320 complete DELETE/INSERT/LOOKUP cycles) for `RHM`, `GZHM`, `GZHM_ADAPTIVE`, **but only 583 phase records for `TRHM`** (194 complete cycles plus cycle 194 DELETE). The GitHub job had exited successfully. In `bench/hm_churn.cc`, `profile_ops()` returns `-1` on `QF_NO_SPACE`, `run_churn()` breaks, and `main()` returns 0. This establishes a misleading experiment-completion signal, although it does not independently prove which exact key triggered this particular stop; a verbose rerun is needed.
+
+- Audit tooling: `scripts/audit_zombie_native.py`, verified with synthetic incomplete-log regression tests.
+- Immutable provenance: `results/v0.4.0-author-v03-audit/provenance.json` with source commit, run, artifact ID, ZIP digest.
+- Parsed evidence: `audit.csv`, `audit.json`, `native-cycles.csv`, `native-summary.csv`; **TRHM must never contribute to the final-64-cycle comparative cohort** because it has none.
+- Timing caution: upstream churn logs use `high_resolution_clock`'s raw `.count()`, so the normalized unit is *native clock ticks per operation*, not guaranteed nanoseconds across toolchains. The independent OpenSSL RNG in each process also prevents paired causal comparisons.
+- The v0.4.0 GitHub Action now runs the same original source at q=13 / 85% and 95% load with two repeated independent runs per variant and machine-verifies completed phases. `RHM`, `GZHM` and `GZHM_ADAPTIVE` are required to complete, with failure recorded if not; TRHM may be incomplete but is explicitly labeled as such and the raw evidence is retained.
+
+A successful q=13 scaled test is **not a reproduction of the paper's q=27 large configuration** and does not imply identical original-paper statistics. Full-paper and cross-implementation paired replication remain open.

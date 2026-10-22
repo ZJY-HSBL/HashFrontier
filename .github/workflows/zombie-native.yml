@@ -1,20 +1,21 @@
-name: ZombieHT author-native scaled 320-cycle churn
+name: ZombieHT author-native multi-load completeness audit
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/zombie-native.yml'
       - 'papers/zombie2025/**'
+      - 'scripts/audit_zombie_native.py'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   author-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Pin original author implementation
+      - name: Pin upstream source and submodules
         run: |
           set -euo pipefail
           git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT upstream
@@ -23,22 +24,62 @@ jobs:
           git -C upstream submodule update --init --recursive
           mkdir -p native-logs
           git -C upstream rev-parse HEAD > native-logs/author-commit.txt
-          c++ --version | head -1 > native-logs/compiler.txt
+          c++ --version | head -n 1 > native-logs/compiler.txt
+          cmake --version | head -n 1 > native-logs/cmake.txt
           lscpu > native-logs/cpu.txt
-      - name: Build original variants and run 320 churn cycles each
+      - name: Build original author variants
         run: |
           set -euo pipefail
           for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
             cmake -S upstream -B "build-${variant}" -DCMAKE_BUILD_TYPE=Release -DVARIANT="${variant}" -DCMAKE_CXX_STANDARD=23
             cmake --build "build-${variant}" --target hm_churn -j2
-            mkdir -p "native-logs/${variant}"
-            echo "q=13;load=95;cycles=320;deletions=389;insertions=389;lookups=778;unpaired=true" > "native-logs/${variant}/protocol.txt"
-            "build-${variant}/hm_churn" -k 64 -q 13 -v 0 -i 95 -c 320 -w 389 -l 778 -s 1 -t 1 -m 0 -g 0 -d "native-logs/${variant}/" > "native-logs/${variant}/stdout.log" 2>&1
           done
-          find native-logs -type f -print0 | sort -z | xargs -0 sha256sum > native-logs/sha256.txt
-      - uses: actions/upload-artifact@v4
+      - name: Native scaled churn | 85 and 95 percent | 2 unpaired repeats
+        run: |
+          set -euo pipefail
+          for load in 85 95; do
+            # q=13 implies 8192 slots; 5% of occupied keys churned/cycle.
+            changes=$(( (8192 * load / 100) / 20 ))
+            lookups=$(( changes * 2 ))
+            for repeat in 01 02; do
+              for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
+                out="native-logs/L${load}/R${repeat}/${variant}"
+                mkdir -p "$out"
+                printf 'q=13;load=%d;cycles=320;deletions=%d;insertions=%d;lookups=%d;unpaired=true\n' \
+                  "$load" "$changes" "$changes" "$lookups" > "$out/protocol.txt"
+                # Original main() can return 0 after an incomplete churn! Validate logs separately.
+                "build-${variant}/hm_churn" -k 64 -q 13 -v 0 -i "$load" -c 320 \
+                  -w "$changes" -l "$lookups" -s 1 -t 1 -m 0 -g 0 \
+                  -d "$out/" > "$out/stdout.log" 2>&1
+                test -s "$out/churn_thrput.txt"
+              done
+            done
+          done
+          find native-logs -type f ! -name sha256.txt -print0 | sort -z | xargs -0 sha256sum > native-logs/sha256.txt
+      - name: Mandatory phase-level audit, not just process exit code
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_zombie_native.py native-logs \
+            --out audit --allow-incomplete TRHM \
+            --require-complete RHM GZHM GZHM_ADAPTIVE
+          python3 - <<'PY'
+          import csv, os
+          with open('audit/audit.csv', newline='') as f:
+              rows=list(csv.DictReader(f))
+          dest=os.environ['GITHUB_STEP_SUMMARY']
+          with open(dest,'a') as f:
+              f.write('## Original ZombieHT: author-native completion audit\n\n')
+              f.write('This is **not** a full q=27 paper reproduction. TRHM shortfalls are reported rather than hidden. Runs are unpaired.\n\n')
+              f.write('| Load | Repeat | Variant | Complete cycles | Complete? |\n|---|---|---|---:|---|\n')
+              for r in rows:
+                  f.write(f"| {r['load_pct']}% | {r['run_id']} | {r['variant']} | {r['completed_cycles']}/{r['cycles']} | {r['complete']} |\n")
+          PY
+      - name: Preserve author-native evidence even on failure
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: zombie-author-native-scaled-320
-          path: native-logs/
+          name: zombieht-multiload-q13-author-native
+          path: |
+            native-logs/
+            audit/
           if-no-files-found: warn

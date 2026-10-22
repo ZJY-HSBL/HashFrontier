@@ -11,7 +11,7 @@
 
 收录范围限与散列表结构或冲突处理直接相关的 Nature / Science / Cell 体系、经年份及学科核实的 SCI Q1/Q2、以及 STOC / FOCS / SODA / SIGMOD / VLDB 等顶会。当前只有 **5 篇已核实的 2025 年论文候选**，并非穷尽检索；全部为 **queued（尚未复现）**。详见 [准入与验证协议](papers/PROTOCOL.md)。
 
-**v0.1.0 = 基础设施与经典对照；v0.2.0 = 长周期 churn、维护尾部开销和 ZombieHT 原版复现准备。两者都不声明已完成 2025–2026 论文复现或原创算法验证。**
+**版本进度：v0.1.0 经典基线；v0.2.0 全表清理对照；v0.3.0 六独立种子 × 320 周期的精确更新尾部分析与有界修复的否定性结果。仍未完成任何顶会论文的论文级复现。**
 
 ### 已实现的经典基线
 
@@ -94,6 +94,81 @@ python scripts/analyze_churn.py
 
 **研究状态：**已定位并审查作者公开仓库固定提交及原始构建/工作负载入口，并加入独立的作者代码编译与小型 smoke 工作流；这不是已经完成的原论文大规模复现。所有全表清理策略均属于经典对照，不冒充 Zombie Hashing。原论文实验需保留与本项目不同的 2²⁷ 槽设置、重复试验和具体硬件条件。
 
+### v0.4.0 | 论文原版实验的完成率审计（重要纠正）
+
+SIGMOD 2025 [Zombie Hashing](https://doi.org/10.1145/3725424) 作者的固定源码版本 `5064a381fd3b7a540594fadd6f7595fdcc748a6c` 在 [GitHub Actions 原始运行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335) 中被成功编译并退出，但我重新获取**作者原始工作流 Artifact**（ID `12432115740`）后，发现 **TRHM 在 95% 负载的 q=13 缩小实验中只完成 194/320 个完整周期**，其余三个变体全部完成 320 个周期。早先笼统描述为“全部 320 周期成功”是不准确的，现已纠正。
+
+| 作者原版变体 | 请求周期 | 完整周期 | 原始记录行数 | 审计结论 |
+|---|---:|---:|---:|---|
+| RHM | 320 | 320 | 960 | Complete |
+| TRHM | 320 | **194** | **583** | **Incomplete** |
+| GZHM | 320 | 320 | 960 | Complete |
+| GZHM_ADAPTIVE | 320 | 320 | 960 | Complete |
+
+原因追踪：作者 `bench/hm_churn.cc` 遇到 `QF_NO_SPACE` 时从 `profile_ops()` 返回失败，`run_churn()` 中止循环，而 `main()` 仍返回零。对于此次 TRHM 截断，仍需要额外的有日志重跑来确认准确的失败键和触发机制。因此这不是认定论文算法错误，而是**科研验证工具不能只相信进程退出码**的案例。
+
+![Native author code insertion cost trend](figures/v0.4.0-native-insert-trends.svg)
+
+![Native author code phase median overview](figures/v0.4.0-native-phase-median.svg)
+
+**原版缩小实验的描述性数据（每种方法自身完成周期的时钟 tick/操作，中位数）**：
+
+| 原版实现 | DELETE | INSERT | LOOKUP |
+|---|---:|---:|---:|
+| RHM | 763.3 | 565.6 | 21.8 |
+| TRHM（仅 194 周期） | 55.0 | 199.5 | 41.8 |
+| GZHM | 41.3 | 556.7 | 30.8 |
+| GZHM_ADAPTIVE | 38.9 | 440.5 | 28.7 |
+
+不同实现使用作者内部 OpenSSL 随机数产生的**非配对数据**，不能据此做统计显著性或性能优越性的因果判断；TRHM 截断周期与其余方法不相同。原始时间字段是 `high_resolution_clock` 的 ticks，不保证跨硬件的纳秒单位。**本轮未运行作者论文 q=27 的完整原始大规模实验。**
+
+[原作者源码 Artifact 与运行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335) · [完成性审计数据](results/v0.4.0-author-v03-audit/audit.csv) · [全部正常完成周期的原始解析数据](results/v0.4.0-author-v03-audit/native-cycles.csv) · [来源及 SHA-256](results/v0.4.0-author-v03-audit/provenance.json) · [审计工具与单测](scripts/audit_zombie_native.py)
+
+**v0.4.0 还引入了作者原版 q=13 的 85%/95% 负载、每组 2 次独立重复、共 16 次运行的 Actions 工作流**；该工作流会强制验证周期完整性，并记录 TRHM 的提前终止。重复实验的实际完成情况以 [ZombieHT Actions 工作流](https://github.com/ZJY-HSBL/HashFrontier/actions/workflows/zombie-native.yml) 和对应 Artifact 为准，不应将尚未审核的运行当作结果。
+
+下一步：用确定性的统一键/操作轨迹驱动**原论文作者实现本身**，而不是使用本地经典基线冒充；在此基础上补足相同初始装载、操作顺序、负载与硬件下的配对对照。再从稳定的失败模式设计墓碑分布不变量与有限重排机制。
+
+### v0.3.0 | 320 周期实验：有界修复为什么失败？
+
+本版加入两个**探索性算法假设** `bounded_repair_8` / `bounded_repair_32`：删除后只允许最多检查 8/32 个槽位，按线性探测合法路径搬移键；预算耗尽时保留墓碑。这些是我们自行设计的受限局部修复**对照**，**不是** Zombie Hashing 的实现，也不声称具有独创性。
+
+所有 8 种算法在相同键、SplitMix64 散列、固定 4096 容量以及按种子配对的操作序列上测试：**75%/85%/95% 占用、6 个独立随机种子、每种条件 320 个 churn 周期、每周期替换 5% 现有键并查询 64 次命中与 64 次未命中**。总共 **46,080 条完整周期记录**，另外记录 144 个算法/负载/种子组的 **全量更新对探测直方图精确分位数**。与“每周期 P99 的平均值”不同，本版 P99 真正覆盖从第一个到最后一个周期的所有更新对。
+
+![Long-term unsuccessful-lookup probes](figures/v0.3.0-miss-drift.svg)
+
+![Exact update-tail P99](figures/v0.3.0-exact-p99.svg)
+
+![Negative lookup / update Pareto](figures/v0.3.0-pareto.svg)
+
+**95% 负载下的代表性结果**（每个种子先取末 64 周期均值，再跨种子求均值；更新 P99 是每个种子的**全 320 周期**真实分位数后取种子均值；探测次数越低越好）：
+
+| 方法 | 末 64 周期失败查询均值 | 全局更新对 P99 探测均值 | 观察到的单次最大更新对探测 | 每种子平均全表重建次数 |
+|---|---:|---:|---:|---:|
+| Robin Hood | **10.34** | **1,552.7** | 4,245 | 0 |
+| Backshift | 162.00 | 1,563.2 | 4,227 | 0 |
+| Tombstones | 4,096.00 | 4,448.2 | 5,376 | 0 |
+| Rebuild at 2% capacity | 216.34 | 1,554.8 | **107,188** | 365.5 |
+| Rebuild at half slack | 234.62 | 1,589.2 | 105,272 | 250.7 |
+| Bounded repair (8) | 4,096.00 | 4,445.3 | 5,309 | 0 |
+| Bounded repair (32) | 4,096.00 | 4,419.3 | 5,426 | 0 |
+
+**结论不是我们的新策略赢了：恰恰相反。** 有界 8/32 槽的修复仅延缓墓碑累积；长周期后几乎所有失败查询仍需扫描满表，原假设在这一测试中**被否定**。局部搬移预算本身不足以维持长期负载，需要额外的全局不变量或持续、可证明有效的墓碑再分布机制。固定 8% 容量的重建阈值在 95% 负载永远不会触发（与不重建版本表现一致）；而触发全表清理的策略出现十万级别的罕见更新探测尖峰，**更新 P99 未必能揭示这些峰值，因此同时报告最大值**。Robin Hood 在这组失败查询指标上最好，但在别的键类型/硬件/操作混合中未必整体最好。
+
+[完整原始实验 CSV.gz（Release 附件，CI 独立重跑）](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.3.0) · [本地精确尾部 CSV](results/v0.3.0-tail.csv) · [种子层面汇总](results/v0.3.0-summary.csv) · [配对差值](results/v0.3.0-paired.csv) · [执行环境](results/v0.3.0-environment.json)
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+./build/hf_churn_benchmark 6 320 64 results/v0.3.0-tail.csv | gzip -9 > results/v0.3.0-churn.csv.gz
+python -m pip install matplotlib
+python scripts/analyze_v03.py
+```
+
+**作者原版 SIGMOD 2025 复现进度**：独立 GitHub Actions 从固定源提交编译 `RHM`、`TRHM`、`GZHM`、`GZHM_ADAPTIVE`，尝试 95% 负载的 320 周期缩小版原生实验（q=13、每周期 389 删/389 插/778 查），记录作者原始输出与机器、编译器信息。它不同于论文的 q=27 大规模实验，不与上述 HashFrontier 配对序列混入同一排行榜。作者实现的运行成功与否以 [Actions](https://github.com/ZJY-HSBL/HashFrontier/actions/workflows/zombie-native.yml) 实际结果为准；即使成功，也**不等于完成论文全文实验复现**。[审计记录](papers/zombie2025/REPRODUCTION.md)。
+
+**限制：**目前仍是 64 次/周期的少量查询采样、固定整数键、单机微基准、6 种子探索性对比。原始时间字段包含计时成本，统计置信区间属于探索性估计；还没有 CPU 性能计数器、跨机器确认、动态扩容、更多 key 分布，以及原版作者算法与本地基线的严格配对对照。不能将这些结果视为顶会论文精确复现或新算法性能优越性的证据。
+
 ### 研究下一步
 
 1. 对论文扩充检索并审计发表场所、实现/许可及复现实验规格；第一优先级是 **SIGMOD 2025 Zombie Hashing** 的窗口墓碑再分布，和 **SODA 2025 Bubble-up Cuckoo Hashing** 的高负载操作。
@@ -129,29 +204,10 @@ License: [MIT](LICENSE).
 
 Six independently implemented classical/control variants (three basic tables plus three periodic full-rebuild policies), 1,080 paired 75/85/95%-load churn records and 1.8 million randomized differential operations have now been evaluated locally. **None of the new controls implements Zombie Hashing.** Original SIGMOD 2025 code provenance is pinned in [the reproducibility plan](papers/zombie2025/REPRODUCTION.md), with a separate upstream smoke CI workflow. At 95% occupancy, a tombstone trigger set at 8% of capacity can never activate because total vacancies are only around 5%; a slack-relative trigger works but causes rare O(n) rebuild spikes. Per-cycle P99 alone may hide such extreme maintenance events, so the benchmark records maximum per-update probes as well. CPU timings remain exploratory; no claims of statistically significant speedups or exact author-paper reproduction are made.
 
-### v0.3.0 | 320-cycle long-churn study and falsified bounded repair / 长周期实验
+### English | v0.3.0 update
 
-Two **experimental** bounded tombstone-repair controls (8/32 scanned slots per deletion) are added. They are **not** Zombie Hashing implementations and **not** claimed to be novel. The 8-variant study covers 75%, 85%, and 95% occupancy, six matched independent seeds, 320 churn cycles and 64 hit + 64 miss queries per cycle: **46,080 completed cycle observations**. Each churn cycle replaces about 5% of the live keys.
+We added two **exploratory bounded tombstone repair** controls (8/32 scanned slots on deletion), explicitly **not** Zombie Hashing or a novelty claim. The paired long-churn matrix contains 46,080 cycle records (8 algorithms × 3 occupancies × 6 independent seeds × 320 cycles), plus exact update-pair probe-tail histograms for 144 groups. At 95% load, both bounded-repair strategies degraded to 4,096 probes per unsuccessful lookup after prolonged churn, falsifying this initial heuristic. Full rebuild controls reduce misses but incur rare >100,000-probe maintenance outliers; reporting P99 without the maximum would hide this risk. Original SIGMOD 2025 authors' code is separately pinned and exercised via a **scaled 320-cycle native CI workflow**, not yet the full q=27 paper reproduction. See the [author provenance](papers/zombie2025/REPRODUCTION.md) and [v0.3.0 source/CI evidence](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.3.0). These are exploratory single-host results, not publication-ready superiority claims.
 
-![Miss probe cost](figures/v0.3.0-miss-probes.svg)
+### English update | v0.4.0
 
-![Exact whole-run update P99](figures/v0.3.0-exact-p99.svg)
-
-![Worst observed update](figures/v0.3.0-max-update.svg)
-
-At 95% occupancy, final-64-cycle unsuccessful-lookup mean probes are **10.34 for Robin Hood**, 162.00 for Backshift, and **4,096 for BOTH bounded-repair candidates**. The candidates therefore **fail to prevent long-term tombstone saturation**. Whole-run exact P99 update probes average ~1,553 for Robin Hood, ~1,555 for 2%-capacity full rebuild and ~4,419/4,445 for the bounded 32/8 variants. The 2%-capacity rebuild has a largest observed single update-pair cost of **107,188 probes**, a rare spike that the P99 summary hides. These numbers count slot probes, not wall-clock nanoseconds.
-
-**中文研究结论：** 有界局部修复在长期插入、删除后仍积累大量墓碑；仅设定 8/32 槽扫描预算并不能实现稳定高负载散列表。全表清理降低平均探测，却产生超过十万次探测的单次维护峰值。下一阶段应先研究有正确性保证的去摊销墓碑分布机制，并同时约束失败查询和更新尾部成本，而不是只调整阈值。
-
-[Six-seed 95%-load summary / 六种子汇总](results/v0.3.0-overview.csv) · [v0.3.0 Release including CI-recomputed 46,080-row raw CSV.gz and 144 whole-run tail histograms](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.3.0)
-
-To repeat the exact trace-generation protocol:
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-ctest --test-dir build --output-on-failure
-./build/hf_churn_benchmark 6 320 64 results/v0.3.0-tail.csv | gzip -9 > results/v0.3.0-churn.csv.gz
-```
-
-**Reproduction integrity:** original SIGMOD 2025 ZombieHT code is pinned in a separate GitHub Actions workflow, which attempts a *scaled* author-native 320-cycle, q=13 experiment for RHM/TRHM/GZHM/GZHM_ADAPTIVE. The published q=27 experimental scale, complete paper figures, hardware comparability and controlled author-code paired-seed evaluation are NOT yet reproduced. Native source runs must not be merged with HashFrontier's independently implemented matched-trace results as if they used identical keys. CPU microbenchmark timings and single-machine probe observations are exploratory, and paper-level reproduction remains incomplete.
+Re-auditing the official SIGMOD 2025 ZombieHT q=13 author-output shows that the initial CI exit code falsely implied four complete 320-cycle runs: RHM, GZHM and GZHM_ADAPTIVE finished; TRHM stopped after 194 complete cycles plus a DELETE phase. The upstream binary returns 0 after an interrupted churn run. See [machine-readable audit](results/v0.4.0-author-v03-audit/audit.csv), [raw author artifact](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335), [source provenance](results/v0.4.0-author-v03-audit/provenance.json), and [visuals](figures/v0.4.0-native-insert-trends.svg). This is a scaled, unpaired source-backed experiment, **not** faithful reproduction of the full SIGMOD paper and **not** evidence that our own hashing policy wins.

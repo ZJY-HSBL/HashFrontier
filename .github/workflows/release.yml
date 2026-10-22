@@ -15,6 +15,7 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j2
           ctest --test-dir build --output-on-failure
+          python3 -m unittest discover -s tests -p "test_native_audit.py" -v
       - name: Publish tagged source and evidence
         env:
           GH_TOKEN: ${{ github.token }}
@@ -26,14 +27,27 @@ jobs:
             case "$tag" in
             v0.1.0) assets=(results/v0.1.0-local.csv results/v0.1.0-summary.csv); title="research baseline" ;;
             v0.2.0) assets=(results/v0.2.0-churn.csv results/v0.2.0-churn-summary.csv); title="churn cost and reproduction staging" ;;
-            v0.3.0) assets=(results/v0.3.0-churn-ci.csv.gz results/v0.3.0-tail-ci.csv results/v0.3.0-overview.csv results/v0.3.0-ci-runtime.txt); title="320-cycle exact probe tails" ;;
+            v0.3.0) assets=(results/v0.3.0-churn-ci.csv.gz results/v0.3.0-tail-ci.csv results/v0.3.0-tail.csv results/v0.3.0-summary.csv results/v0.3.0-paired.csv results/v0.3.0-environment.json results/v0.3.0-ci-runtime.txt); title="320-cycle bounded-repair falsification and author-native gate" ;;
+            v0.4.0) assets=(results/v0.4.0-author-v03-audit/audit.csv results/v0.4.0-author-v03-audit/audit.json results/v0.4.0-author-v03-audit/native-cycles.csv results/v0.4.0-author-v03-audit/native-summary.csv figures/v0.4.0-native-insert-trends.svg figures/v0.4.0-native-phase-median.svg); title="native-paper-source completion audit and measured failure" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then
             ./build/hf_churn_benchmark 6 320 64 results/v0.3.0-tail-ci.csv | gzip -9 > results/v0.3.0-churn-ci.csv.gz
-            { c++ --version | head -n 1; uname -a; } > results/v0.3.0-ci-runtime.txt
+            { c++ --version | head -n 1; uname -a; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -n 4; } > results/v0.3.0-ci-runtime.txt
             test "$(zcat results/v0.3.0-churn-ci.csv.gz | wc -l)" -eq 46081
             test "$(wc -l < results/v0.3.0-tail-ci.csv)" -eq 145
+          fi
+          if [ "$tag" = "v0.4.0" ]; then
+            test "$(wc -l < results/v0.4.0-author-v03-audit/audit.csv)" -eq 5
+            test "$(wc -l < results/v0.4.0-author-v03-audit/native-cycles.csv)" -eq 3463
+            python3 - <<'PY_NATIVE'
+          import csv
+          with open('results/v0.4.0-author-v03-audit/audit.csv') as f:
+              rows={r['variant']:r for r in csv.DictReader(f)}
+          assert len(rows)==4
+          assert all(rows[v]['complete']=='True' for v in ('RHM','GZHM','GZHM_ADAPTIVE'))
+          assert rows['TRHM']['complete']=='False' and int(rows['TRHM']['completed_cycles'])==194
+          PY_NATIVE
           fi
           gh release create "$tag" "${assets[@]}" \
               --target "$GITHUB_SHA" --title "HashFrontier $tag — $title" \

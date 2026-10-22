@@ -1,0 +1,23 @@
+{
+  "paper": "Zombie Hashing: Reanimating Tombstones in Graveyard",
+  "doi": "10.1145/3725424",
+  "upstream": "https://github.com/saltsystemslab/ZombieHT",
+  "upstream_commit": "5064a381fd3b7a540594fadd6f7595fdcc748a6c",
+  "github_workflow_run": "https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335",
+  "artifact_id": 12432115740,
+  "artifact_name": "zombie-author-native-scaled-320",
+  "source_zip_sha256": "e0710931fc92d3e661acb07225a6643d13ee31d33dec7f159fefa679b7ddc294",
+  "source_artifact_digest": "sha256:e0710931fc92d3e661acb07225a6643d13ee31d33dec7f159fefa679b7ddc294",
+  "workload": {
+    "q": 13,
+    "capacity": 8192,
+    "load_pct": 95,
+    "cycles_requested": 320,
+    "deletes_per_cycle": 389,
+    "inserts_per_cycle": 389,
+    "lookups_per_cycle": 778,
+    "traces": "author-internal OpenSSL RNG, different per process; not paired"
+  },
+  "qualification": "scaled author-native reproduction audit only; not full paper settings; raw native cycle phase clock ticks are not calibrated cross-hardware latencies",
+  "v03_note": "Some upstream variants return exit code 0 even when failed insert interrupts the churn loop; see audit.csv"
+}
