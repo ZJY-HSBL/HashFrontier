@@ -26,8 +26,15 @@ jobs:
             case "$tag" in
             v0.1.0) assets=(results/v0.1.0-local.csv results/v0.1.0-summary.csv); title="research baseline" ;;
             v0.2.0) assets=(results/v0.2.0-churn.csv results/v0.2.0-churn-summary.csv); title="churn cost and reproduction staging" ;;
+            v0.3.0) assets=(results/v0.3.0-churn-ci.csv.gz results/v0.3.0-tail-ci.csv results/v0.3.0-overview.csv results/v0.3.0-ci-runtime.txt); title="320-cycle exact probe tails" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
+          if [ "$tag" = "v0.3.0" ]; then
+            ./build/hf_churn_benchmark 6 320 64 results/v0.3.0-tail-ci.csv | gzip -9 > results/v0.3.0-churn-ci.csv.gz
+            { c++ --version | head -n 1; uname -a; } > results/v0.3.0-ci-runtime.txt
+            test "$(zcat results/v0.3.0-churn-ci.csv.gz | wc -l)" -eq 46081
+            test "$(wc -l < results/v0.3.0-tail-ci.csv)" -eq 145
+          fi
           gh release create "$tag" "${assets[@]}" \
               --target "$GITHUB_SHA" --title "HashFrontier $tag — $title" \
               --notes-file RELEASE_NOTES.md
