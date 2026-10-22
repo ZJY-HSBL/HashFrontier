@@ -19,7 +19,13 @@ jobs:
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows
         run: test "$(wc -l < smoke.csv)" -eq 163
+      - name: Churn update-tail smoke
+        run: |
+          ./build/hf_churn_benchmark 1 2 16 > churn-smoke.csv
+          test "$(wc -l < churn-smoke.csv)" -eq 37
       - uses: actions/upload-artifact@v4
         with:
           name: benchmark-smoke
-          path: smoke.csv
+          path: |
+            smoke.csv
+            churn-smoke.csv

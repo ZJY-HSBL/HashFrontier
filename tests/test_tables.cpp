@@ -42,5 +42,8 @@ int main() {
     test<hf::LinearTombstone>("linear_tombstone");
     test<hf::LinearBackshift>("linear_backshift");
     test<hf::RobinHood>("robin_hood");
+    test<hf::LinearPeriodicRebuild<2>>("linear_rebuild_2pct");
+    test<hf::LinearPeriodicRebuild<8>>("linear_rebuild_8pct");
+    test<hf::LinearPeriodicRebuild<50, true>>("linear_rebuild_half_slack");
     std::cout << "All randomized differential tests passed.\n";
 }

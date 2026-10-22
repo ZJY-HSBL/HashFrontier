@@ -23,7 +23,12 @@ jobs:
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "Release $tag exists; not overwriting immutable evidence."
           else
-            gh release create "$tag" results/v0.1.0-local.csv results/v0.1.0-summary.csv \
-              --target "$GITHUB_SHA" --title "HashFrontier $tag — research baseline" \
+            case "$tag" in
+            v0.1.0) assets=(results/v0.1.0-local.csv results/v0.1.0-summary.csv); title="research baseline" ;;
+            v0.2.0) assets=(results/v0.2.0-churn.csv results/v0.2.0-churn-summary.csv); title="churn cost and reproduction staging" ;;
+            *) echo "Unexpected version: $tag" >&2; exit 1 ;;
+          esac
+          gh release create "$tag" "${assets[@]}" \
+              --target "$GITHUB_SHA" --title "HashFrontier $tag — $title" \
               --notes-file RELEASE_NOTES.md
           fi

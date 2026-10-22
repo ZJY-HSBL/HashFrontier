@@ -11,7 +11,7 @@
 
 收录范围限与散列表结构或冲突处理直接相关的 Nature / Science / Cell 体系、经年份及学科核实的 SCI Q1/Q2、以及 STOC / FOCS / SODA / SIGMOD / VLDB 等顶会。当前只有 **5 篇已核实的 2025 年论文候选**，并非穷尽检索；全部为 **queued（尚未复现）**。详见 [准入与验证协议](papers/PROTOCOL.md)。
 
-**v0.1.0 = 基准基础设施与经典对照，不是 2025–2026 论文复现，也未实现原创候选算法。**
+**v0.1.0 = 基础设施与经典对照；v0.2.0 = 长周期 churn、维护尾部开销和 ZombieHT 原版复现准备。两者都不声明已完成 2025–2026 论文复现或原创算法验证。**
 
 ### 已实现的经典基线
 
@@ -60,6 +60,40 @@ python scripts/analyze.py results/my-run.csv --out figures
 
 **重要限制**：这是单进程 CPU 微基准；包含 8,000 次查询的较短时间片，时钟噪声较大。分组标准差仅描述跨 5 个种子的分散程度，不是置信区间。尚未控制 CPU 频率/NUMA、重复批次、内存分配器、分位延迟与多线程公平性；图表的时间数据不得用于正式论文的性能优越性声明。固定容量实验不包含动态扩容成本。 `allocated_bytes` 仅指槽位向量的底层容量，不包括容器头部/分配器/进程 RSS。多赛道（并发、GPU、静态完美散列）**不会直接放在一个不加限定的榜单**。
 
+### v0.2.0 | 长周期插删与重建代价研究（已真实运行）
+
+新增同容量 `linear_rebuild_2pct`、`linear_rebuild_8pct`、`linear_rebuild_half_slack` 三种 **全表墓碑清理对照机制**（**不是** SIGMOD ZombieHT），加上 v0.1.0 三个经典实现，共六个对照。12 个 churn 周期（每周期随机替换 5% 现存键）、75/85/95% 负载、5 个配对随机种子、每周期 256 次成功查询及 256 次失败查询、全部算法合计 1,080 条实验记录（6×3×5×12）。原始数据含更新对的 P99 与最大探测次数、重建次数、槽位搬移、计时指标。
+
+![95% 负载长期失败查询变化](figures/v0.2.0-miss-drift.svg)
+
+![P99 更新代价](figures/v0.2.0-update-p99.svg)
+
+![探测与更新代价 Pareto 权衡](figures/v0.2.0-tradeoff.svg)
+
+**95% 负载、末四周期（9–12）、每种算法先对每个随机种子求均值，再对五个种子平均：**
+
+| 对照算法 | 失败查询均值（探测/次） | 周期内 P99 更新对探测均值 | 单周期最大更新对探测均值 | 平均每周期全表重建次数 |
+|---|---:|---:|---:|---:|
+| Linear + tombstones | 2,593.27 | 4,052.1 | 4,162.4 | 0 |
+| Linear + backshift | 168.56 | 1,334.6 | 1,504.5 | 0 |
+| Robin Hood | **10.51** | 1,321.95 | 1,463.1 | 0 |
+| Global rebuild at 2% capacity | 225.00 | 6,028.3 | **39,031.3** | 1.15 |
+| Global rebuild at 8% capacity | 2,593.27 | 4,052.1 | 4,162.4 | 0 |
+| Global rebuild at 50% slack | 263.22 | **1,157.6** | 29,325.35 | 0.75 |
+
+**关键发现：**95% 真实占用意味着最多只有约 5% 的槽位可为空槽或墓碑，因此“墓碑超过总容量 8% 才清理”在该负载下根本不可能触发。以空闲预算而非总容量为基准的阈值可以启动清理，但全表维护形成极大的最大探测开销；P99 则可能漏掉单个稀有的重建尖峰。Robin Hood 在这里的失败查询探测表现更好，但不能直接将其定义为跨场景最优；计时数据受缓存和时钟扰动，不用于论文显著性声明。
+
+[原始 1,080 行 CSV](results/v0.2.0-churn.csv) · [按种子聚合的摘要、探索性区间](results/v0.2.0-churn-summary.csv) · [ZombieHT 作者实现及复现进度](papers/zombie2025/REPRODUCTION.md)
+
+```bash
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+./build/hf_churn_benchmark 5 12 256 > results/v0.2.0-churn.csv
+python scripts/analyze_churn.py
+```
+
+**研究状态：**已定位并审查作者公开仓库固定提交及原始构建/工作负载入口，并加入独立的作者代码编译与小型 smoke 工作流；这不是已经完成的原论文大规模复现。所有全表清理策略均属于经典对照，不冒充 Zombie Hashing。原论文实验需保留与本项目不同的 2²⁷ 槽设置、重复试验和具体硬件条件。
+
 ### 研究下一步
 
 1. 对论文扩充检索并审计发表场所、实现/许可及复现实验规格；第一优先级是 **SIGMOD 2025 Zombie Hashing** 的窗口墓碑再分布，和 **SODA 2025 Bubble-up Cuckoo Hashing** 的高负载操作。
@@ -90,3 +124,7 @@ Build and reproduce with the commands above. CPU microbenchmarks are environment
 **Reproduction integrity:** Paper implementations remain `queued` until validated against the relevant paper specification and its experiment protocol. Proposed improvements will have independent ablations, matched traces and seeds, and held-out confirmation.
 
 License: [MIT](LICENSE).
+
+### English | v0.2.0 update
+
+Six independently implemented classical/control variants (three basic tables plus three periodic full-rebuild policies), 1,080 paired 75/85/95%-load churn records and 1.8 million randomized differential operations have now been evaluated locally. **None of the new controls implements Zombie Hashing.** Original SIGMOD 2025 code provenance is pinned in [the reproducibility plan](papers/zombie2025/REPRODUCTION.md), with a separate upstream smoke CI workflow. At 95% occupancy, a tombstone trigger set at 8% of capacity can never activate because total vacancies are only around 5%; a slack-relative trigger works but causes rare O(n) rebuild spikes. Per-cycle P99 alone may hide such extreme maintenance events, so the benchmark records maximum per-update probes as well. CPU timings remain exploratory; no claims of statistically significant speedups or exact author-paper reproduction are made.

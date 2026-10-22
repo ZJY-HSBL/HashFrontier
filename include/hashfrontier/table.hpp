@@ -13,7 +13,7 @@ inline std::uint64_t mix64(std::uint64_t x) {
     x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
     return x ^ (x >> 31);
 }
-struct Stats { std::uint64_t probes = 0, moves = 0; };
+struct Stats { std::uint64_t probes = 0, moves = 0, rebuilds = 0; };
 struct Slot { std::uint64_t key = 0; std::uint8_t state = 0; };
 class TableBase {
 protected:
@@ -72,6 +72,65 @@ public:
         return false;
     }
 };
+// Stop-the-world tombstone cleanup control. Not Zombie Hashing or Graveyard Hashing.
+// Rebuilds the SAME capacity when tombstones exceed a table-size or free-space budget.
+// Count scans and reinserts explicitly; temporary scratch allocation may double
+// the peak slot storage, though `bytes()` records only steady-state slot storage.
+template <unsigned ThresholdPercent, bool SlackBased = false> class LinearPeriodicRebuild : public LinearTombstone {
+    static_assert(ThresholdPercent >= 1 && ThresholdPercent <= 100);
+    std::size_t tombstones_ = 0;
+
+    void rebuild() {
+        // Safe to reconstruct because all live keys are reinserted with their
+        // original homes and no key is removed from the logical set.
+        std::vector<Slot> rebuilt(this->capacity());
+        for (const auto& entry : this->slots_) {
+            this->touch();
+            if (entry.state != 1) continue;
+            auto dst = this->home(entry.key);
+            while (rebuilt[dst].state != 0) {
+                this->touch();
+                dst = (dst + 1) & this->mask_;
+            }
+            rebuilt[dst] = entry;
+            ++this->stats_.moves;
+        }
+        this->slots_.swap(rebuilt);
+        this->tombstones_ = 0;
+        ++this->stats_.rebuilds;
+    }
+public:
+    using LinearTombstone::LinearTombstone;
+    bool insert(std::uint64_t key) {
+        auto i = this->home(key), first_dead = this->capacity();
+        for (std::size_t step = 0; step < this->capacity(); ++step, i = (i + 1) & this->mask_) {
+            this->touch();
+            if (this->slots_[i].state == 1 && this->slots_[i].key == key) return false;
+            if (this->slots_[i].state == 2 && first_dead == this->capacity()) first_dead = i;
+            if (this->slots_[i].state == 0) {
+                const auto dst = first_dead == this->capacity() ? i : first_dead;
+                this->slots_[dst] = {key, 1};
+                if (dst == first_dead) --tombstones_;
+                ++this->count_;
+                return true;
+            }
+        }
+        if (first_dead != this->capacity()) {
+            this->slots_[first_dead] = {key, 1};
+            --tombstones_; ++this->count_;
+            return true;
+        }
+        return false;
+    }
+    bool erase(std::uint64_t key) {
+        if (!LinearTombstone::erase(key)) return false;
+        ++tombstones_;
+        const auto scale = SlackBased ? this->capacity() - this->size() : this->capacity();
+        if (tombstones_ * 100 >= scale * ThresholdPercent) rebuild();
+        return true;
+    }
+};
+
 // Linear probing with backward-shift deletion, without tombstones.
 class LinearBackshift : public TableBase {
 public:

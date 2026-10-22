@@ -1,0 +1,33 @@
+{
+  "protocol": "hf-churn-v0.2.0",
+  "date": "2026-10-22",
+  "type": "exploratory local single process",
+  "host_system": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "python": "3.13.5",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "cmake": "cmake version 3.31.6",
+  "cpu": "model name\t: AMD EPYC 9V74 80-Core Processor",
+  "capacity": 4096,
+  "load_percent": [
+    75,
+    85,
+    95
+  ],
+  "paired_seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "cycles": 12,
+  "churn_fraction_of_live": 0.05,
+  "hit_and_miss_queries_per_cycle": 256,
+  "caveats": [
+    "P99 per cycle may omit single expensive rebuild",
+    "clock overhead and CPU scheduling uncontrolled",
+    "full table rebuilding has temporary scratch allocation not captured by steady slot bytes",
+    "one host and five seeds; do not infer general speed superiority",
+    "no paper-faithful ZombieHT is included in results"
+  ]
+}

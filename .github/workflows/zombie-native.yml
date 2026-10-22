@@ -1,0 +1,42 @@
+name: ZombieHT upstream source smoke (not paper replication)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/zombie-native.yml'
+      - 'papers/zombie2025/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  author-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Pin and fetch official author code
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT upstream
+          git -C upstream checkout --detach 5064a381fd3b7a540594fadd6f7595fdcc748a6c
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git -C upstream submodule update --init --recursive
+          git -C upstream rev-parse HEAD | tee author-commit.txt
+      - name: Build and run paper-native ordered variants at small scale
+        run: |
+          set -euo pipefail
+          mkdir -p native-logs
+          for variant in TRHM GZHM; do
+            cmake -S upstream -B "build-${variant}" -DCMAKE_BUILD_TYPE=Release -DVARIANT="${variant}" -DCMAKE_CXX_STANDARD=23
+            cmake --build "build-${variant}" --target hm_churn -j2
+            mkdir -p "native-logs/${variant}"
+            "build-${variant}/hm_churn" -k 64 -q 13 -v 0 -i 85 -c 4 -w 150 -l 300 -s 1 -t 1 -m 0 -g 0 -d "native-logs/${variant}/"
+          done
+      - name: Upload native evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zombie-native-ordered-smoke
+          path: |
+            author-commit.txt
+            native-logs/
+          if-no-files-found: warn
