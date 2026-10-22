@@ -1,0 +1,43 @@
+{
+  "artifact_version": "v0.1.0",
+  "kind": "exploratory_local_cpu_microbenchmark",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "cmake": "cmake version 3.31.6",
+  "os": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "architecture": "x86_64",
+  "build_type": "Release",
+  "compiler_flags": [
+    "-O3",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic"
+  ],
+  "workload": {
+    "slots": 4096,
+    "loads": [
+      0.5,
+      0.8,
+      0.93
+    ],
+    "patterns": [
+      "uniform",
+      "zipf",
+      "hotspot_shift"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "queries_per_phase": 8000,
+    "churn_pairs": 1500
+  },
+  "command": [
+    "./build/hf_benchmark",
+    "8000",
+    "5"
+  ],
+  "limitations": "Unpinned frequency / local container / short samples; raw timings are exploratory"
+}

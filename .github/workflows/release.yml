@@ -1,0 +1,29 @@
+name: Versioned release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test release commit
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure
+      - name: Publish tagged source and evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(cat VERSION)"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag exists; not overwriting immutable evidence."
+          else
+            gh release create "$tag" results/v0.1.0-local.csv results/v0.1.0-summary.csv \
+              --target "$GITHUB_SHA" --title "HashFrontier $tag — research baseline" \
+              --notes-file RELEASE_NOTES.md
+          fi
