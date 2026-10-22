@@ -94,6 +94,25 @@ python scripts/analyze_churn.py
 
 **研究状态：**已定位并审查作者公开仓库固定提交及原始构建/工作负载入口，并加入独立的作者代码编译与小型 smoke 工作流；这不是已经完成的原论文大规模复现。所有全表清理策略均属于经典对照，不冒充 Zombie Hashing。原论文实验需保留与本项目不同的 2²⁷ 槽设置、重复试验和具体硬件条件。
 
+### v0.5.0 | 源码配对输入与 v0.4.0 实验故障审计
+
+**此次首要研究结果是一项严格的失败审计，而不是对新算法的成功宣告。** [v0.4.0 作者原版多负载 CI](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39795819645) 在 95% 负载首次重复的 TRHM 中遭遇 SIGSEGV（139）；85% 下的四算法、两次重复均完成 320 周期。95% RHM 首次重复完成；TRHM 仅 191 周期，余下 **6 个任务没有执行**。完整性不能只由 GitHub CI 或作者 `main()` 退出值判断。
+
+![Author native multi-load failure audit](figures/v0.5.0-v04-incident.svg)
+
+| 负载与批次 | RHM | TRHM | GZHM | GZHM_ADAPTIVE |
+|---|---|---|---|---|
+| 85% / R01 | 320/320 | 320/320 | 320/320 | 320/320 |
+| 85% / R02 | 320/320 | 320/320 | 320/320 | 320/320 |
+| 95% / R01 | 320/320 | **191/320，SIGSEGV** | 未运行 | 未运行 |
+| 95% / R02 | 未运行 | 未运行 | 未运行 | 未运行 |
+
+[原始证据](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39795819645) · [逐任务完成表](results/v0.5.0-v04-incident.csv) · [来源及校验](results/v0.5.0-v04-provenance.json)
+
+新的 [**可配对作者源码工作流**](.github/workflows/zombie-paired.yml) 保持 `GZHM`/`GZHM_ADAPTIVE`/`TRHM`/`RHM` 算法实现原封不动，仅在上游 **benchmark 输入生成器**中接入可重复种子和操作流指纹：逐周期比较 BUILD/CHURN 操作数组的 hash；只有相同负载、相同种子、相同完整 320 周期的对象才能进入配对分析。另有输入漂移、原版提前终止与伪成功退出码的测试。工作流设定 85%/95% 负载、3 种种子以及 320 周期，并将在完成后产生 `completion.csv`、`trace-integrity.csv`、`complete-cohorts.csv`，未运行或中途崩溃的变体不允许进入排名。
+
+**复现状态边界**：这是对作者程序的 *instrumented source* 对照实验，**不是** q=27 的全部论文实验，更不是我们的新算法。CI 若未成功完成，不能声称得到了配对优势结论。比较时间为作者实现的原生 `high_resolution_clock` tick/操作，跨进程 CPU 噪声仍有影响。后续应优先查明高负载 TRHM 崩溃原因、验证配对轨迹及 oracle 正确性，再推进创新方案。
+
 ### v0.4.0 | 论文原版实验的完成率审计（重要纠正）
 
 SIGMOD 2025 [Zombie Hashing](https://doi.org/10.1145/3725424) 作者的固定源码版本 `5064a381fd3b7a540594fadd6f7595fdcc748a6c` 在 [GitHub Actions 原始运行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335) 中被成功编译并退出，但我重新获取**作者原始工作流 Artifact**（ID `12432115740`）后，发现 **TRHM 在 95% 负载的 q=13 缩小实验中只完成 194/320 个完整周期**，其余三个变体全部完成 320 个周期。早先笼统描述为“全部 320 周期成功”是不准确的，现已纠正。
@@ -211,3 +230,7 @@ We added two **exploratory bounded tombstone repair** controls (8/32 scanned slo
 ### English update | v0.4.0
 
 Re-auditing the official SIGMOD 2025 ZombieHT q=13 author-output shows that the initial CI exit code falsely implied four complete 320-cycle runs: RHM, GZHM and GZHM_ADAPTIVE finished; TRHM stopped after 194 complete cycles plus a DELETE phase. The upstream binary returns 0 after an interrupted churn run. See [machine-readable audit](results/v0.4.0-author-v03-audit/audit.csv), [raw author artifact](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335), [source provenance](results/v0.4.0-author-v03-audit/provenance.json), and [visuals](figures/v0.4.0-native-insert-trends.svg). This is a scaled, unpaired source-backed experiment, **not** faithful reproduction of the full SIGMOD paper and **not** evidence that our own hashing policy wins.
+
+### English update | v0.5.0
+
+We recovered a genuine CI failure in the v0.4.0 multi-load official-author experiment: both 85%-load repeats fully completed for all four variants, but the first 95%-load TRHM run segfaulted after 191 complete cycles; the remaining six high-load runs were not executed. This version records **missing vs incomplete vs complete** experiments explicitly. Our new source-instrumented paired-run workflow changes only the upstream benchmark input RNG and emits byte-stable per-cycle operation fingerprints; it does not replace or relabel the author hash table algorithms. Only complete and trace-identical cohorts may enter statistical comparison. Neither q=27 full-paper replication nor a superior new algorithm is claimed.

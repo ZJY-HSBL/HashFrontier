@@ -1,0 +1,106 @@
+name: ZombieHT paired-seed author-source benchmark
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/zombie-paired.yml'
+      - 'scripts/audit_zombie_paired.py'
+      - 'scripts/patch_zombie_paired.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  paired-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch exact source and instrument workload generator
+        run: |
+          set -euo pipefail
+          git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT upstream
+          git -C upstream checkout --detach 5064a381fd3b7a540594fadd6f7595fdcc748a6c
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git -C upstream submodule update --init --recursive
+          sha256sum upstream/bench/hm_churn.cc > upstream-benchmark-pristine.sha256
+          python3 scripts/patch_zombie_paired.py upstream/bench/hm_churn.cc
+          mkdir -p paired-logs
+          cp upstream-benchmark-pristine.sha256 paired-logs/
+          git -C upstream rev-parse HEAD > paired-logs/upstream-commit.txt
+          sha256sum upstream/bench/hm_churn.cc > paired-logs/instrumented-benchmark.sha256
+          c++ --version | head -n 1 > paired-logs/compiler.txt
+          lscpu > paired-logs/cpu.txt
+      - name: Build upstream author algorithms (workload generator instrumented)
+        run: |
+          set -euo pipefail
+          for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
+            cmake -S upstream -B "build-$variant" -DCMAKE_BUILD_TYPE=Release -DVARIANT="$variant"
+            cmake --build "build-$variant" --target hm_churn -j2
+          done
+      - name: Same-seed native operations (85/95 percent, 320 cycles, three seeds)
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          for load in 85 95; do
+            changes=$(( (8192 * load / 100) / 20 ))
+            lookups=$(( changes * 2 ))
+            for seed in 41 53 67; do
+              for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
+                out="paired-logs/L${load}/S${seed}/${variant}"
+                mkdir -p "$out"
+                printf 'q=13;load=%d;cycles=320;deletions=%d;insertions=%d;lookups=%d;unpaired=false;seed=%d\n' \
+                  "$load" "$changes" "$changes" "$lookups" "$seed" > "$out/protocol.txt"
+                set +e
+                HF_PAIR_SEED="$seed" "build-$variant/hm_churn" -k 64 -q 13 -v 0 -i "$load" -c 320 \
+                  -w "$changes" -l "$lookups" -s 1 -t 1 -m 0 -g 0 -d "$out/" > "$out/stdout.log" 2>&1
+                code=$?
+                set -e
+                printf '%d\n' "$code" > "$out/exitcode.txt"
+                echo "load=$load seed=$seed variant=$variant exit=$code"
+              done
+            done
+          done
+          find paired-logs -type f ! -name sha256.txt -print0 | sort -z | xargs -0 sha256sum > paired-logs/sha256.txt
+      - name: Verify actual operations have identical per-cycle fingerprints
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_zombie_paired.py paired-logs --out audit
+          python3 - <<'PY'
+          import csv, os
+          with open('audit/completion.csv') as f: rows=list(csv.DictReader(f))
+          with open('audit/trace-integrity.csv') as f: traces=list(csv.DictReader(f))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+            f.write('## Instrumented source-backed paired ZombieHT audit\n\n')
+            f.write(f'{len(rows)} runs, {len(traces)} fingerprints. Matched full-run variants only enter the cohort.\n\n')
+            f.write('| Load | Seed | Variant | Complete cycles | Exit code |\n|---|---:|---|---:|---:|\n')
+            for r in rows:
+              f.write(f"| {r['load_pct']}% | {r['seed']} | {r['variant']} | {r['completed_cycles']}/{r['cycles']} | {r['exitcode']} |\n")
+          PY
+      - name: Upload full raw input, upstream clock and audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zombie-paired-v0.5.0-raw
+          path: |
+            paired-logs/
+            audit/
+          if-no-files-found: warn
+      - name: Attach verified paired evidence to v0.5.0 release
+        if: success() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            if gh release view v0.5.0 >/dev/null 2>&1; then break; fi
+            sleep 8
+          done
+          gh release view v0.5.0 >/dev/null
+          if gh release view v0.5.0 --json assets --jq '.assets[].name' | grep -qx 'v0.5.0-paired-completion.csv'; then
+            echo 'Already attached; refusing to overwrite released evidence.'
+          else
+            cp audit/completion.csv audit/v0.5.0-paired-completion.csv
+            cp audit/complete-cohorts.csv audit/v0.5.0-paired-complete-cohorts.csv
+            cp audit/trace-integrity.csv audit/v0.5.0-paired-trace-integrity.csv
+            gh release upload v0.5.0 audit/v0.5.0-paired-*.csv
+          fi

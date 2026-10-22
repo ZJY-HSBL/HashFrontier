@@ -17,6 +17,8 @@ jobs:
         run: ctest --test-dir build --output-on-failure
       - name: Author-native log audit regression tests
         run: python3 -m unittest discover -s tests -p "test_native_audit.py" -v
+      - name: Paired trace instrumentation and audit regressions
+        run: python3 -m unittest discover -s tests -p "test_paired_native.py" -v
       - name: Small benchmark smoke
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows

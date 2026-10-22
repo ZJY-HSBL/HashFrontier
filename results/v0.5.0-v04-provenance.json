@@ -1,0 +1,8 @@
+{
+  "source": "GitHub Actions failed artifact",
+  "run": "39795819645",
+  "artifact": "12432837986",
+  "archive_sha256": "3414e6d5bd06dae8890f8db7703054fb08df20e4d127367a7a514524d9e56ef8",
+  "upstream_revision": "5064a381fd3b7a540594fadd6f7595fdcc748a6c",
+  "analysis": "Completeness counts derived from phase records. Crash cause beyond SIGSEGV not established."
+}

@@ -1,0 +1,17 @@
+load,repeat,variant,status,completed_cycles,phase_rows
+85,R01,RHM,complete,320,960
+85,R01,TRHM,complete,320,960
+85,R01,GZHM,complete,320,960
+85,R01,GZHM_ADAPTIVE,complete,320,960
+85,R02,RHM,complete,320,960
+85,R02,TRHM,complete,320,960
+85,R02,GZHM,complete,320,960
+85,R02,GZHM_ADAPTIVE,complete,320,960
+95,R01,RHM,complete,320,960
+95,R01,TRHM,incomplete_or_crashed,191,573
+95,R01,GZHM,not_executed,0,0
+95,R01,GZHM_ADAPTIVE,not_executed,0,0
+95,R02,RHM,not_executed,0,0
+95,R02,TRHM,not_executed,0,0
+95,R02,GZHM,not_executed,0,0
+95,R02,GZHM_ADAPTIVE,not_executed,0,0

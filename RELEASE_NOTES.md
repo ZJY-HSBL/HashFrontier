@@ -1,25 +1,11 @@
-# HashFrontier v0.4.0 — Auditing incomplete original ZombieHT experiments
+# HashFrontier v0.5.0 — Paired-workload instrumentation and honest crash reporting
 
-**2026-10-22 | SIGMOD 2025 Zombie Hashing author-source audit | Evidence, not a new algorithm**
+**Research update, 2026-10-22. Not a claim of a new superior hashing algorithm.**
 
-## Critical correction to v0.3.0
+The primary result is an audit of v0.4.0 author-source multi-load evidence: 85% occupancy completed all four native variants twice (320 cycles each); at 95% occupancy RHM completed 320 cycles, TRHM segfaulted after 191 cycles (exit 139), and the remaining six matrix entries were not executed because the GitHub shell exited. Data: `results/v0.5.0-v04-incident.csv`, `results/v0.5.0-v04-provenance.json`, and `figures/v0.5.0-v04-incident.svg`; original run `39795819645` and uploaded raw Artifact `12432837986`.
 
-The author's pinned source and CI job completed with a successful process exit, but inspecting the *original upstream per-phase output* shows that only **RHM, GZHM, GZHM_ADAPTIVE** ran the requested 320 full cycles at 95% occupancy, q=13. **TRHM completed 194/320 cycles and then logged only DELETE in cycle 194 (zero-based); it did not complete INSERT or LOOKUP.** 583 phase records appeared instead of 960. This run must not be labeled a successful full 320-cycle TRHM experiment.
+This release adds a *new research capability* designed to fix the earlier non-paired bias: `scripts/patch_zombie_paired.py` instruments **only** the author benchmark input generation in pinned `saltsystemslab/ZombieHT` commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`. It replaces OpenSSL-sampled test-key material with seedable C++ PRNG bytes, seeds the benchmark `rand()`, and fingerprints every complete generated operation tape. The original hash-table algorithm files are unchanged. `scripts/audit_zombie_paired.py` verifies full phase logs, process exits, and per-cycle trace identity before admitting complete cohorts. An independently running GitHub Actions job executes 85%/95% occupancy with seeds 41/53/67 and 320 cycles, saving all raw logs and checksums even when a variant crashes. Regression tests include deliberate trace divergence.
 
-The upstream `bench/hm_churn.cc::profile_ops()` returns `-1` on `QF_NO_SPACE`; `run_churn()` breaks its loop, but `main()` still returns `0`. Thus GitHub Actions green is not evidence of cycle completeness. This is a fidelity/correctness-of-experimental-reporting finding, not proof the Zombie algorithm is wrong. Confirming the reason for this exact TRHM stop still requires an instrumented rerun.
+**Important:** A successful v0.5.0 release does not mean the separately-triggered native paired benchmark is successful. Consult the "ZombieHT paired-seed author-source benchmark" GitHub Action and raw Artifact. It is a scaled q=13 *instrumented* comparison, not the full published paper's q=27 setting, nor original-algorithm independent correctness proof. Failed/incomplete runs cannot count as comparable endpoints. Our bounded-repair candidate remains falsified by v0.3.0 data.
 
-## Deliverables
-
-- Recovered genuine GitHub Actions artifact ID 12432115740 from [run 39792045335](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39792045335), pinned upstream commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`.
-- Portable `scripts/audit_zombie_native.py` audits author-native phase completeness, declared workload operation counts, and missing cycles. Four regression tests include early, otherwise-successful process termination.
-- Audit CSV/JSON, raw converted native-cycle data, per-phase descriptive summaries, provenance with hashes, and two SVG figures are available in `results/v0.4.0-author-v03-audit/` and `figures/`.
-- Expanded author-native CI workflow: 85% / 95% occupancy, two *unpaired* independent repeats, 320 requested cycles, pinned q=13 and original variants. RHM/GZHM/GZHM_ADAPTIVE are required to complete; an incomplete TRHM is explicitly recorded, not treated as 320-cycle success. Workflow artifact and job summary retain the results, even on failure.
-- No high-tier paper is marked fully reproduced. No proposed new hashing algorithm wins any claim in v0.4.0.
-
-## Methodological limits
-
-The four variants' original OpenSSL-random key traces differ across processes. Their median author-clock ticks/operation are **descriptive only**; not a paired performance claim and not directly comparable to HashFrontier local C++ probes. The scale (2^13 slots) is smaller than the authors' large-workload setting (2^27), and only selected ordered variants are studied. Native throughput values are source clock ticks, not certified nanoseconds across machines.
-
-## Next scientific step
-
-First inspect the new multiple-load, multiple-repeat author-native CI run for stability of TRHM premature termination. Then build a deterministic trace adapter to all four official implementations (keeping algorithm semantics intact) so comparisons are paired; only after correctness and paper-fidelity gates pass should an original bounded-tombstone-redistribution mechanism be evaluated.
+Next: validate identical input traces and operator equivalence under oracle tests, run more independent paired seeds, diagnose the TRHM crash with sanitizers, and only then design invariant-preserving bounded tombstone relocation.
