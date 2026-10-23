@@ -10,15 +10,16 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 namespace hf {
 class AdvancedBubbleUp {
 public:
-    struct Slot { std::uint64_t key=0; std::uint16_t choice=0; };
+    struct Slot { std::uint64_t key=0; std::uint16_t choice=0; bool tombstone=false; };
     struct Stats { std::uint64_t probes=0, noncore_probes=0, evictions=0, core_moves=0, failures=0; };
 private:
     std::vector<Slot> table_;
-    std::size_t count_=0, d_=0, core_=0, dmax_=0, phases_=1, max_core_chain_=0;
+    std::size_t count_=0, tombstones_=0, d_=0, core_=0, dmax_=0, phases_=1, max_core_chain_=0;
     double alpha_;
     std::uint64_t seed_=0, rng_=0;
     mutable Stats stat_{};
@@ -55,7 +56,32 @@ public:
         dmax_ = core_+gamma;
         if(dmax_>d_) dmax_=d_;
     }
+    // Physical augmented load counts tombstones: Appendix C, SODA 2025.
     std::size_t size() const {return count_;}
+    std::size_t live_size() const {return count_-tombstones_;}
+    std::size_t tombstone_count() const {return tombstones_;}
+    std::size_t locate_augmented(std::uint64_t key) const {
+        for(std::size_t j=dmax_;j>0;--j) {
+            auto i=pos(key,j);
+            ++stat_.probes;
+            if(table_[i].choice && table_[i].key==key) return i;
+        }
+        return table_.size();
+    }
+    bool augmented_contains(std::uint64_t key) const {return locate_augmented(key)!=table_.size();}
+    bool mark_deleted(std::uint64_t key) {
+        const auto i=locate_augmented(key);
+        if(i==table_.size() || table_[i].tombstone) return false;
+        table_[i].tombstone=true;
+        ++tombstones_;
+        return true;
+    }
+    // Used only for paper Appendix C's scheduled rebuild; never rehash a tombstone.
+    std::vector<std::uint64_t> live_keys_for_rebuild() const {
+        std::vector<std::uint64_t> keys;keys.reserve(live_size());
+        for(const auto& slot:table_) if(slot.choice&&!slot.tombstone) keys.push_back(slot.key);
+        return keys;
+    }
     std::size_t capacity() const {return table_.size();}
     std::size_t max_choices() const {return d_;}
     std::size_t active_choices() const {return dmax_;}
@@ -67,12 +93,19 @@ public:
         for(std::size_t j=dmax_;j>0;--j) {
             ++stat_.probes;
             const auto& slot=table_[pos(key,j)];
-            if(slot.choice && slot.key==key) return true;
+            if(slot.choice && !slot.tombstone && slot.key==key) return true;
         }
         return false;
     }
     bool insert(std::uint64_t key) {
-        if(contains(key) || count_==capacity()) return false;
+        const auto existing=locate_augmented(key);
+        if(existing!=table_.size()) {
+            if(!table_[existing].tombstone) return false;
+            table_[existing].tombstone=false;
+            --tombstones_;
+            return true;
+        }
+        if(count_==capacity()) return false;
         advance();
         const auto rng_start=rng_;
         const auto evict_start=stat_.evictions;
@@ -89,6 +122,7 @@ public:
             return false;
         };
         std::uint16_t choice=0;
+        bool moving_tombstone=false;
         std::size_t core_streak=0;
         const std::size_t max_steps=std::max<std::size_t>(max_core_chain_*8,d_*32);
         for(std::size_t step=0;step<max_steps;++step) {
@@ -114,21 +148,23 @@ public:
             }
             Slot old=table_[index];
             undo.push_back({index,old});
-            table_[index]={key,static_cast<std::uint16_t>(next_choice)};
+            table_[index]={key,static_cast<std::uint16_t>(next_choice),moving_tombstone};
             if(!old.choice) {++count_;return true;}
             ++stat_.evictions;key=old.key;choice=old.choice;
+            moving_tombstone=old.tombstone;
         }
         return rollback();
     }
     // Exhaustive validation of stored placement, without relying on hit queries.
     bool valid() const {
-        std::size_t n=0;
+        std::size_t n=0, dead=0;
         for(std::size_t i=0;i<table_.size();++i) {
             auto s=table_[i];if(!s.choice)continue;
             if(s.choice>dmax_||pos(s.key,s.choice)!=i) return false;
             ++n;
+            if(s.tombstone) ++dead;
         }
-        return n==count_;
+        return n==count_ && dead==tombstones_;
     }
 };
 } // namespace hf

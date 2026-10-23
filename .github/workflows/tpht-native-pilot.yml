@@ -1,0 +1,46 @@
+name: PVLDB 2026 TPHT upstream native tests and original benchmark pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tpht-native-pilot.yml'
+  workflow_dispatch:
+jobs:
+  author-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin the official TPHT author's implementation
+        run: |
+          set -euo pipefail
+          git clone https://github.com/Xilinion/TPHT upstream-tpht
+          git -C upstream-tpht checkout --detach 3c39de26faba11bc1a037a1dfd24e3c633ac8987
+          test "$(git -C upstream-tpht rev-parse HEAD)" = '3c39de26faba11bc1a037a1dfd24e3c633ac8987'
+          mkdir -p native-tpht-results
+          git -C upstream-tpht rev-parse HEAD > native-tpht-results/source-sha.txt
+          sha256sum upstream-tpht/tpht.c upstream-tpht/tpht.h > native-tpht-results/source-files-sha256.txt
+          { c++ --version | head -n 1; uname -a; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -n 4; } > native-tpht-results/environment.txt
+      - name: Execute upstream TPHT full correctness / SIMD test runner
+        run: |
+          set -euo pipefail
+          cd upstream-tpht
+          ./tests/run_tpht_tests.sh | tee ../native-tpht-results/upstream-tests.log
+      - name: Run original author latency and memory bench drivers (scaled pilot)
+        run: |
+          set -euo pipefail
+          cd upstream-tpht
+          RESULT_DIR="${GITHUB_WORKSPACE}/native-tpht-results" PYTHON=/usr/bin/python3 \
+            ./benchmarks/run_latency.sh 10 17 8 0.85 | tee ../native-tpht-results/latency-protocol.log
+          RESULT_DIR="${GITHUB_WORKSPACE}/native-tpht-results" \
+            ./benchmarks/run_space_eff.sh 50000 | tee ../native-tpht-results/space-protocol.log
+          test -s ../native-tpht-results/tpht_latency.csv
+          test -s ../native-tpht-results/tpht_space_eff.csv
+          wc -l ../native-tpht-results/*.csv
+          (cd ../native-tpht-results && sha256sum *.csv > measurements-sha256.txt)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tpht-native-author-pilot-correctness-and-latency-space
+          path: native-tpht-results/
+          if-no-files-found: warn

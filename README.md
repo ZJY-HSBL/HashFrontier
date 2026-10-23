@@ -1,5 +1,20 @@
 # HashFrontier
 
+## v0.9.1 | SODA 2025 Appendix C (mechanism validation only, NOT complete L2)
+
+The SODA 2025 Bubble-up paper's Appendix C prescribes tombstones retained as actual entries in eviction chains, their reactivation on reinsertion, and a full-table rebuild when augmented load reaches a threshold. This release reproduces those mechanisms on top of our separately implemented Section 5.2 insertion engine; it is not a new algorithm.
+
+- Correctness: 2,447,592 oracle checks; 888 observed full rebuilds; local ASan/UBSan passes. All 30/30 small-scale dynamic trials completed (70/85/95% target live load; ten seeds each).
+- Evidence: [Appendix C report](docs/APPENDIX-C-REPRODUCTION.md) · [raw CSV](results/v0.9.1-appendix-c-pilot.csv) · [statistics](results/v0.9.1-appendix-c-summary.csv) · [L2/L3 evidence gates](docs/NEXT-L2-L3-GATES.md).
+- Limitations: 4,096-slot finite test, d=10 and d_core=5 fail theorem admissibility; memory counts only implementation slots. HF-Score and paper-native L2 are NOT claimed.
+
+![Real insert timings](figures/v0.9.1-appendix-c-insert.svg)
+
+![Real scheduled rebuilds](figures/v0.9.1-appendix-c-rebuild.svg)
+
+A separate GitHub workflow now runs TPHT's original author test driver and scaled native latency/space drivers, to collect partial L2 evidence without mislabelling it as full replication.
+
+
 ## v0.9.0 | 第 3 篇论文 Advanced Bubble-up 第 5.2 节机制实现与真实实验
 
 已对 SODA 2025 第 5.2 节阶段化 Advanced Bubble-up 开展独立实现：d_max 动态阶段、核心区随机游走、非核心候选搜索、逆序查询及失败回滚。**这不是对原论文最强定理的完整复现**：工程用 d=8、d_core=4、alpha=0.5 和 SplitMix 派生哈希，尚不满足可据以宣称 Theorem 5.1 的全部理论条件；第 C 附录删除算法尚未实现。

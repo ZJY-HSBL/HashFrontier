@@ -1,0 +1,52 @@
+name: SODA 2025 Appendix C tombstones and rebuild reproduction gate
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/advanced_bubble_up.hpp'
+      - 'include/hashfrontier/advanced_bubble_appendix_c.hpp'
+      - 'tests/test_advanced_appendix_c.cpp'
+      - 'src/appendix_c_benchmark.cpp'
+      - '.github/workflows/bubble-appendix-c.yml'
+  workflow_dispatch:
+jobs:
+  appendix-c-finite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build mechanism tests, benchmark and sanitizer build
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_advanced_appendix_c.cpp -o out/appendix-c-tests
+          c++ -std=c++20 -O3 -Wall -Wextra -Wpedantic -Iinclude src/appendix_c_benchmark.cpp -o out/appendix-c-bench
+          c++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_advanced_appendix_c.cpp -o out/appendix-c-sanitizers
+      - name: Differential tests and sanitizer correctness
+        run: |
+          set -euo pipefail
+          ./out/appendix-c-tests | tee out/oracle-tests.txt
+          ASAN_OPTIONS=detect_leaks=1 ./out/appendix-c-sanitizers | tee out/sanitizer-tests.txt
+      - name: Re-run all finite comparison traces, verify exact matrix
+        run: |
+          set -euo pipefail
+          ./out/appendix-c-bench 10 28 > out/appendix-c-raw.csv
+          python3 - <<'PY'
+          import csv
+          rows=list(csv.DictReader(open('out/appendix-c-raw.csv')))
+          assert len(rows)==30
+          assert len({(r['load_pct'],r['seed']) for r in rows})==30
+          assert {r['load_pct'] for r in rows}=={'70','85','95'}
+          assert all(r['correct']=='true' and int(r['failed_rebuilds'])==0 for r in rows)
+          assert all(int(r['rebuilds'])>0 for r in rows)
+          PY
+          { c++ --version | head -n 1; uname -a; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -n 4; } > out/environment.txt
+          sha256sum out/appendix-c-raw.csv > out/evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appendix-c-finite-l1-native-evidence
+          path: |
+            out/*.csv
+            out/*.txt
+          if-no-files-found: warn
