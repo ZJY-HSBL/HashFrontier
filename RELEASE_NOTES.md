@@ -1,11 +1,7 @@
-# HashFrontier v0.6.0 — HF-Score v1.0 unified evaluation standard
+# HashFrontier v0.7.0 — first author-source cross-paper comparison
 
-**2026-10-22. Protocol and software release, NOT new cross-paper replication evidence.**
+This version integrates the **unmodified native algorithm cores** of SIGMOD 2025 Zombie Hashing and PVLDB 2026 Tiny Pointer Hash Tables in one reproducible, oracle-validated **set-membership** benchmark. The common deterministic binary traces are archived with the workflow artifact. This release contains the benchmark source and protocol, not a claim that any method is faster in advance of runtime verification.
 
-This version freezes the proposed seven-metric dynamic CPU table scoring formula and adds a strict machine-readable evaluator, preregistered pilot scenario manifest, 12 pure-stdlib correctness/completeness tests, CI smoke, a demonstrably synthetic CLI fixture, and a review of prior measurement gaps.
+Five implementations: GZHM, GZHM_ADAPTIVE, Chained-TPHT, Flattened-TPHT and standard-library control. Pilot: three loads (70/85/95%), three seeds (101/102/103), 32 update cycles with successful/unsuccessful queries = 45 scheduled jobs. Strict per-run completion CSV, provenance and raw logs are mandatory.
 
-Core metrics and fixed weights: initial construction 15%; successful lookup 20%; unsuccessful lookup 15%; insertion 15%; deletion 10%; per-operation mutation P99 10%; complete bytes per live key 15%. All are strictly positive lower-is-better. Across prerecorded scenario/seed pairs, score `100 * exp(mean_log_gain - 0.25 * between_scenario_log_gain_sd)` relative to pinned Robin Hood baseline. Missing metrics, failed correctness, different hardware or input trace, absent rows, and incomplete reference all fail the strict scoring gate. 30 seeds and paired seed bootstrap are required for formal candidate uncertainty intervals. Different capabilities/tracks are not silently mixed.
-
-**No formal score ranking is published.** Existing v0.1–v0.5 results cannot support the seven-metric, cross-paper comparison and must not be merged or imputed. `examples/hfscore/*` is explicitly fake software-test data, not experimental performance. Current work remains reproducing eligible research papers and measuring them on the same trace.
-
-Evidence: `results/v0.6.0-data-readiness.json`, `scoring/protocol-v1.0.json`, `scoring/PROTOCOL.md`, strict unit/CI tests. v0.5.0 crash and original ZombieHT replication limitations remain unresolved in this release.
+**Important limitations:** Different native memory allocation accounting, TPHT 1-byte dummy payload vs Zombie 0-bit payload, CPU microbenchmark overhead and only three seeds make HF-Score v1.0 inapplicable. No fabricated composite ranking and no claim of Bubble-up Cuckoo replication. The author-source workflow will attach measured CSV and SVG after successful execution. Failed or incomplete runs remain recorded as such.

@@ -25,6 +25,8 @@ jobs:
         run: |
           python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json --observations examples/hfscore/demo-input.csv --output hfscore-ci.json --csv-output hfscore-ci.csv
           python3 -c "import json; d=json.load(open('hfscore-ci.json')); assert d['evidence_level']=='synthetic_fixture_not_evidence' and d['results'][0]['score']==100"
+      - name: Cross-paper strict report regression tests
+        run: python3 -m unittest discover -s tests -p "test_cross_paper_report.py" -v
       - name: Small benchmark smoke
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows

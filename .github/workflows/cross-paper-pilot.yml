@@ -1,0 +1,123 @@
+name: Cross-paper TPHT x ZombieHT fixed-trace benchmark
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cross-paper-pilot.yml'
+      - 'src/cross_paper.cpp'
+      - 'scripts/cross_paper_report.py'
+      - 'papers/cross-paper-v0.7.0.md'
+      - 'VERSION'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  author-cross-paper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned unmodified paper implementations
+        run: |
+          set -euo pipefail
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT author-zombie
+          git -C author-zombie checkout --detach 5064a381fd3b7a540594fadd6f7595fdcc748a6c
+          git -C author-zombie submodule update --init --recursive
+          git clone --filter=blob:none https://github.com/Xilinion/TPHT author-tpht
+          git -C author-tpht checkout --detach 3c39de26faba11bc1a037a1dfd24e3c633ac8987
+          mkdir -p cross-output traces
+          git -C author-zombie rev-parse HEAD > cross-output/zombie-source-sha.txt
+          git -C author-tpht rev-parse HEAD > cross-output/tpht-source-sha.txt
+          sha256sum author-zombie/src/gqf.c author-zombie/src/hm.c author-tpht/tpht.c author-tpht/tpht.h > cross-output/author-core-sha256.txt
+          { uname -a; g++ --version | head -1; gcc --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > cross-output/environment.txt
+      - name: Build original ZombieHT variants and original TPHT C library
+        run: |
+          set -euo pipefail
+          cat >> author-zombie/CMakeLists.txt <<'CMAKE'
+          add_library(hf_author_tpht STATIC ${CMAKE_SOURCE_DIR}/../author-tpht/tpht.c)
+          target_include_directories(hf_author_tpht PUBLIC ${CMAKE_SOURCE_DIR}/../author-tpht)
+          set_property(TARGET hf_author_tpht PROPERTY C_STANDARD 11)
+          add_executable(hf_cross_compare ${CMAKE_SOURCE_DIR}/../src/cross_paper.cpp)
+          target_include_directories(hf_cross_compare PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/tests)
+          target_link_libraries(hf_cross_compare PRIVATE hf_author_tpht hm pc gqf hashutil ssl crypto pthread)
+          CMAKE
+          for variant in GZHM GZHM_ADAPTIVE; do
+            cmake -S author-zombie -B "build-$variant" -DCMAKE_BUILD_TYPE=Release -DVARIANT="$variant"
+            cmake --build "build-$variant" --target hf_cross_compare -j2
+          done
+      - name: Trace generation repeatability and tiny cross-paper preflight
+        run: |
+          set -euo pipefail
+          build-GZHM/hf_cross_compare generate 2048 75 101 4 32 traces/tiny.bin
+          build-GZHM/hf_cross_compare generate 2048 75 101 4 32 traces/tiny-second.bin
+          cmp traces/tiny.bin traces/tiny-second.bin
+          rm traces/tiny-second.bin
+          for alg in zombie tpht_flatten tpht_chained std_unordered_set; do
+            build-GZHM/hf_cross_compare run "$alg" traces/tiny.bin >> cross-output/preflight.csv
+          done
+          build-GZHM_ADAPTIVE/hf_cross_compare run zombie traces/tiny.bin >> cross-output/preflight.csv
+          python3 scripts/cross_paper_report.py --preflight cross-output/preflight.csv
+      - name: Reproducible cross-paper pilot on exact same binary operation traces
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          printf 'algorithm,scenario,seed,load_pct,requested_capacity,final_capacity,initial_keys,cycles,inserts,hit_queries,miss_queries,trace_sha256,status,correct,build_ns_per_key,hit_ns_per_op,miss_ns_per_op,insert_ns_per_op,delete_ns_per_op,update_p99_ns,author_reported_memory_bytes,peak_rss_kb,error\n' > cross-output/observations.csv
+          printf 'algorithm,scenario,seed,trace_sha256,exit_code,status,error\n' > cross-output/completeness.csv
+          for load in 70 85 95; do
+            for seed in 101 102 103; do
+              f="traces/L${load}-S${seed}.bin"
+              build-GZHM/hf_cross_compare generate 8192 "$load" "$seed" 32 128 "$f"
+              sha="$(sha256sum "$f" | cut -d' ' -f1)"
+              for alg in std_unordered_set tpht_flatten tpht_chained zombie_gzhm zombie_gzhm_adaptive; do
+                exe=build-GZHM/hf_cross_compare
+                inner="$alg"
+                if [[ "$alg" = "zombie_gzhm" ]]; then inner=zombie; fi
+                if [[ "$alg" = "zombie_gzhm_adaptive" ]]; then exe=build-GZHM_ADAPTIVE/hf_cross_compare; inner=zombie; fi
+                log="cross-output/${alg}-L${load}-S${seed}.log"
+                set +e
+                timeout 100 "$exe" run "$inner" "$f" > "$log" 2>&1
+                rc=$?
+                set -e
+                if [[ "$rc" -eq 0 && "$(wc -l < "$log")" -eq 1 ]]; then
+                  sed "s/^zombie,/zombie_gzhm${alg#zombie_gzhm},/" "$log" >> cross-output/observations.csv
+                  printf '%s,load_%s,%s,%s,0,complete,\n' "$alg" "$load" "$seed" "$sha" >> cross-output/completeness.csv
+                else
+                  err="$(tail -c 180 "$log" | tr '\n,\r' '   ' | tr -cd '[:alnum:] ._:-')"
+                  printf '%s,load_%s,%s,%s,%s,failed,%s\n' "$alg" "$load" "$seed" "$sha" "$rc" "$err" >> cross-output/completeness.csv
+                fi
+              done
+            done
+          done
+          python3 scripts/cross_paper_report.py --observations cross-output/observations.csv --completeness cross-output/completeness.csv --out cross-output
+          sha256sum traces/*.bin > cross-output/trace-sha256.txt
+          sha256sum cross-output/observations.csv cross-output/completeness.csv cross-output/summary.csv > cross-output/evidence-sha256.txt
+      - name: Preserve full evidence whether or not algorithms succeed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-paper-v0.7.0-raw
+          path: |
+            cross-output/
+            traces/
+          if-no-files-found: warn
+      - name: Attach raw results to immutable versioned release
+        if: success() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            if gh release view v0.7.0 >/dev/null 2>&1; then break; fi
+            sleep 5
+          done
+          gh release view v0.7.0 >/dev/null
+          if gh release view v0.7.0 --json assets --jq '.assets[].name' | grep -qx 'v0.7.0-cross-paper-observations.csv'; then
+            echo 'Evidence already exists; will not replace it.'
+          else
+            cp cross-output/observations.csv cross-output/v0.7.0-cross-paper-observations.csv
+            cp cross-output/completeness.csv cross-output/v0.7.0-cross-paper-completeness.csv
+            cp cross-output/summary.csv cross-output/v0.7.0-cross-paper-summary.csv
+            cp cross-output/comparison.svg cross-output/v0.7.0-cross-paper-comparison.svg
+            gh release upload v0.7.0 cross-output/v0.7.0-cross-paper-*
+          fi

@@ -37,6 +37,13 @@ python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
 
 ## 中文 | 研究目标
 
+### v0.7.0 | 首次跨论文同轨迹实验（作者原版算法）
+
+已添加 [跨论文统一二进制操作轨迹实验](papers/cross-paper-v0.7.0.md) 和 [GitHub Actions](.github/workflows/cross-paper-pilot.yml)。候选算法：SIGMOD 2025 原版 ZombieHT（GZHM、GZHM_ADAPTIVE）、PVLDB 2026 原版 TPHT（Flattened、Chained），以及标准库 set 对照。作者算法源码固定版本，不改动算法主体；所有算法必须逐项通过相同二进制输入和标准集合正确性检查。实验定义为**集合语义的先导交叉测试**，内存统计口径与正式 HF-Score/64-bit key-value 字典协议不同，因此**目前禁止生成正式 HF-Score 排名**。
+
+先导矩阵：70/85/95% 负载，3 个配对随机种子，32 个 churn 周期；预计 45 次运行。完整、失败与未完成的原始证据由 Actions 和 Release 附件公开，不能把“工作流成功”直接当作“论文结果复现成功”。正式对比需要逐项核查输出结果。
+
+
 通过 **2025-01-01—2026-10-22 高水平论文筛选 → 逐篇正确复现 → 统一负载评测 → 数据驱动机制设计 → 独立确认**，研究在构造耗时、成功/失败查询、动态插删、尾部延迟、空间开销之间具有稳健 Pareto 表现的散列表。核心方法优先不依赖机器学习。
 
 收录范围限与散列表结构或冲突处理直接相关的 Nature / Science / Cell 体系、经年份及学科核实的 SCI Q1/Q2、以及 STOC / FOCS / SODA / SIGMOD / VLDB 等顶会。当前只有 **5 篇已核实的 2025 年论文候选**，并非穷尽检索；全部为 **queued（尚未复现）**。详见 [准入与验证协议](papers/PROTOCOL.md)。
