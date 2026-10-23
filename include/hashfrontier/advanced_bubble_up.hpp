@@ -10,17 +10,17 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
-#include <stdexcept>
 
 namespace hf {
 class AdvancedBubbleUp {
 public:
     struct Slot { std::uint64_t key=0; std::uint16_t choice=0; bool tombstone=false; };
-    struct Stats { std::uint64_t probes=0, noncore_probes=0, evictions=0, core_moves=0, failures=0; };
+    struct Stats { std::uint64_t probes=0, noncore_probes=0, evictions=0, core_moves=0, failures=0, choice_prime_evaluations=0, core_collision_redirects=0; };
 private:
     std::vector<Slot> table_;
     std::size_t count_=0, tombstones_=0, d_=0, core_=0, dmax_=0, phases_=1, max_core_chain_=0;
     double alpha_;
+    bool appendix_b_choice_prime_=false;
     std::uint64_t seed_=0, rng_=0;
     mutable Stats stat_{};
     static std::uint64_t mix(std::uint64_t x) {
@@ -31,6 +31,21 @@ private:
     }
     std::size_t pos(std::uint64_t key,std::size_t choice) const {
         return static_cast<std::size_t>(mix(key ^ mix(seed_ + 0xd6e8feb86659fd93ULL*choice)) % table_.size());
+    }
+    // Appendix B (10): evaluate highest hash index attaining an occupied cell.
+    // This replaces the idealized O(1) choice(x,j) assumption in §5.2.
+    std::size_t choice_prime(std::uint64_t key,std::size_t cell) const {
+        for(std::size_t j=dmax_;j>0;--j)
+            if(pos(key,j)==cell) return j;
+        throw std::logic_error("Appendix B: stored key not in any active hash position");
+    }
+    // Appendix B, p.26: BEFORE probing a noncore candidate, if it overlaps
+    // any core location, route the item directly to the core.  We must not
+    // observe the occupancy of the colliding position (core independence).
+    bool overlaps_core(std::uint64_t key,std::size_t candidate) const {
+        for(std::size_t j=dmax_-core_+1;j<=dmax_;++j)
+            if(pos(key,j)==candidate) return true;
+        return false;
     }
     std::size_t core_choice() {
         rng_=mix(rng_);
@@ -47,9 +62,11 @@ public:
     // admissibility from small sample sizes.
     AdvancedBubbleUp(std::size_t capacity,std::size_t total_choices,
                      std::size_t d_core,double alpha,std::uint64_t seed,
-                     std::size_t max_consecutive_core_moves=2048)
+                     std::size_t max_consecutive_core_moves=2048,
+                     bool appendix_b_choice_prime=false)
         :table_(capacity),d_(total_choices),core_(d_core),max_core_chain_(max_consecutive_core_moves),
-         alpha_(alpha),seed_(seed),rng_(mix(seed^0xCAFED00D12345678ULL)) {
+         alpha_(alpha),appendix_b_choice_prime_(appendix_b_choice_prime),
+         seed_(seed),rng_(mix(seed^0xCAFED00D12345678ULL)) {
         if(capacity<2 || core_<2 || d_<core_ || d_>65535 || !(alpha_>0 && alpha_<1) ||
            max_core_chain_==0) throw std::invalid_argument("invalid advanced bubble-up parameters");
         const auto gamma = d_%core_;
@@ -84,6 +101,7 @@ public:
     }
     std::size_t capacity() const {return table_.size();}
     std::size_t max_choices() const {return d_;}
+    bool appendix_b_enabled() const {return appendix_b_choice_prime_;}
     std::size_t active_choices() const {return dmax_;}
     std::size_t phases() const {return phases_;}
     std::size_t memory_bytes() const {return table_.capacity()*sizeof(Slot);}
@@ -112,12 +130,16 @@ public:
         const auto core_start=stat_.core_moves;
         const auto probes_start=stat_.probes;
         const auto first_start=stat_.noncore_probes;
+        const auto choice_prime_start=stat_.choice_prime_evaluations;
+        const auto redirects_start=stat_.core_collision_redirects;
         std::vector<std::pair<std::size_t,Slot>> undo;
         undo.reserve(std::min<std::size_t>(max_core_chain_+d_*4, table_.size()));
         auto rollback=[&] {
             for(auto it=undo.rbegin();it!=undo.rend();++it) table_[it->first]=it->second;
             rng_=rng_start; stat_.evictions=evict_start; stat_.core_moves=core_start;
             stat_.probes=probes_start; stat_.noncore_probes=first_start;
+            stat_.choice_prime_evaluations=choice_prime_start;
+            stat_.core_collision_redirects=redirects_start;
             ++stat_.failures;
             return false;
         };
@@ -135,13 +157,19 @@ public:
                 ++stat_.probes;
             } else {
                 core_streak=0;
-                bool found=false;
+                bool found=false, redirect=false;
                 for(std::size_t j=std::max<std::size_t>(1,choice>core_?choice-core_:1);
                     j<=dmax_-core_;++j) {
-                    index=pos(key,j); ++stat_.probes; ++stat_.noncore_probes;
+                    index=pos(key,j);
+                    if(appendix_b_choice_prime_ && overlaps_core(key,index)) {
+                        ++stat_.core_collision_redirects;
+                        redirect=true;
+                        break;
+                    }
+                    ++stat_.probes; ++stat_.noncore_probes;
                     if(!table_[index].choice) {next_choice=j;found=true;break;}
                 }
-                if(!found) {
+                if(!found || redirect) {
                     next_choice=core_choice(); index=pos(key,next_choice);
                     ++stat_.probes; ++stat_.core_moves;
                 }
@@ -150,7 +178,12 @@ public:
             undo.push_back({index,old});
             table_[index]={key,static_cast<std::uint16_t>(next_choice),moving_tombstone};
             if(!old.choice) {++count_;return true;}
-            ++stat_.evictions;key=old.key;choice=old.choice;
+            ++stat_.evictions;
+            key=old.key;
+            if(appendix_b_choice_prime_) {
+                choice=static_cast<std::uint16_t>(choice_prime(old.key,index));
+                ++stat_.choice_prime_evaluations;
+            } else choice=old.choice;
             moving_tombstone=old.tombstone;
         }
         return rollback();

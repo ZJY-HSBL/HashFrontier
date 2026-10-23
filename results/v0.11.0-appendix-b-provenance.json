@@ -1,0 +1,42 @@
+{
+  "experiment_type": "finite_approximation_mechanism_pilot_not_theorem_or_final_L3",
+  "executor": "ChatGPT remote ephemeral Linux container",
+  "host_os": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "uname": {
+    "system": "Linux",
+    "node": "2081bc7b339b",
+    "release": "6.18.55",
+    "version": "#1 SMP Wed Oct 14 19:45:18 UTC 2026",
+    "machine": "x86_64",
+    "processor": ""
+  },
+  "gcc": "g++ (Debian 14.2.0-19) 14.2.0",
+  "logical_processors": 5,
+  "memory_cgroup_limit": "4294967296",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "benchmark_parameters": {
+    "source": "src/appendix_b_benchmark.cpp",
+    "seeds": "101..110",
+    "loads": [
+      70,
+      85,
+      95
+    ],
+    "capacities": [
+      4096,
+      16384
+    ],
+    "d": 9,
+    "d_core": 3,
+    "alpha": 0.95,
+    "max_core_moves": 4096,
+    "build_flags": "g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic"
+  },
+  "sha256": {
+    "include/hashfrontier/advanced_bubble_up.hpp": "ab04f153e4460864147c9dce2f157f4cb4444abe07322f058828df14cb222d1b",
+    "include/hashfrontier/advanced_bubble_appendix_c.hpp": "1aacbcef80308748d5ed49febc6d4b7c6e3a809c8962d359089976c98fba9064",
+    "tests/test_appendix_b.cpp": "808a4ef4a47f3b698cb39c2076e9b6f508af232e531a3838ec4b509a28711141",
+    "src/appendix_b_benchmark.cpp": "dea9d97a16db0374d36d108b95796ae8167713a60675abe6c5ebc2487431cf00",
+    "results/v0.11.0-appendix-b-cloud-pilot.csv": "a910ade88bbfa5f84b029e0fb7ea76333f1c1501506e7ed46820bcb30f775327"
+  }
+}

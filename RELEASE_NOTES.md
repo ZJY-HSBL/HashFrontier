@@ -1,8 +1,10 @@
-# HashFrontier v0.10.0 — Fixed-platform admission and paper-fidelity audit
+# HashFrontier v0.11.0 — SODA 2025 Appendix B executable algorithm reproduction
 
-- Registered a **single target CPU environment** for all forthcoming formal L3 cross-paper tests: AMD EPYC 9654, 256 GiB RAM, Ubuntu 24.04, GCC 13.3.0, pinned CPU, NUMA, governor and allocator. **Not physically bound yet**: existing GitHub/local timings remain exploratory.
-- Added fail-closed host inspection, strict drift checks against existing HF-Score/1.0 (four scenarios, seven metrics and 30 seeds), and 12 protocol regression tests.
-- Paper-to-code audited SODA 2025 Bubble-up §4, §5, Appendix B and Appendix C; documented the unimplemented Appendix B choice/collision path, independence assumption, finite parameter mismatch and no empirical-original-figure suite.
-- Necessary-condition audit rejects theorem promotion from the old 4096-slot, d=10/d_core=5 trials. This does not invalidate their genuine finite L1 differential correctness tests.
-- Revalidated exact Git blob versions in nonformal GCC 14.2 Debian: 2,447,592 Appendix C oracle checks / 888 rebuilds, ASan and UBSan passed; advanced mechanism had 2,587,159 oracle checks and 18 explicit recorded failures.
-- Updated the three-paper reproduction ledger, README, source registry and CI. **No new algorithm. No false L2/L3 promotion.**
+- Adds **paper Appendix B Equation (10)** `choice′(x,j)` reconstruction on actual eviction, plus the stated early redirect when a non-core location coincides with a core hash location. These are *paper mechanisms*, not new algorithm inventions.
+- Preserves the §5.2 original stored-choice mode as an explicit comparison option, without changing the default or breaking previous API usage.
+- Propagates the Appendix B option through Appendix C transactional tombstone-clearing rebuilds. Existing Appendix C tests remain passing.
+- New correctness tests: **269,540 checks, 40 true phase-progressions, 101 collision redirects, 570,235 choice′ evaluations**, ASan/UBSan clean in the local cloud container. Existing Appendix C regression: **2,447,592 checks, 888 rebuilds**.
+- **120 / 120 real pilot observations** (2 implementations × 2 capacities × 3 loads × 10 seeds) checked in CSV, with reproducible SVG visualizations and provenance.
+- Fixes an *experimental coverage gap*: prior `d=8,d_core=4,alpha=.5` pilot never crossed its 96.98% phase threshold; this pilot deliberately crosses at ~87.13%. Finite `d_core=3` **does not** satisfy Theorem 5.1 and no theorem/optimality claims are made.
+- New independent GitHub Actions workflow runs the Appendix B regression and repeats all 120 benchmark rows, uploading results for independent verification.
+- All measurements remain **cloud pilot / correctness stage**. No claim of physical-host L3 comparison, no HF-Score, no original innovations.

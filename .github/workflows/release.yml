@@ -31,6 +31,7 @@ jobs:
             echo "Release $tag exists; not overwriting immutable evidence."
           else
             case "$tag" in
+            v0.11.0) assets=(results/v0.11.0-appendix-b-cloud-pilot.csv results/v0.11.0-appendix-b-summary.csv results/v0.11.0-appendix-b-provenance.json figures/v0.11.0-appendix-b-build.svg figures/v0.11.0-appendix-b-hit.svg docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md); title="SODA 2025 Appendix B choice-prime reproduction and measured cloud pilot" ;;
             v0.1.0) assets=(results/v0.1.0-local.csv results/v0.1.0-summary.csv); title="research baseline" ;;
             v0.2.0) assets=(results/v0.2.0-churn.csv results/v0.2.0-churn-summary.csv); title="churn cost and reproduction staging" ;;
             v0.3.0) assets=(results/v0.3.0-churn-ci.csv.gz results/v0.3.0-tail-ci.csv results/v0.3.0-tail.csv results/v0.3.0-summary.csv results/v0.3.0-paired.csv results/v0.3.0-environment.json results/v0.3.0-ci-runtime.txt); title="320-cycle bounded-repair falsification and author-native gate" ;;

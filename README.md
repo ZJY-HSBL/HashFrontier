@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.11.0 | SODA 2025 Appendix B 机制复现与云端实测
+
+已完成 [Appendix B 的 choice′ 与冲突重定向](docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md)，并保留 §5.2 旧实现作为对照。通过 **269,540 次**随机/查询检查，另通过原有 Appendix C 测试；云端容器中 **120/120 组**构造与查询实验正确且完成。真实 [原始 CSV](results/v0.11.0-appendix-b-cloud-pilot.csv)、[统计汇总](results/v0.11.0-appendix-b-summary.csv)、[环境与 SHA-256](results/v0.11.0-appendix-b-provenance.json) 均公开。独立 GitHub Actions 工作流会再次运行，并上传其原生结果。
+
+![Appendix B build experiment](figures/v0.11.0-appendix-b-build.svg)
+
+![Appendix B query experiment](figures/v0.11.0-appendix-b-hit.svg)
+
+**本阶段只复现论文和云端验证，不进行算法创新、不计算最终 HF-Score。** 旧版试验参数没有触发阶段切换，现已通过新参数及回归测试专门覆盖；详见实验报告。
+
+
 ## v0.10.0 | 固定硬件环境与论文忠实复现门槛
 
 **当前研究只做符合时间和发表要求的散列表论文复现与同条件比较，不做算法创新。** [统一实验协议](docs/BENCHMARK-PROTOCOL-v1.0.md)规定 AMD EPYC 9654、256 GiB 内存、Ubuntu 24.04、GCC 13.3.0 **目标机器规格**；实际物理机器尚未绑定，旧版 GitHub runner 和本地 CPU 计时**不得作为正式 L3 结果**。

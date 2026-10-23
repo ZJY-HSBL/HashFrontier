@@ -16,6 +16,7 @@ class AdvancedBubbleAppendixC {
     double alpha_;
     std::uint64_t seed_;
     std::uint64_t rebuilds_=0, failed_rebuilds_=0;
+    bool appendix_b_choice_prime_=false;
     AdvancedBubbleUp table_;
 
     bool rebuild() {
@@ -24,7 +25,7 @@ class AdvancedBubbleAppendixC {
         // partially rebuilt table can replace the valid live dictionary.
         for(std::uint64_t attempt=1;attempt<=4;attempt++) {
             AdvancedBubbleUp candidate(capacity_,choices_,core_,alpha_,
-                  seed_+0x9e3779b97f4a7c15ULL*(rebuilds_+attempt),max_chain_);
+                  seed_+0x9e3779b97f4a7c15ULL*(rebuilds_+attempt),max_chain_,appendix_b_choice_prime_);
             bool ok=true;
             for(auto key:keys) if(!candidate.insert(key)) {ok=false;break;}
             if(ok && candidate.valid() && candidate.live_size()==keys.size()) {
@@ -37,10 +38,12 @@ class AdvancedBubbleAppendixC {
 public:
     AdvancedBubbleAppendixC(std::size_t capacity,std::size_t choices,
           std::size_t core,double alpha,std::uint64_t seed,
-          double max_live_load,double max_augmented_load,std::size_t max_chain=2048)
+          double max_live_load,double max_augmented_load,std::size_t max_chain=2048,
+          bool appendix_b_choice_prime=false)
         : capacity_(capacity),choices_(choices),core_(core),max_chain_(max_chain),
           max_augmented_(static_cast<std::size_t>(std::floor(capacity*max_augmented_load))),
-          alpha_(alpha),seed_(seed),table_(capacity,choices,core,alpha,seed,max_chain) {
+          alpha_(alpha),seed_(seed),appendix_b_choice_prime_(appendix_b_choice_prime),
+          table_(capacity,choices,core,alpha,seed,max_chain,appendix_b_choice_prime) {
         if(!(max_live_load>0 && max_live_load<max_augmented_load && max_augmented_load<1) ||
             max_augmented_<=static_cast<std::size_t>(std::ceil(capacity*max_live_load)))
             throw std::invalid_argument("Appendix C requires augmented-load headroom");
