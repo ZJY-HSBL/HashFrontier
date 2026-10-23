@@ -1,6 +1,7 @@
+# Superseded extended and screened list: papers/registry-v0.9.0.csv
 id,year,title,venue,doi,track,reproduction_status,notes
 stoc25-open,2025,Optimal Non-oblivious Open Addressing,STOC,10.1145/3717823.3718215,dynamic-theory,queued,Theoretical construction; full algorithm detail review required
 soda25-bubble,2025,Efficient d-ary Cuckoo Hashing at High Load Factors by Bubbling Up,SODA,10.1137/1.9781611978322.133,dynamic,queued,Distinct d-ary workload; do not claim reproduced by basic cuckoo
 stoc25-history,2025,History-Independent Concurrent Hash Tables,STOC,10.1145/3717823.3718283,concurrent,queued,Concurrency correctness requires LL/SC or explicit model
-a-mod25-zombie,2025,Zombie Hashing: Reanimating Tombstones in Graveyard,SIGMOD / PACMMOD,10.1145/3725424,dynamic,source_identified,Official RHM/TRHM/GZHM/GZHM_ADAPTIVE source fixed; v0.4 audit finds TRHM 194 of 320 complete cycles in a scaled run; full replication not achieved
+a-mod25-zombie,2025,Zombie Hashing: Reanimating Tombstones in a Graveyard,SIGMOD / PACMMOD,10.1145/3725424,dynamic,source_identified,Official RHM/TRHM/GZHM/GZHM_ADAPTIVE source fixed; v0.4 audit finds TRHM 194 of 320 complete cycles in a scaled run; full replication not achieved
 a-mod25-gph,2025,GPH: An Efficient and Effective Perfect Hashing Scheme for GPU Architectures,SIGMOD / PACMMOD,10.1145/3725406,gpu-static,queued,GPU hardware and build/query protocol required

@@ -1,5 +1,24 @@
 # HashFrontier
 
+## v0.9.0 | 第 3 篇论文 Advanced Bubble-up 第 5.2 节机制实现与真实实验
+
+已对 SODA 2025 第 5.2 节阶段化 Advanced Bubble-up 开展独立实现：d_max 动态阶段、核心区随机游走、非核心候选搜索、逆序查询及失败回滚。**这不是对原论文最强定理的完整复现**：工程用 d=8、d_core=4、alpha=0.5 和 SplitMix 派生哈希，尚不满足可据以宣称 Theorem 5.1 的全部理论条件；第 C 附录删除算法尚未实现。
+
+真实探索性纯构造/查询：8192 槽，70/85/95% 负载，30 个配对种子，Basic §4 / Advanced §5.2 共 180 次运行，**180/180 完整**。本地正确性测试、ASan/UBSan 通过；下列数字为本地容器的 ns 耗时，并非论文作者性能保证。
+
+| 负载 | Basic §4 构造 ns/key | Advanced §5.2 构造 ns/key | Basic §4 命中 ns/op | Advanced §5.2 命中 ns/op |
+|---|---:|---:|---:|---:|
+| 70% | 162.74 | 129.28 | 143.29 | 29.94 |
+| 85% | 587.15 | 141.97 | 445.69 | 25.51 |
+| 95% | 3623.05 | 206.31 | 2975.86 | 24.35 |
+
+![Advanced Bubble-up pilot](figures/v0.9.0-bubble-compare.svg)
+
+[180 条原始记录](results/v0.9.0-bubble-pilot.csv) · [真实汇总](results/v0.9.0-bubble-summary.csv) · [硬件与来源 SHA](results/v0.9.0-provenance.json) · [算法与限制](docs/ADVANCED-BUBBLE-UP.md) · [2025–2026 文献纳入/排除表](papers/SCREENING-2025-2026.md) · [完整候选注册表](papers/registry-v0.9.0.csv)。**这轮未达到 L2 / L3，不能计算正式 HF-Score。**
+
+---
+
+
 **Hash table construction, collision resolution and reproducible benchmarks**  
 **散列表构造、冲突处理与可复现基准研究**
 

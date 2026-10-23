@@ -1,0 +1,41 @@
+name: SODA 2025 advanced Bubble-up independent reproduction pilot
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/advanced_bubble_up.hpp'
+      - 'src/bubble_paper_benchmark.cpp'
+      - 'tests/test_advanced_bubble_up.cpp'
+      - 'scripts/analyze_bubble_pilot.py'
+      - '.github/workflows/bubble-advanced.yml'
+  workflow_dispatch:
+jobs:
+  section5-mechanics:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build paper-specific implementations and correctness tests
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure
+      - name: Rerun all 180 paired pure-build and query observations on GitHub runner
+        run: |
+          set -euo pipefail
+          mkdir -p advanced-ci
+          ./build/hf_bubble_paper_benchmark 30 8192 > advanced-ci/observations.csv
+          python3 - <<'PY_CHECK'
+          import csv
+          rows=list(csv.DictReader(open('advanced-ci/observations.csv')))
+          assert len(rows)==180, len(rows)
+          assert len({(r['method'],r['load'],r['seed']) for r in rows})==180
+          assert {r['method'] for r in rows}=={'bubble_basic_s4','bubble_advanced_s52'}
+          assert {r['load'] for r in rows}=={'70','85','95'}
+          assert all(r['status']=='complete' for r in rows)
+          PY_CHECK
+          { c++ --version | head -1; uname -a; lscpu | grep 'Model name:' | head -1; } > advanced-ci/environment.txt
+          sha256sum advanced-ci/observations.csv > advanced-ci/observations.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: soda25-advanced-section52-pilot
+          path: advanced-ci/

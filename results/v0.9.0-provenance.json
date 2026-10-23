@@ -1,0 +1,74 @@
+{
+  "version": "v0.9.0",
+  "research_status": "exploratory engineering implementation; not L2 or L3",
+  "paper": "SODA 2025 10.1137/1.9781611978322.133",
+  "paper_section": "5.2 with paper Section 4 baseline",
+  "measured_on": "local ephemeral container, not GitHub pinned CPU",
+  "cpu": "Model name:                              AMD EPYC 9V74 80-Core Processor",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "command": "./build/hf_bubble_paper_benchmark 30 8192 > results/v0.9.0-bubble-pilot.csv",
+  "capacity": 8192,
+  "loads_pct": [
+    70,
+    85,
+    95
+  ],
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130
+  ],
+  "algorithms": [
+    "bubble_basic_s4",
+    "bubble_advanced_s52"
+  ],
+  "advanced_pilot_parameters": {
+    "d": 8,
+    "d_core": 4,
+    "alpha": 0.5,
+    "hash_family": "SplitMix64-derived (non-ideal)"
+  },
+  "known_limitations": [
+    "Theorem 5.1 asymptotic regime violated",
+    "not original author code",
+    "only insert/query; Appendix C delete not implemented",
+    "CPU not affinity pinned, clock overhead",
+    "memory counts Slot vector only",
+    "not a cross-paper L3 comparison"
+  ],
+  "sha256": {
+    "results/v0.9.0-bubble-pilot.csv": "c6d4f9de9328f9ed4d19130ae424025c21382655f502e6ecce090b06870f502b",
+    "results/v0.9.0-bubble-summary.csv": "6b1992282ef8a17b83a79b82fc2176a641dac6d1b2511ec9cc3eefbd0240c6cf",
+    "figures/v0.9.0-bubble-compare.svg": "b1b5a6f10989130a1326b080aedc77727cbdc462ac28be021dbaee6de2647194",
+    "include/hashfrontier/advanced_bubble_up.hpp": "293201ac1b54503b051a7186dc8172b6bb70bc3a19f390550efac2b2379e38ae",
+    "tests/test_advanced_bubble_up.cpp": "eeceafb157d3894ed6b07f5d805737fc5bcb7e524d3a1b423d7bcf50828c63dd",
+    "src/bubble_paper_benchmark.cpp": "3b4e3b39534273dd57e149118ed30efea4c025e3caa13cf8903e7a24a0ede147"
+  }
+}

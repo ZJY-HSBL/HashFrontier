@@ -1,0 +1,15 @@
+id,year,title,venue,doi_or_official_url,track,priority,decision,replication_status,notes
+zombie-2025,2025,Zombie Hashing: Reanimating Tombstones in a Graveyard,SIGMOD/PACMMOD,10.1145/3725424,cpu_dynamic,P1,retain,pilot_source_run,L2 native paper experiments pending
+tpht-2026,2026,Succinct and Fast Tiny Pointer Hash Tables,PVLDB,10.14778/3819518.3819542,cpu_dynamic,P1,retain,pilot_source_run,L2 native memory YCSB pending
+bubble-2025,2025,Efficient d-ary Cuckoo Hashing at High Load Factors by Bubbling Up,SODA,10.1137/1.9781611978322.133,cpu_insert_query,P1,retain,advanced_mechanics_pilot,Section 5.2 implemented finite engineering parameters theorem not verified
+stoc25-open,2025,Optimal Non-oblivious Open Addressing,STOC,10.1145/3717823.3718215,dynamic_theory,P2,retain,queued,No generic baseline accepted as reproduction
+stoc26-greedy,2026,Greedy Open Addressing Revisited: Beyond Yao's Lower Bound,STOC,https://acm-stoc.org/stoc2026/toc.html,probing_theory,P2,retain,queued,Paper pseudocode review first
+focs26-twochoice,2026,The Power of Two-Choice Linear Probing,FOCS accepted,https://focs.computer.org/2026/accepted-papers/,probing_theory,P2,provisional_acceptance,queued,2026-11 meeting not yet held
+focs26-bucket,2026,Fast Insertion for Bucketized Cuckoo Hashing,FOCS accepted,https://focs.computer.org/2026/accepted-papers/,bucket_cuckoo,P2,provisional_acceptance,queued,2026-11 meeting not yet held
+stoc25-static,2025,Optimal Static Dictionary with Worst-Case Constant Query Time,STOC,10.1145/3717823.3718278,static_dictionary,P3,retain_separate,queued,No dynamic erase
+sigmod26-meep,2026,Meep Hashing: Ultrafast and Compact Minimal Perfect Hashing for Practical Large-Scale Lookup Systems,SIGMOD,https://2026.sigmod.org/sigmod_papers.shtml,static_mphf,P3,retain_separate,queued,Nonmember validation separate
+sigmod25-gph,2025,GPH: An Efficient and Effective Perfect Hashing Scheme for GPU Architectures,SIGMOD/PACMMOD,10.1145/3725406,gpu,P4,retain_separate,queued,GPU dedicated hardware
+stoc25-concurrent,2025,History-Independent Concurrent Hash Tables,STOC,10.1145/3717823.3718283,concurrent,P4,retain_separate,queued,LL SC model required
+stoc25-linear,2025,Linear Hashing Is Optimal,STOC,https://acm-stoc.org/stoc2025/toc.html,hash_family_theory,EXCLUDE,exclude,not_applicable,Balls bins bound not hash table structure
+focs25-filter,2025,Fingerprint Filters Are Optimal,FOCS,10.1109/FOCS63196.2025.00055,approximate_filter_lower_bound,EXCLUDE,exclude,not_applicable,Not exact set and chiefly lower bound
+soda25-retrieval,2025,Tight Bounds and Phase Transitions for Incremental and Dynamic Retrieval,SODA,https://epubs.siam.org/doi/book/10.1137/1.9781611978322,retrieval_structure,EXCLUDE,exclude_core,not_applicable,Nonmember semantics different

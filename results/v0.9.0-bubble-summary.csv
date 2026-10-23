@@ -1,0 +1,7 @@
+method,load,seeds,completed,failed,mean_build_ns_per_key,mean_hit_ns_per_op,mean_miss_ns_per_op,sample_stddev_build_ns_per_key,sample_stddev_hit_ns_per_op
+bubble_advanced_s52,70,30,30,0,129.27716,29.93883,41.72946,37.49827,7.36539
+bubble_advanced_s52,85,30,30,0,141.96893,25.51318,28.68076,35.20277,4.07501
+bubble_advanced_s52,95,30,30,0,206.30535,24.35349,17.31647,48.83489,9.00511
+bubble_basic_s4,70,30,30,0,162.73927,143.29077,135.32900,37.81884,52.03632
+bubble_basic_s4,85,30,30,0,587.15384,445.68573,409.30993,284.75397,118.57646
+bubble_basic_s4,95,30,30,0,3623.05465,2975.86101,3202.28496,876.63806,271.54942

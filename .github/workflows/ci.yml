@@ -27,6 +27,10 @@ jobs:
           python3 -c "import json; d=json.load(open('hfscore-ci.json')); assert d['evidence_level']=='synthetic_fixture_not_evidence' and d['results'][0]['score']==100"
       - name: Cross-paper strict report regression tests
         run: python3 -m unittest discover -s tests -p "test_cross_paper_report.py" -v
+      - name: SODA Advanced Bubble-up paper mechanics pilot smoke
+        run: |
+          ./build/hf_bubble_paper_benchmark 2 8192 > bubble-advanced-smoke.csv
+          test "$(wc -l < bubble-advanced-smoke.csv)" -eq 13
       - name: Small benchmark smoke
         run: ./build/hf_benchmark 100 1 > smoke.csv
       - name: Verify expected number of rows
