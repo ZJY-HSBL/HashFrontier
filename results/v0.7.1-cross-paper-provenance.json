@@ -1,0 +1,35 @@
+{
+  "protocol": "HashFrontier cross-paper set-membership pilot v0.7.1",
+  "source_action_url": "https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39888537155",
+  "source_commit": "5c4aec02cd44ac2592f91c5d214bc2f5d2737897",
+  "source_artifact_id": 12473319245,
+  "algorithms": [
+    "std_unordered_set",
+    "tpht_chained",
+    "tpht_flatten",
+    "zombie_gzhm",
+    "zombie_gzhm_adaptive"
+  ],
+  "load_pct": [
+    70,
+    85,
+    95
+  ],
+  "seeds": [
+    101,
+    102,
+    103
+  ],
+  "requested_slots": 8192,
+  "churn_cycles": 32,
+  "completed_runs": 45,
+  "scheduled_runs": 45,
+  "trace_files": 9,
+  "trace_sha256_verification": true,
+  "limitations": [
+    "set semantics only: Zombie 0-bit value; TPHT 1-byte fixed value",
+    "memory figures not comparable across paper implementations",
+    "ns/op timing includes per-operation clock calls",
+    "not formal HF-Score"
+  ]
+}

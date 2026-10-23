@@ -28,3 +28,7 @@ Commands and source pinning are recorded in [the workflow](../.github/workflows/
 ### Native status adapter correction (v0.7.1)
 
 The first v0.7.0 preflight failed because its wrapper accepted only zero for insert success. The author QF API returns nonnegative success codes (observed 2). The corrected wrapper accepts r>=0 while rejecting negative error codes. No full pilot dataset was produced under v0.7.0; refer only to v0.7.1 or later verified runs.
+
+### Verified cross-paper result and evidence freeze (v0.7.2)
+
+The corrected v0.7.1 Action [39888537155](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39888537155) produced 45 of 45 complete, oracle-correct executions. All nine independent operation files were SHA-256 rechecked against recorded row fingerprints. Group means, the real SVG figure, exact source SHA-256, per-run completion records and environment are now committed in results/ and figures/, and the entire compressed original Action bundle is attached to v0.7.2 Release. Results remain exploratory because they cover only a set-membership common subset on one ephemeral runner with three seeds.

@@ -37,6 +37,29 @@ python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
 
 ## 中文 | 研究目标
 
+### v0.7.2 | 两篇高水平论文，首次真实同轨迹横向对照（45/45 完整）
+
+**正式实验证据已核查：** [GitHub Actions 39888537155](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39888537155) 的作者核心代码运行，45/45 个预定算法实例完成且通过精确集合 oracle。9 个二进制轨迹文件逐一重新计算 SHA-256，与每一行原始 CSV 所记录的 SHA 一致；每个负载/种子对应的五个算法输入完全相同。**这是两个不同论文的首次统一数据实测，而非一个论文内部的对比。**
+
+![2025 SIGMOD ZombieHT vs 2026 PVLDB TPHT, real data](figures/v0.7.1-cross-paper.svg)
+
+**95% 负载（8192 初始槽、7782 键、每种 3 个配对随机种子、32 churn 周期，平均 ns/op；越低越好）：**
+
+| 来源/算法 | 构造 ns/key | 成功查询 | 失败查询 | 插入 | 删除 | 更新 P99 |
+|---|---:|---:|---:|---:|---:|---:|
+| PVLDB 2026 · TPHT Flattened | **45.65** | **46.16** | **42.11** | **47.32** | **50.08** | **90.67** |
+| PVLDB 2026 · TPHT Chained | 60.90 | 60.71 | 56.14 | 71.74 | 77.29 | 127.33 |
+| SIGMOD 2025 · Zombie GZHM | 252.20 | 63.64 | 56.23 | 667.33 | 74.49 | 2253.67 |
+| SIGMOD 2025 · Zombie GZHM_ADAPTIVE | 126.87 | 64.18 | 56.86 | 561.07 | 73.28 | 1987.33 |
+| C++ 标准库 · unordered_set | 84.67 | 63.03 | 63.36 | 69.25 | 82.70 | 130.33 |
+
+**当前可证实的观察**：Flattened-TPHT 在这一特定工作负载下的查询与插入耗时更低；Chained-TPHT 的作者报告分配量为 87,092 字节，Flattened-TPHT 为 134,785 字节，表现出空间/速度取舍。GZHM_ADAPTIVE 在这个小规模长期插删测试中比 GZHM 的插入耗时更低，但这不能泛化到原论文的大规模工况。更新 P99 为各独立运行原始操作延迟的 nearest-rank 分位数**再取种子均值**，并非合并样本计算得到的全局 P99。
+
+**严格限制**：本轮是 64-bit 集合成员语义，Zombie 原版配置为 0 位值、TPHT 使用 1 字节哑元值；各作者的内存统计方式不同，标准库的有效桶数也不同。单机 GitHub runner（AMD EPYC 7763）、仅 3 种子、时间测量包含每操作时钟调用开销，无法作正式显著性或跨硬件声明。**不得计算正式七项 HF-Score，也不得宣称已复现论文全部实验**。下一轮必须在统一 64-bit 键值语义和可比内存测量下补足 30 种子。
+
+[原始 45 行 CSV](results/v0.7.1-cross-paper-observations.csv) · [45 次完成表](results/v0.7.1-cross-paper-completeness.csv) · [15 组汇总](results/v0.7.1-cross-paper-summary.csv) · [来源/参数核验](results/v0.7.1-cross-paper-provenance.json) · [CPU 编译环境](results/v0.7.1-cross-paper-environment.txt) · [两个作者原版代码 SHA-256](results/v0.7.1-cross-paper-author-sha256.txt) · [操作轨迹 SHA-256](results/v0.7.1-cross-paper-traces-sha256.txt)。完整二进制轨迹和逐次原始日志保存在 Actions Artifact，并在此版 Release 固化为可下载的压缩包。
+
+
 ### v0.7.1 | 作者源码跨论文实验修正
 
 修正 ZombieHT 插入接口的返回码适配：非负值表示成功，而不仅是 0。原 v0.7.0 跨论文 workflow 已记录失败（小规模预检 unexpected zombie insert status=2），正式矩阵未执行；此后的有效数据只能来自 v0.7.1 新运行的 Artifact，不能用 v0.7.0 声称性能结论。
@@ -247,6 +270,10 @@ python scripts/analyze_v03.py
 ---
 
 ## English | Scope and evidence
+
+### v0.7.2 actual cross-paper evidence (not a paper-level replication)
+
+**45/45 complete and oracle-verified native runs** across three loads and three seeds; every algorithm consumed the exact same binary mutation/query trace within each load/seed group. The released raw CSV and source/trace SHA-256 manifests substantiate the results. The 95%-load per-operation ns averages are in the Chinese table and the chart above. Flattened-TPHT is faster in this small pilot, while Chained-TPHT uses less author-reported memory within the same codebase. This is not a formal HF-Score comparison: the set semantics, different dummy value widths, different allocation accounting, per-operation timing overhead and only three seeds are important limitations. The author implementations remain unmodified; benchmarking adapters are project code.
 
 HashFrontier is a **reproducible benchmark-first research project** for hash table construction and collision handling. It aims to identify robust time/space tradeoffs across diverse workloads, rather than optimize only a single synthetic speed score. Prefer classical algorithmic and mathematical mechanisms over machine-learning-based controllers.
 

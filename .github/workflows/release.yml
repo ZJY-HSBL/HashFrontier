@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
 jobs:
   release:
     runs-on: ubuntu-24.04
@@ -36,6 +37,7 @@ jobs:
             v0.6.0) assets=(scoring/protocol-v1.0.json scoring/PROTOCOL.md results/v0.6.0-data-readiness.json examples/hfscore/demo-score.json); title="strict seven-metric HF-Score protocol and data eligibility gates" ;;
             v0.7.0) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="author-source cross-paper reproducible benchmark" ;;
             v0.7.1) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="fixed author-source cross-paper benchmark" ;;
+            v0.7.2) assets=(results/v0.7.1-cross-paper-observations.csv results/v0.7.1-cross-paper-completeness.csv results/v0.7.1-cross-paper-summary.csv results/v0.7.1-cross-paper-provenance.json results/v0.7.1-cross-paper-environment.txt results/v0.7.1-cross-paper-author-sha256.txt results/v0.7.1-cross-paper-traces-sha256.txt figures/v0.7.1-cross-paper.svg); title="first measured SIGMOD x PVLDB same-trace comparison" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then
@@ -55,6 +57,13 @@ jobs:
           assert all(rows[v]['complete']=='True' for v in ('RHM','GZHM','GZHM_ADAPTIVE'))
           assert rows['TRHM']['complete']=='False' and int(rows['TRHM']['completed_cycles'])==194
           PY_NATIVE
+          fi
+          if [ "$tag" = "v0.7.2" ]; then
+            mkdir -p result-archive
+            gh run download 39888537155 -n cross-paper-v0.7.1-raw -D result-archive
+            tar -czf results/v0.7.1-raw-binary-traces.tar.gz -C result-archive traces cross-output
+            assets+=(results/v0.7.1-raw-binary-traces.tar.gz)
+            test "$(find result-archive/traces -name '*.bin' | wc -l)" -eq 9
           fi
           gh release create "$tag" "${assets[@]}" \
               --target "$GITHUB_SHA" --title "HashFrontier $tag — $title" \

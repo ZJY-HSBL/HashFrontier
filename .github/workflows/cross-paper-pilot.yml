@@ -3,11 +3,9 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/cross-paper-pilot.yml'
       - 'src/cross_paper.cpp'
       - 'scripts/cross_paper_report.py'
       - 'papers/cross-paper-v0.7.1.md'
-      - 'VERSION'
   workflow_dispatch:
 permissions:
   contents: write
