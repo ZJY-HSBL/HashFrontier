@@ -9,7 +9,7 @@ from collections import defaultdict
 from pathlib import Path
 
 METRICS = ('build_ns_per_key','hit_ns_per_op','miss_ns_per_op','insert_ns_per_op','delete_ns_per_op','update_p99_ns')
-ALGORITHMS = ('std_unordered_set','tpht_flatten','tpht_chained','zombie_gzhm','zombie_gzhm_adaptive')
+ALGORITHMS = ('std_unordered_set','tpht_flatten','tpht_chained','zombie_gzhm','zombie_gzhm_adaptive','bubble_up_basic')
 
 
 def load_csv(path):
@@ -41,7 +41,7 @@ def verify(rows, completeness):
             present=key in runs
             if (r['status']=='complete') != present:raise ValueError('inconsistent completion '+str(key))
             if present and r['trace_sha256']!=runs[key]['trace_sha256']:raise ValueError('fingerprint mismatch')
-        if len(seen)!=45:raise ValueError('missing planned runs: expected 45, got '+str(len(seen)))
+        if len(seen)!=180:raise ValueError('missing planned runs: expected 180, got '+str(len(seen)))
     return runs
 
 
@@ -51,7 +51,7 @@ def summary(rows, completeness):
     for alg in ALGORITHMS:
         for load in (70,85,95):
             sub=[r for r in rows if r['algorithm']==alg and int(r['load_pct'])==load]
-            v={'algorithm':alg,'load_pct':load,'completed_seeds':len(sub),'planned_seeds':3}
+            v={'algorithm':alg,'load_pct':load,'completed_seeds':len(sub),'planned_seeds':10}
             v.update({f'mean_{m}': f'{statistics.mean(float(r[m]) for r in sub):.4f}' if sub else '' for m in METRICS})
             # Native TPHT and Zombie memory reports differ in semantics: informational only.
             v['reported_memory_bytes_mean']=f'{statistics.mean(int(r["author_reported_memory_bytes"]) for r in sub):.0f}' if sub else ''
@@ -63,7 +63,7 @@ def write_svg(summary_rows,path):
     # Display successful/unsuccessful lookup data only, no fabricated bars for failures.
     width,height=970,540
     positions={70:170,85:470,95:770}
-    colors=dict(zip(ALGORITHMS,('#4A90A4','#6B9A68','#9C7FBB','#CE8E62','#A6A05D')))
+    colors=dict(zip(ALGORITHMS,('#4A90A4','#6B9A68','#9C7FBB','#CE8E62','#A6A05D','#A66D8E')))
     rects=[]
     for load in (70,85,95):
         base=positions[load]
@@ -72,9 +72,9 @@ def write_svg(summary_rows,path):
         for i,r in enumerate(sub):
             value=float(r['mean_miss_ns_per_op']);x=base-120+i*44;y=430-min(320,300*value/maximum)
             rects.append(f'<rect x="{x}" y="{y:.1f}" width="32" height="{430-y:.1f}" fill="{colors[r["algorithm"]]}"/><text x="{x+16}" y="{y-5:.1f}" text-anchor="middle" font-size="10">{value:.0f}</text>')
-    legend=''.join(f'<rect x="{25+i*190}" y="492" width="13" height="13" fill="{colors[a]}"/><text x="{44+i*190}" y="503" font-size="12">{a.replace("_"," ")}</text>' for i,a in enumerate(ALGORITHMS))
+    legend=''.join(f'<rect x="{25+i*160}" y="492" width="13" height="13" fill="{colors[a]}"/><text x="{44+i*160}" y="503" font-size="12">{a.replace("_"," ")}</text>' for i,a in enumerate(ALGORITHMS))
     ticks=''.join(f'<text x="{positions[l]}" y="455" text-anchor="middle" font-size="14">{l}% occupancy</text>' for l in (70,85,95))
-    svg=f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}"><rect width="100%" height="100%" fill="white"/><text x="28" y="35" font-size="21" font-family="sans-serif">HashFrontier v0.7.0: unsuccessful lookup ns/op</text><text x="28" y="57" font-size="13" fill="#555">Author-source fixed-trace pilot, 3 seeds; exploratory only. Lower is better.</text><line x1="30" y1="430" x2="930" y2="430" stroke="#888"/>{ticks}{"".join(rects)}{legend}</svg>'
+    svg=f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}"><rect width="100%" height="100%" fill="white"/><text x="28" y="35" font-size="21" font-family="sans-serif">HashFrontier v0.8.0: unsuccessful lookup ns/op</text><text x="28" y="57" font-size="13" fill="#555">Author-source fixed-trace pilot, 10 paired seeds; exploratory only. Lower is better.</text><line x1="30" y1="430" x2="930" y2="430" stroke="#888"/>{ticks}{"".join(rects)}{legend}</svg>'
     Path(path).write_text(svg,encoding='utf-8')
 
 
@@ -87,9 +87,9 @@ def main():
             if len(fields)!=23 or fields[13]!='true' or fields[12]!='complete':
                 raise ValueError('preflight failed row: '+line[:200])
             rows.append(fields)
-        if len(rows)!=5 or len({r[11] for r in rows})!=1:
+        if len(rows)!=6 or len({r[11] for r in rows})!=1:
             raise ValueError('preflight incomplete/unpaired')
-        print('PASS preflight: five runs, same trace, all correct');return
+        print('PASS preflight: six runs, same trace, all correct');return
     if not(args.observations and args.completeness and args.out):p.error('supply both inputs and --out')
     a=load_csv(args.observations);b=load_csv(args.completeness)
     results=summary(a,b)

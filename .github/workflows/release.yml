@@ -38,6 +38,7 @@ jobs:
             v0.7.0) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="author-source cross-paper reproducible benchmark" ;;
             v0.7.1) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="fixed author-source cross-paper benchmark" ;;
             v0.7.2) assets=(results/v0.7.1-cross-paper-observations.csv results/v0.7.1-cross-paper-completeness.csv results/v0.7.1-cross-paper-summary.csv results/v0.7.1-cross-paper-provenance.json results/v0.7.1-cross-paper-environment.txt results/v0.7.1-cross-paper-author-sha256.txt results/v0.7.1-cross-paper-traces-sha256.txt figures/v0.7.1-cross-paper.svg); title="first measured SIGMOD x PVLDB same-trace comparison" ;;
+            v0.8.0) assets=(docs/BASIC-BUBBLE-UP.md); title="SODA 2025 basic bubble-up and three-paper same-trace comparison" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then

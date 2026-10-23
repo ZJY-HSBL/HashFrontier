@@ -18,3 +18,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 enable_testing()
 add_test(NAME randomized_differential COMMAND hf_tests)
+
+# SODA 2025 §4 Basic Bubble-up independent reimplementation.
+add_executable(hf_test_basic_bubble_up tests/test_basic_bubble_up.cpp)
+target_link_libraries(hf_test_basic_bubble_up PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(hf_test_basic_bubble_up PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME basic_bubble_up_randomized COMMAND hf_test_basic_bubble_up)

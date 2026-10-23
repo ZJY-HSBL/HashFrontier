@@ -35,6 +35,10 @@ python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
 
 **重要：**以往 v0.1.0—v0.5.0 的数据尚未将插入、删除、单次更新纳秒 P99 与完整内存口径全部分离，更没有多篇论文共用的完整 30-seed 矩阵，不能拼接旧 CSV 虚构综合排名。下一步仍是**忠实复现 Zombie Hashing、TPHT 和 Bubble-up Cuckoo 并使用统一操作轨迹测试**。
 
+## v0.8.0 | SODA 2025 Basic Bubble-up joins cross-paper comparison
+
+The [SODA 2025 **Basic Bubble-up** §4 implementation](docs/BASIC-BUBBLE-UP.md) is an **independent reimplementation of the paper's warmup algorithm**, with a clearly labeled out-of-scope direct-erase extension. **It is not the advanced §5 algorithm** and cannot claim its strongest theoretical bounds. The new [v0.8.0 common-trace experiment](.github/workflows/cross-paper-v08.yml) is configured for 6 implementations across 3 papers, 70/85/95% loads × 10 paired seeds = **180 planned runs**, with identical binary operation traces, live-key correctness checks, and explicit failure rows. Actual completed observations belong to the GitHub Actions evidence and versioned Release, not to the planned count. This **exploratory** comparison is not a formal HF-Score: memory accounting is not yet comparable and the formal 30-seed threshold is unmet.
+
 ## 中文 | 研究目标
 
 ### v0.7.2 | 两篇高水平论文，首次真实同轨迹横向对照（45/45 完整）

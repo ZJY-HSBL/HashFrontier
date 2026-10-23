@@ -1,7 +1,7 @@
-# HashFrontier v0.7.2 — first VERIFIED measured cross-paper comparison
+# HashFrontier v0.8.0 — SODA 2025 Section 4 joins the unified trace comparison
 
-This release permanently archives the v0.7.1 **actual** same-trace comparisons between SIGMOD 2025 ZombieHT (GZHM/GZHM_ADAPTIVE), PVLDB 2026 TPHT (Flattened/Chained), and std::unordered_set. All 45 scheduled runs at 70/85/95% requested occupancy passed the set oracle and completion tests. Nine binary operation trace SHA-256 digests match all reported rows. The complete original data, source hashes, operation binaries and logs are attached to this Release; the same CSV/real SVG are committed to the repository.
-
-At 95% requested occupancy, Flattened-TPHT averaged 46.16 ns successful lookup, 42.11 ns unsuccessful lookup, and 47.32 ns insertion. Chained-TPHT averaged 60.71, 56.14 and 71.74 respectively, but reported smaller allocations (87,092 bytes vs 134,785 bytes) within the same author library. Zombie GZHM and GZHM_ADAPTIVE show substantially higher insertion cost in this small 32-cycle pilot; this is not a universal paper conclusion.
-
-**No HF-Score**: this is a 64-bit set-membership *pilot* rather than the frozen 64-bit key/value protocol. Native author memory reporting conventions differ and three paired seeds do not support formal inferential claims. The old v0.7.0 preflight failure and v0.7.1 subsequent fix are retained as provenance.
+- Adds independent implementation of **Basic Bubble-up Cuckoo (§4)** from Kuszmaul–Mitzenmacher, SODA 2025. Four evacuation rules, bounded core-eviction chain, explicit slot-choice metadata, and an out-of-theorem direct erase extension are documented.
+- Adds randomized correctness testing (12 seeds × four loads), with check against `std::unordered_set`.
+- Extends the SIGMOD ZombieHT / VLDB TPHT *author-source* common binary-trace runner to **six implementations across three papers**, 70/85/95% occupancy, ten common seeds (101–110), 32 churn cycles per trace, and 180 planned runs. Actual completion and measurements are in the post-release CI Artifact and its uploaded summary; a code release is **not** itself an experiment-completion claim.
+- Preserves authors' core source SHA locks; our independent basic Bubble-up is **not** a reproduction of SODA advanced §5 or its main bound. No HF-Score until compatible seven-metric, 30-seed data and a verified, common memory accounting protocol exist.
+- The earlier v0.7.2 three-seed data remain intact and separate. This release retains unsuccessful runs in the completion matrix rather than silently excluding them.

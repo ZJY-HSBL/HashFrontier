@@ -21,6 +21,7 @@
 #include <openssl/sha.h>
 #include <sys/resource.h>
 #include "hm_wrapper.h"
+#include "hashfrontier/basic_bubble_up.hpp"
 extern "C" {
 #include "tpht.h"
 }
@@ -80,7 +81,7 @@ struct Zombie:Table{
  size_t count=0;
  Zombie(const Trace&t){if(!g_init(t.capacity,64,0,float(t.load)/100.0f))throw std::runtime_error("zombie init failed");}
  ~Zombie(){g_destroy();}
- bool insert(Key k)override{int r=g_insert(k,0);if(r==QF_NO_SPACE)throw std::runtime_error("QF_NO_SPACE"); if(r>=0){++count;return true;}throw std::runtime_error("unexpected zombie insert status="+std::to_string(r));}
+ bool insert(Key k)override{int r=g_insert(k,0);if(r==QF_NO_SPACE)throw std::runtime_error("QF_NO_SPACE"); if(r==0){++count;return true;}throw std::runtime_error("unexpected zombie insert status="+std::to_string(r));}
  bool erase(Key k)override{int r=g_remove(k);if(r==0){--count;return true;}throw std::runtime_error("unexpected zombie erase status="+std::to_string(r));}
  bool has(Key k)override{std::uint64_t out=0;int r=g_lookup(k,&out);if(r==0)return true;if(r==QF_DOESNT_EXIST)return false;throw std::runtime_error("unexpected zombie get status="+std::to_string(r));}
  size_t memory()const override{return g_memory_usage();}
@@ -106,6 +107,15 @@ struct Chained:Table{
  size_t memory()const override{return chained_tpht64_memory_bytes(t);}
  size_t physical_capacity()const override{return chained_tpht64_capacity(t);}
 };
+struct BubbleBasic:Table{
+ hf::BasicBubbleUp t;
+ BubbleBasic(const Trace&tr):t(tr.capacity,int(tr.load),tr.seed){}
+ bool insert(Key k)override{return t.insert(k);}
+ bool erase(Key k)override{return t.erase(k);}
+ bool has(Key k)override{return t.contains(k);}
+ size_t memory()const override{return t.memory_bytes();}
+ size_t physical_capacity()const override{return t.capacity();}
+};
 struct Standard:Table{
  std::unordered_set<Key> t;
  Standard(const Trace&tr){t.reserve(tr.capacity);}
@@ -122,6 +132,7 @@ static void benchmark(const std::string&alg,const Trace&t){
  if(alg=="zombie")table=std::make_unique<Zombie>(t);
  else if(alg=="tpht_flatten")table=std::make_unique<Flatten>(t);
  else if(alg=="tpht_chained")table=std::make_unique<Chained>(t);
+ else if(alg=="bubble_up_basic")table=std::make_unique<BubbleBasic>(t);
  else if(alg=="std_unordered_set")table=std::make_unique<Standard>(t);
  else throw std::runtime_error("unknown algorithm");
  std::unordered_set<Key> oracle;oracle.reserve(t.capacity);
