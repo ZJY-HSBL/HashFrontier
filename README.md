@@ -1,5 +1,7 @@
 # HashFrontier
 
+**v0.11.1**: Independent GitHub Actions chart generation now uses standard-library SVG without Matplotlib, while preserving the original measured 120-run CSV. [Cloud reproduction workflow](.github/workflows/bubble-appendix-b.yml) · [Appendix B results](docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md).
+
 ## v0.11.0 | SODA 2025 Appendix B 机制复现与云端实测
 
 已完成 [Appendix B 的 choice′ 与冲突重定向](docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md)，并保留 §5.2 旧实现作为对照。通过 **269,540 次**随机/查询检查，另通过原有 Appendix C 测试；云端容器中 **120/120 组**构造与查询实验正确且完成。真实 [原始 CSV](results/v0.11.0-appendix-b-cloud-pilot.csv)、[统计汇总](results/v0.11.0-appendix-b-summary.csv)、[环境与 SHA-256](results/v0.11.0-appendix-b-provenance.json) 均公开。独立 GitHub Actions 工作流会再次运行，并上传其原生结果。
