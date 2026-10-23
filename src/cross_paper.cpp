@@ -81,7 +81,7 @@ struct Zombie:Table{
  size_t count=0;
  Zombie(const Trace&t){if(!g_init(t.capacity,64,0,float(t.load)/100.0f))throw std::runtime_error("zombie init failed");}
  ~Zombie(){g_destroy();}
- bool insert(Key k)override{int r=g_insert(k,0);if(r==QF_NO_SPACE)throw std::runtime_error("QF_NO_SPACE"); if(r==0){++count;return true;}throw std::runtime_error("unexpected zombie insert status="+std::to_string(r));}
+ bool insert(Key k)override{int r=g_insert(k,0);if(r==QF_NO_SPACE)throw std::runtime_error("QF_NO_SPACE"); if(r>=0){++count;return true;}throw std::runtime_error("unexpected zombie insert status="+std::to_string(r));}
  bool erase(Key k)override{int r=g_remove(k);if(r==0){--count;return true;}throw std::runtime_error("unexpected zombie erase status="+std::to_string(r));}
  bool has(Key k)override{std::uint64_t out=0;int r=g_lookup(k,&out);if(r==0)return true;if(r==QF_DOESNT_EXIST)return false;throw std::runtime_error("unexpected zombie get status="+std::to_string(r));}
  size_t memory()const override{return g_memory_usage();}
