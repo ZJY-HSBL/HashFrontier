@@ -1,0 +1,65 @@
+{
+  "schema": "HashFrontier/cpu-dynamic-l3-plan/1.0",
+  "score_protocol": "scoring/protocol-v1.0.json",
+  "frozen_host_profile": "benchmarks/frozen-platform-v1.0.json",
+  "track": "cpu_dynamic_exact_dictionary",
+  "key_bits": 64,
+  "value_bits": 64,
+  "reference_algorithm": "robin_hood",
+  "required_metrics": [
+    "build_ns_per_key",
+    "hit_ns_per_op",
+    "miss_ns_per_op",
+    "insert_ns_per_op",
+    "delete_ns_per_op",
+    "update_p99_ns",
+    "bytes_per_key"
+  ],
+  "seed_start": 101,
+  "seed_count": 30,
+  "scenarios": [
+    {
+      "id": "uniform_load_70_read95",
+      "key_distribution": "uniform",
+      "load_factor": 0.7,
+      "read_fraction": 0.95,
+      "insert_fraction": 0.025,
+      "delete_fraction": 0.025
+    },
+    {
+      "id": "uniform_load_95_churn50",
+      "key_distribution": "uniform",
+      "load_factor": 0.95,
+      "read_fraction": 0.5,
+      "insert_fraction": 0.25,
+      "delete_fraction": 0.25
+    },
+    {
+      "id": "zipf_load_85_read95",
+      "key_distribution": "zipfian_read",
+      "load_factor": 0.85,
+      "read_fraction": 0.95,
+      "insert_fraction": 0.025,
+      "delete_fraction": 0.025
+    },
+    {
+      "id": "hotshift_load_95_churn50",
+      "key_distribution": "hotspot_shift",
+      "load_factor": 0.95,
+      "read_fraction": 0.5,
+      "insert_fraction": 0.25,
+      "delete_fraction": 0.25
+    }
+  ],
+  "pilot_slots": 8192,
+  "formal_capacity_slots": [
+    1048576
+  ],
+  "phase_operations_per_seed": 100000,
+  "warmup_iterations": 5,
+  "measurement_repetitions": 5,
+  "fixed_trace_sha256_per_scenario_seed": true,
+  "measure_allocator_and_peak_memory": true,
+  "failures_must_be_preserved": true,
+  "note": "Registration extends the existing immutable HF-Score/1.0 four-scenario profile; any change requires a separately versioned protocol. Physical host binding remains pending."
+}

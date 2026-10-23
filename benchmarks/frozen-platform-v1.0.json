@@ -1,0 +1,29 @@
+{
+  "schema": "HashFrontier/benchmark-host/1.0",
+  "stage": "target_spec_not_bound_to_a_physical_host",
+  "hardware_profile": "hf-cpu-epyc9654-256g-v1",
+  "cpu_model_required": "AMD EPYC 9654",
+  "minimum_memory_bytes": 274877906944,
+  "os_release": {
+    "ID": "ubuntu",
+    "VERSION_ID": "24.04"
+  },
+  "compiler_command": "g++",
+  "compiler_version_required": "13.3.0",
+  "compiler_flags": [
+    "-O3",
+    "-DNDEBUG",
+    "-march=znver4"
+  ],
+  "c_standard": "c11",
+  "cpp_standard": "c++20",
+  "single_thread_per_process": true,
+  "cpu_affinity_logical_id": null,
+  "numa_node_id": null,
+  "cpu_governor_required": "performance",
+  "allocator_id": null,
+  "clock_source": "CLOCK_MONOTONIC_RAW",
+  "machine_binding_id": null,
+  "paper_specific_native_settings_separate_from_l3": true,
+  "environment_binding_required_for_formal_score": true
+}
