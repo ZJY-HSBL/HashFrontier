@@ -6,7 +6,7 @@ on:
       - '.github/workflows/cross-paper-pilot.yml'
       - 'src/cross_paper.cpp'
       - 'scripts/cross_paper_report.py'
-      - 'papers/cross-paper-v0.7.0.md'
+      - 'papers/cross-paper-v0.7.1.md'
       - 'VERSION'
   workflow_dispatch:
 permissions:
@@ -96,7 +96,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cross-paper-v0.7.0-raw
+          name: cross-paper-v0.7.1-raw
           path: |
             cross-output/
             traces/
@@ -108,16 +108,16 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 40); do
-            if gh release view v0.7.0 >/dev/null 2>&1; then break; fi
+            if gh release view v0.7.1 >/dev/null 2>&1; then break; fi
             sleep 5
           done
-          gh release view v0.7.0 >/dev/null
-          if gh release view v0.7.0 --json assets --jq '.assets[].name' | grep -qx 'v0.7.0-cross-paper-observations.csv'; then
+          gh release view v0.7.1 >/dev/null
+          if gh release view v0.7.1 --json assets --jq '.assets[].name' | grep -qx 'v0.7.1-cross-paper-observations.csv'; then
             echo 'Evidence already exists; will not replace it.'
           else
-            cp cross-output/observations.csv cross-output/v0.7.0-cross-paper-observations.csv
-            cp cross-output/completeness.csv cross-output/v0.7.0-cross-paper-completeness.csv
-            cp cross-output/summary.csv cross-output/v0.7.0-cross-paper-summary.csv
-            cp cross-output/comparison.svg cross-output/v0.7.0-cross-paper-comparison.svg
-            gh release upload v0.7.0 cross-output/v0.7.0-cross-paper-*
+            cp cross-output/observations.csv cross-output/v0.7.1-cross-paper-observations.csv
+            cp cross-output/completeness.csv cross-output/v0.7.1-cross-paper-completeness.csv
+            cp cross-output/summary.csv cross-output/v0.7.1-cross-paper-summary.csv
+            cp cross-output/comparison.svg cross-output/v0.7.1-cross-paper-comparison.svg
+            gh release upload v0.7.1 cross-output/v0.7.1-cross-paper-*
           fi

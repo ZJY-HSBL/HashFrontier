@@ -37,6 +37,10 @@ python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
 
 ## 中文 | 研究目标
 
+### v0.7.1 | 作者源码跨论文实验修正
+
+修正 ZombieHT 插入接口的返回码适配：非负值表示成功，而不仅是 0。原 v0.7.0 跨论文 workflow 已记录失败（小规模预检 unexpected zombie insert status=2），正式矩阵未执行；此后的有效数据只能来自 v0.7.1 新运行的 Artifact，不能用 v0.7.0 声称性能结论。
+
 ### v0.7.0 | 首次跨论文同轨迹实验（作者原版算法）
 
 已添加 [跨论文统一二进制操作轨迹实验](papers/cross-paper-v0.7.0.md) 和 [GitHub Actions](.github/workflows/cross-paper-pilot.yml)。候选算法：SIGMOD 2025 原版 ZombieHT（GZHM、GZHM_ADAPTIVE）、PVLDB 2026 原版 TPHT（Flattened、Chained），以及标准库 set 对照。作者算法源码固定版本，不改动算法主体；所有算法必须逐项通过相同二进制输入和标准集合正确性检查。实验定义为**集合语义的先导交叉测试**，内存统计口径与正式 HF-Score/64-bit key-value 字典协议不同，因此**目前禁止生成正式 HF-Score 排名**。

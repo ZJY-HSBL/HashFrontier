@@ -35,6 +35,7 @@ jobs:
             v0.5.0) assets=(results/v0.5.0-v04-incident.csv results/v0.5.0-v04-provenance.json figures/v0.5.0-v04-incident.svg); title="trace pairing infrastructure and high-load crash audit" ;;
             v0.6.0) assets=(scoring/protocol-v1.0.json scoring/PROTOCOL.md results/v0.6.0-data-readiness.json examples/hfscore/demo-score.json); title="strict seven-metric HF-Score protocol and data eligibility gates" ;;
             v0.7.0) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="author-source cross-paper reproducible benchmark" ;;
+            v0.7.1) assets=(papers/cross-paper-v0.7.0.md scoring/PROTOCOL.md); title="fixed author-source cross-paper benchmark" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then

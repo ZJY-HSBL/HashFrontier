@@ -24,3 +24,7 @@ Commands and source pinning are recorded in [the workflow](../.github/workflows/
 2. Extend the same exact trace format to `robin_hood` as an actual key-value adapter, and include Bubble-up Cuckoo only after faithfully implementing the SODA 2025 algorithm (never substitute ordinary cuckoo).
 3. Add allocator instrumentation or RSS-isolated measurement for comparable physical memory; use a genuine `uint64 -> uint64` dictionary track and freeze hardware/30 seeds before running full HF-Score.
 4. Compare author paper native experiment configurations independently from this cross-paper pilot.
+
+### Native status adapter correction (v0.7.1)
+
+The first v0.7.0 preflight failed because its wrapper accepted only zero for insert success. The author QF API returns nonnegative success codes (observed 2). The corrected wrapper accepts r>=0 while rejecting negative error codes. No full pilot dataset was produced under v0.7.0; refer only to v0.7.1 or later verified runs.
