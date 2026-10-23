@@ -63,7 +63,7 @@ jobs:
             gh run download 39888537155 -n cross-paper-v0.7.1-raw -D result-archive
             tar -czf results/v0.7.1-raw-binary-traces.tar.gz -C result-archive traces cross-output
             assets+=(results/v0.7.1-raw-binary-traces.tar.gz)
-            test "$(find result-archive/traces -name '*.bin' | wc -l)" -eq 9
+            test "$(find result-archive/traces -name 'L*.bin' | wc -l)" -eq 9
           fi
           gh release create "$tag" "${assets[@]}" \
               --target "$GITHUB_SHA" --title "HashFrontier $tag — $title" \
