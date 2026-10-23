@@ -1,4 +1,4 @@
-name: Cross-paper three-publication benchmark (Basic Bubble-up + ZombieHT + TPHT)
+name: Cross-paper three-publication dynamic plus static comparison v0.8.1
 on:
   push:
     branches: [main]
@@ -8,6 +8,7 @@ on:
       - 'scripts/cross_paper_report.py'
       - 'docs/BASIC-BUBBLE-UP.md'
       - 'VERSION'
+      - 'scripts/static_report_v081.py'
       - 'include/hashfrontier/basic_bubble_up.hpp'
   workflow_dispatch:
 permissions:
@@ -97,11 +98,42 @@ jobs:
           python3 scripts/cross_paper_report.py --observations cross-output/observations.csv --completeness cross-output/completeness.csv --out cross-output
           sha256sum traces/*.bin > cross-output/trace-sha256.txt
           sha256sum cross-output/observations.csv cross-output/completeness.csv cross-output/summary.csv > cross-output/evidence-sha256.txt
+      - name: Construction-only static comparison (same initial keys, no deletion extension)
+        run: |
+          set -euo pipefail
+          printf 'algorithm,scenario,seed,load_pct,requested_capacity,initial_keys,trace_sha256,query_sha256,status,correct,build_ns_per_key,hit_ns_per_op,miss_ns_per_op,author_reported_memory_bytes\n' > cross-output/static-observations.csv
+          printf 'algorithm,scenario,seed,trace_sha256,exit_code,status,error\n' > cross-output/static-completeness.csv
+          for load in 70 85 95; do
+            for seed in $(seq 101 110); do
+              f="traces/L${load}-S${seed}.bin"
+              sha="$(sha256sum "$f" | cut -d' ' -f1)"
+              for alg in std_unordered_set tpht_flatten tpht_chained zombie_gzhm zombie_gzhm_adaptive bubble_up_basic; do
+                exe=build-GZHM/hf_cross_compare
+                inner="$alg"
+                if [[ "$alg" = "zombie_gzhm" ]]; then inner=zombie; fi
+                if [[ "$alg" = "zombie_gzhm_adaptive" ]]; then exe=build-GZHM_ADAPTIVE/hf_cross_compare; inner=zombie; fi
+                log="cross-output/static-${alg}-L${load}-S${seed}.log"
+                set +e
+                timeout 100 "$exe" run_static "$inner" "$f" > "$log" 2>&1
+                rc=$?
+                set -e
+                if [[ "$rc" -eq 0 && "$(wc -l < "$log")" -eq 1 ]]; then
+                  sed "s/^zombie,/zombie_gzhm${alg#zombie_gzhm},/" "$log" >> cross-output/static-observations.csv
+                  printf '%s,static_load_%s,%s,%s,0,complete,\n' "$alg" "$load" "$seed" "$sha" >> cross-output/static-completeness.csv
+                else
+                  err="$(tail -c 180 "$log" | tr '\n,\r' '   ' | tr -cd '[:alnum:] ._:-')"
+                  printf '%s,static_load_%s,%s,%s,%s,failed,%s\n' "$alg" "$load" "$seed" "$sha" "$rc" "$err" >> cross-output/static-completeness.csv
+                fi
+              done
+            done
+          done
+          python3 scripts/static_report_v081.py --observations cross-output/static-observations.csv --completeness cross-output/static-completeness.csv --out cross-output
+          python3 scripts/analyze_paired_v08.py cross-output/observations.csv cross-output/paired-timing.csv
       - name: Preserve full evidence whether or not algorithms succeed
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cross-paper-v0.8.0-raw
+          name: cross-paper-v0.8.1-raw
           path: |
             cross-output/
             traces/
@@ -113,16 +145,21 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 40); do
-            if gh release view v0.8.0 >/dev/null 2>&1; then break; fi
+            if gh release view v0.8.1 >/dev/null 2>&1; then break; fi
             sleep 5
           done
-          gh release view v0.8.0 >/dev/null
-          if gh release view v0.8.0 --json assets --jq '.assets[].name' | grep -qx 'v0.8.0-cross-paper-observations.csv'; then
+          gh release view v0.8.1 >/dev/null
+          if gh release view v0.8.1 --json assets --jq '.assets[].name' | grep -qx 'v0.8.1-cross-paper-observations.csv'; then
             echo 'Evidence already exists; will not replace it.'
           else
-            cp cross-output/observations.csv cross-output/v0.8.0-cross-paper-observations.csv
-            cp cross-output/completeness.csv cross-output/v0.8.0-cross-paper-completeness.csv
-            cp cross-output/summary.csv cross-output/v0.8.0-cross-paper-summary.csv
-            cp cross-output/comparison.svg cross-output/v0.8.0-cross-paper-comparison.svg
-            gh release upload v0.8.0 cross-output/v0.8.0-cross-paper-*
+            cp cross-output/observations.csv cross-output/v0.8.1-cross-paper-observations.csv
+            cp cross-output/completeness.csv cross-output/v0.8.1-cross-paper-completeness.csv
+            cp cross-output/summary.csv cross-output/v0.8.1-cross-paper-summary.csv
+            cp cross-output/comparison.svg cross-output/v0.8.1-cross-paper-comparison.svg
+            cp cross-output/static-observations.csv cross-output/v0.8.1-static-observations.csv
+            cp cross-output/static-completeness.csv cross-output/v0.8.1-static-completeness.csv
+            cp cross-output/static-summary.csv cross-output/v0.8.1-static-summary.csv
+            cp cross-output/static-comparison.svg cross-output/v0.8.1-static-comparison.svg
+            cp cross-output/paired-timing.csv cross-output/v0.8.1-paired-timing.csv
+            gh release upload v0.8.1 cross-output/v0.8.1-cross-paper-* cross-output/v0.8.1-static-* cross-output/v0.8.1-paired-timing.csv
           fi

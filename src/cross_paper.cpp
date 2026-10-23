@@ -127,7 +127,7 @@ struct Standard:Table{
 };
 static double ns(Clock::time_point a,Clock::time_point b){return std::chrono::duration<double,std::nano>(b-a).count();}
 static double p99(std::vector<double>& v){if(v.empty())throw std::runtime_error("empty latency data");size_t i=(v.size()*99+99)/100-1;std::nth_element(v.begin(),v.begin()+i,v.end());return v[i];}
-static void benchmark(const std::string&alg,const Trace&t){
+static std::unique_ptr<Table> make_table(const std::string&alg,const Trace&t){
  std::unique_ptr<Table> table;
  if(alg=="zombie")table=std::make_unique<Zombie>(t);
  else if(alg=="tpht_flatten")table=std::make_unique<Flatten>(t);
@@ -135,6 +135,10 @@ static void benchmark(const std::string&alg,const Trace&t){
  else if(alg=="bubble_up_basic")table=std::make_unique<BubbleBasic>(t);
  else if(alg=="std_unordered_set")table=std::make_unique<Standard>(t);
  else throw std::runtime_error("unknown algorithm");
+ return table;
+}
+static void benchmark(const std::string&alg,const Trace&t){
+ auto table=make_table(alg,t);
  std::unordered_set<Key> oracle;oracle.reserve(t.capacity);
  std::vector<double> latency;latency.reserve(t.initial.size()/20*t.cycles.size()*2);
  double build=0,insert=0,erase=0,hit=0,miss=0;size_t ni=0,nd=0,nh=0,nm=0;
@@ -151,8 +155,34 @@ static void benchmark(const std::string&alg,const Trace&t){
  std::cout<<alg<<",load_"<<t.load<<","<<t.seed<<","<<t.load<<","<<t.capacity<<","<<table->physical_capacity()<<","<<t.initial.size()<<","<<t.cycles.size()<<","<<ni<<","<<nh<<","<<nm<<","<<t.sha<<",complete,true,"<<std::fixed<<std::setprecision(5)
  <<build/t.initial.size()<<","<<hit/nh<<","<<miss/nm<<","<<insert/ni<<","<<erase/nd<<","<<p99(latency)<<","<<table->memory()<<","<<usage.ru_maxrss<<",\n";
 }
+static void benchmark_static(const std::string&alg,const Trace&t){
+ auto table=make_table(alg,t);
+ std::unordered_set<Key> oracle;oracle.reserve(t.capacity);
+ double build=0,hit=0,miss=0;
+ for(Key k:t.initial){auto a=Clock::now();bool ok=table->insert(k);auto b=Clock::now();
+   build+=ns(a,b);if(!ok||!oracle.insert(k).second)throw std::runtime_error("STATIC build correctness failure");}
+ // All methods use exactly the same fixed query vector and its SHA-256.
+ // No updates/deletes: this isolates the insertion-only algorithm proven in §4.
+ std::mt19937_64 rng(mix(t.seed)^0x1a264c319af235d1ULL);
+ std::uniform_int_distribution<std::size_t> pick(0,t.initial.size()-1);
+ std::vector<Key> hits,misses;hits.reserve(4096);misses.reserve(4096);
+ std::ostringstream qs(std::ios::binary|std::ios::out);
+ for(std::size_t i=0;i<4096;i++){
+   Key k=t.initial[pick(rng)]; hits.push_back(k);write64(qs,k);
+ }
+ for(std::size_t i=0;i<4096;i++){
+   Key k=mix(t.seed*1000003ULL+i+0x78c24ad1ULL);
+   while(oracle.count(k))k=mix(k+1);
+   misses.push_back(k);write64(qs,k);
+ }
+ for(Key k:hits){auto a=Clock::now();bool ok=table->has(k);auto b=Clock::now();hit+=ns(a,b);if(!ok)throw std::runtime_error("STATIC hit failure");}
+ for(Key k:misses){auto a=Clock::now();bool ok=table->has(k);auto b=Clock::now();miss+=ns(a,b);if(ok)throw std::runtime_error("STATIC false positive");}
+ if(table->memory()==0 && alg!="std_unordered_set")throw std::runtime_error("unexpected zero memory");
+ std::cout<<alg<<",static_load_"<<t.load<<","<<t.seed<<","<<t.load<<","<<t.capacity<<","<<t.initial.size()<<","<<t.sha<<","<<digest(qs.str())<<",complete,true,"<<std::fixed<<std::setprecision(5)
+ <<build/t.initial.size()<<","<<hit/hits.size()<<","<<miss/misses.size()<<","<<table->memory()<<"\n";
+}
 int main(int argc,char**argv){try{
  if(argc>=2 && std::strcmp(argv[1],"generate")==0){generate(argc,argv);return 0;}
- if(argc!=4||std::strcmp(argv[1],"run")!=0)throw std::runtime_error("usage: generate capacity pct seed cycles queries file | run algorithm trace.bin");
- Trace t=load_trace(argv[3]);benchmark(argv[2],t);return 0;
+ if(argc!=4||(std::strcmp(argv[1],"run")!=0&&std::strcmp(argv[1],"run_static")!=0))throw std::runtime_error("usage: generate capacity pct seed cycles queries file | run[_static] algorithm trace.bin");
+ Trace t=load_trace(argv[3]);if(std::strcmp(argv[1],"run_static")==0)benchmark_static(argv[2],t);else benchmark(argv[2],t);return 0;
  }catch(const std::exception&e){std::cerr<<"FAIL: "<<e.what()<<"\n";return 2;}}

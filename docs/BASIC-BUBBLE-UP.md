@@ -32,3 +32,7 @@ The build includes deterministic correctness/property tests across four loads an
 The GitHub workflow `.github/workflows/cross-paper-v08.yml` compiles the paper-source ZombieHT and TPHT, runs this Section 4 implementation on **the exact same `.bin` trace files**, and records correctness-gated rows for every algorithm, load and seed. Includes build, positive/negative lookup, insert, delete, update P99 timings. TPHT and ZombieHT memory APIs report incompatible allocation concepts and `std::unordered_set` has no allocator-hook record, so **HF-Score remains forbidden**.
 
 Python report check: `python3 scripts/cross_paper_report.py --observations cross-output/observations.csv --completeness cross-output/completeness.csv --out cross-output`.
+
+### Evidence update (v0.8.1)
+
+In the preceding v0.8.0 dynamic 180-run experiment, **17 of 30 basic Bubble-up runs failed in the local direct-delete extension**: 7/10 at 85% load and 10/10 at 95%; all 10/10 at 70% completed. A replay of the exact failed operation traces confirmed that the initial BUILD completed before the later `core eviction limit` failure; for example, load 95%, seed 101 failed during insertion within churn cycle 8 (0-index cycle 7). Thus this result **cannot** be interpreted as disproving the insertion-only §4 theorem. The v0.8.1 independent static experiment removes the deletion extension to isolate the paper's intended insertion workload.

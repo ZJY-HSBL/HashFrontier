@@ -39,6 +39,10 @@ python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json \
 
 The [SODA 2025 **Basic Bubble-up** §4 implementation](docs/BASIC-BUBBLE-UP.md) is an **independent reimplementation of the paper's warmup algorithm**, with a clearly labeled out-of-scope direct-erase extension. **It is not the advanced §5 algorithm** and cannot claim its strongest theoretical bounds. The new [v0.8.0 common-trace experiment](.github/workflows/cross-paper-v08.yml) is configured for 6 implementations across 3 papers, 70/85/95% loads × 10 paired seeds = **180 planned runs**, with identical binary operation traces, live-key correctness checks, and explicit failure rows. Actual completed observations belong to the GitHub Actions evidence and versioned Release, not to the planned count. This **exploratory** comparison is not a formal HF-Score: memory accounting is not yet comparable and the formal 30-seed threshold is unmet.
 
+### v0.8.1 | 插入型 Bubble-up 与动态删除扩展分离测试
+
+上一版 180 组动态试验中 **163 组完成、17 组失败**，其中失败全部发生在 SODA 2025 Basic Bubble-up 的实验性直接删除扩展中：70% 负载 10/10，85% 负载 3/10，95% 负载 0/10。排查发现部分失败轨迹先完成初始建表，再在数个 churn 周期后达到核心驱逐链上限。因此这并不代表论文原始的插入阶段失败，也不是其第 5 节高级理论的验证。新版增加 **独立的纯构造＋固定成功/失败查询** 180 组计划运行，保持三篇论文相同初始键和查询流；同时保留原动态失败证据，附配对时间比值与真实可视化。详见 [论文机制与复现边界](docs/BASIC-BUBBLE-UP.md)、[统一实验工作流](.github/workflows/cross-paper-v08.yml)。**任何 HF-Score 必须等测量完整、内存可比、30 配对种子后才能计算。**
+
 ## 中文 | 研究目标
 
 ### v0.7.2 | 两篇高水平论文，首次真实同轨迹横向对照（45/45 完整）
