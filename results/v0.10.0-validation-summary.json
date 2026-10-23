@@ -1,0 +1,21 @@
+{
+  "version": "v0.10.0",
+  "scope": "frozen-target protocol & paper fidelity audit, NOT completed L2 or L3",
+  "revalidation_local_nonformal": {
+    "compiler": "Debian GCC 14.2.0",
+    "original_cpp_ctest": "passed",
+    "advanced_bubble_oracle_checks": 2587159,
+    "advanced_bubble_explicit_failures": 18,
+    "appendix_c_oracle_checks": 2447592,
+    "appendix_c_rebuilds": 888,
+    "appendix_c_asan_ubsan": "passed",
+    "protocol_gate_regression_tests": 12
+  },
+  "formal_host_bound": false,
+  "formal_score_generated": false,
+  "papers": {
+    "soda2025_bubble": "L1, L2/L3 incomplete",
+    "sigmod2025_zombie": "L1, L2/L3 incomplete",
+    "pvldb2026_tpht": "L1, partial L2, L3 incomplete"
+  }
+}

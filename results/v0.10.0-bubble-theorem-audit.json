@@ -1,0 +1,71 @@
+{
+  "paper": "SODA 2025 Bubble-up, Theorem 5.1 / Corollary 3.1",
+  "results": [
+    {
+      "n": 4096,
+      "epsilon": 0.30000000000000004,
+      "alpha": 0.5,
+      "d_core": 5,
+      "implemented_d": 10,
+      "theorem_d": 2,
+      "min_epsilon": 0.125,
+      "max_epsilon": 0.006737946999085467,
+      "necessary_conditions": {
+        "epsilon_ge_n_minus_quarter": true,
+        "epsilon_le_exp_minus_d_core": false,
+        "hash_choice_count": false,
+        "core_fits_choices": true
+      },
+      "all_numeric_necessary": false,
+      "paper_randomness_model": "fully_independent_random_hash_functions",
+      "implementation_randomness_model": "deterministic_splitmix_derived_not_fully_independent",
+      "sufficiently_large_core_constant_verified": false,
+      "eligible_to_claim_theorem": false,
+      "note": "Necessary numeric checks only; no theorem proof."
+    },
+    {
+      "n": 4096,
+      "epsilon": 0.15000000000000002,
+      "alpha": 0.5,
+      "d_core": 5,
+      "implemented_d": 10,
+      "theorem_d": 3,
+      "min_epsilon": 0.125,
+      "max_epsilon": 0.006737946999085467,
+      "necessary_conditions": {
+        "epsilon_ge_n_minus_quarter": true,
+        "epsilon_le_exp_minus_d_core": false,
+        "hash_choice_count": false,
+        "core_fits_choices": true
+      },
+      "all_numeric_necessary": false,
+      "paper_randomness_model": "fully_independent_random_hash_functions",
+      "implementation_randomness_model": "deterministic_splitmix_derived_not_fully_independent",
+      "sufficiently_large_core_constant_verified": false,
+      "eligible_to_claim_theorem": false,
+      "note": "Necessary numeric checks only; no theorem proof."
+    },
+    {
+      "n": 4096,
+      "epsilon": 0.050000000000000044,
+      "alpha": 0.5,
+      "d_core": 5,
+      "implemented_d": 10,
+      "theorem_d": 4,
+      "min_epsilon": 0.125,
+      "max_epsilon": 0.006737946999085467,
+      "necessary_conditions": {
+        "epsilon_ge_n_minus_quarter": false,
+        "epsilon_le_exp_minus_d_core": false,
+        "hash_choice_count": false,
+        "core_fits_choices": true
+      },
+      "all_numeric_necessary": false,
+      "paper_randomness_model": "fully_independent_random_hash_functions",
+      "implementation_randomness_model": "deterministic_splitmix_derived_not_fully_independent",
+      "sufficiently_large_core_constant_verified": false,
+      "eligible_to_claim_theorem": false,
+      "note": "Necessary numeric checks only; no theorem proof."
+    }
+  ]
+}
