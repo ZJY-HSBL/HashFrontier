@@ -20,6 +20,8 @@ jobs:
           python3 -m unittest discover -s tests -p "test_paired_native.py" -v
           python3 -m unittest discover -s tests -p "test_cross_paper_report.py" -v
           python3 -m unittest discover -s tests -p "test_hf_score.py" -v
+          python3 scripts/verify_l3_plan.py
+          python3 -m unittest discover -s tests -p "test_reproduction_protocol.py" -v
       - name: Publish tagged source and evidence
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,6 +46,7 @@ jobs:
             v0.9.0) assets=(results/v0.9.0-bubble-pilot.csv results/v0.9.0-bubble-summary.csv results/v0.9.0-provenance.json figures/v0.9.0-bubble-compare.svg papers/registry-v0.9.0.csv papers/SCREENING-2025-2026.md); title="SODA advanced bubble-up mechanism pilot and verified literature screening" ;;
             v0.9.1) assets=(results/v0.9.1-appendix-c-pilot.csv results/v0.9.1-appendix-c-summary.csv figures/v0.9.1-appendix-c-insert.svg figures/v0.9.1-appendix-c-rebuild.svg docs/APPENDIX-C-REPRODUCTION.md docs/NEXT-L2-L3-GATES.md); title="SODA Appendix C deletion mechanism and finite L1 validation" ;;
             v0.9.2) assets=(results/v0.9.2-tpht-native-latency.csv results/v0.9.2-tpht-native-space.csv results/v0.9.2-tpht-upstream-tests.log results/v0.9.2-tpht-ci-environment.txt results/v0.9.2-tpht-source-sha256.txt results/v0.9.2-tpht-measurements-sha256.txt results/v0.9.2-tpht-provenance.json figures/v0.9.2-tpht-native-hits.svg figures/v0.9.2-tpht-native-space.svg docs/TPHT-AUTHOR-NATIVE-PILOT.md); title="TPHT official source tests and native reduced-range benchmarks" ;;
+            v0.10.0) assets=(docs/BENCHMARK-PROTOCOL-v1.0.md docs/BUBBLE-UP-L2-AUDIT-v0.10.0.md docs/REPRODUCTION-GATES-v0.10.0.md benchmarks/frozen-platform-v1.0.json benchmarks/experiment-plan-v1.0.json results/v0.10.0-bubble-theorem-audit.json results/v0.10.0-validation-summary.json); title="frozen target host prerequisites and paper reproduction audit" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then

@@ -1,5 +1,12 @@
 # HashFrontier
 
+## v0.10.0 | 固定硬件环境与论文忠实复现门槛
+
+**当前研究只做符合时间和发表要求的散列表论文复现与同条件比较，不做算法创新。** [统一实验协议](docs/BENCHMARK-PROTOCOL-v1.0.md)规定 AMD EPYC 9654、256 GiB 内存、Ubuntu 24.04、GCC 13.3.0 **目标机器规格**；实际物理机器尚未绑定，旧版 GitHub runner 和本地 CPU 计时**不得作为正式 L3 结果**。
+
+新增 [固定机器资格检查](scripts/verify_benchmark_host.py)、[已冻结 HF-Score/1.0 配对实验矩阵检查](scripts/verify_l3_plan.py)、[SODA 2025 Bubble-up 论文定理适用条件审计](scripts/audit_bubble_theorem.py)。现有 n=4096 的 70/85/95% Bubble-up 实验不满足论文全部理论条件；作者论文属于理论研究，不能要求重现其并不存在的经验性能图。[逐条 L2 审计](docs/BUBBLE-UP-L2-AUDIT-v0.10.0.md)发现附录 B 的 `choice'(x,j)` 和理想随机性假设尚未复现。[三论文验收表](docs/REPRODUCTION-GATES-v0.10.0.md)仍将 Bubble-up、Zombie Hashing、TPHT 的完整 L2/L3 标为**未完成**。
+
+
 ## v0.9.2 | TPHT author-native correctness / latency / memory pilots
 
 The unchanged [Xilinion/TPHT](https://github.com/Xilinion/TPHT) C11 source, pinned to commit 3c39de26faba11bc1a037a1dfd24e3c633ac8987, passed its own complete portable/SIMD/threaded/native modular tests on [GitHub Actions](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39896663610). The original author benchmark scripts yielded **128 measured latency records** and **320 memory records**, with exact source and data SHA-256 retained. This is an **author-native scaled L2 pilot**, NOT complete figure-by-figure L2 and NOT common-trace L3/HF-Score.

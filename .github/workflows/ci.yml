@@ -21,6 +21,14 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_paired_native.py" -v
       - name: HF-Score strict scoring regressions
         run: python3 -m unittest discover -s tests -p "test_hf_score.py" -v
+      - name: Frozen environment and paper premise regression
+        run: |
+          python3 scripts/verify_l3_plan.py
+          python3 -m unittest discover -s tests -p "test_reproduction_protocol.py" -v
+          python3 scripts/verify_benchmark_host.py --out hf-host-nonformal.json
+          python3 scripts/audit_bubble_theorem.py --out hf-bubble-necessary.json
+          python3 -c "import json; assert not json.load(open('hf-host-nonformal.json'))['formal_host_eligible']; assert len(json.load(open('hf-bubble-necessary.json'))['results'])==3"
+
       - name: Verify synthetic demonstration cannot claim measured evidence
         run: |
           python3 scoring/hf_score.py --protocol examples/hfscore/demo-protocol.json --observations examples/hfscore/demo-input.csv --output hfscore-ci.json --csv-output hfscore-ci.csv
