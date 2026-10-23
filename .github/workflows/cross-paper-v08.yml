@@ -1,15 +1,5 @@
 name: Cross-paper three-publication dynamic plus static comparison v0.8.1
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/cross-paper-v08.yml'
-      - 'src/cross_paper.cpp'
-      - 'scripts/cross_paper_report.py'
-      - 'docs/BASIC-BUBBLE-UP.md'
-      - 'VERSION'
-      - 'scripts/static_report_v081.py'
-      - 'include/hashfrontier/basic_bubble_up.hpp'
   workflow_dispatch:
 permissions:
   contents: write

@@ -1,0 +1,17 @@
+{
+  "upstream_artifact": "https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39892858371",
+  "github_artifact_id": 12474939871,
+  "workflow_commit": "211147a4ff173a7522ec8a5ba525d05b3631348d",
+  "sha256_of_source_artifact": "5d4d742d9e4b4612ee944f4492408322a5bc67d9affc489324dec6a435076f8d",
+  "source_files_sha256": {
+    "results/v0.8.1-dynamic-observations.csv": "b2279621a57964a8ed6c21e144d0bdf12fea4782003deb9aefcc0099f01de7eb",
+    "results/v0.8.1-dynamic-completeness.csv": "c82eaf45b6ee675ed6b54d5d891d88ede510d1ef791319b1fb5c09da0bdbd21a",
+    "results/v0.8.1-dynamic-summary.csv": "b3fd13a542706db23f7dcd8c982f100fda4a9c625ab4a38f8a361104105bf42b",
+    "results/v0.8.1-static-observations.csv": "4349dfbe1567b315dd7160770c5f075ebeef4a4706e3583a5668d553a1ccd89b",
+    "results/v0.8.1-static-completeness.csv": "04f75d15cc3f475bbd620e649b55fd214558d23e6cec81670572a767a82e137b",
+    "results/v0.8.1-static-summary.csv": "9b77262fec9308c7e2d647fce870e0557f664d5a683645551f36df57e4bbc5c7",
+    "results/v0.8.1-paired-timing.csv": "a4742c5ecc6835d27699e154073468723a382294d933b75a66cff3a2c82e5352",
+    "figures/v0.8.1-dynamic-comparison.svg": "68e8d5b9609cfa7e5886a4d7e972a6ecfdc2bd56bc9bbb77720b288f8abe1de2",
+    "figures/v0.8.1-static-comparison.svg": "f127ef2350b9225469743c4cdb41cf7371c2d3b0a0665506814380dd28a52e68"
+  }
+}

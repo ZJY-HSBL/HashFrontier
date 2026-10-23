@@ -1,11 +1,5 @@
 name: Cross-paper TPHT x ZombieHT fixed-trace benchmark
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'src/cross_paper.cpp'
-      - 'scripts/cross_paper_report.py'
-      - 'papers/cross-paper-v0.7.1.md'
   workflow_dispatch:
 permissions:
   contents: write

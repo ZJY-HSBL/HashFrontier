@@ -43,6 +43,20 @@ The [SODA 2025 **Basic Bubble-up** §4 implementation](docs/BASIC-BUBBLE-UP.md) 
 
 上一版 180 组动态试验中 **163 组完成、17 组失败**，其中失败全部发生在 SODA 2025 Basic Bubble-up 的实验性直接删除扩展中：70% 负载 10/10，85% 负载 3/10，95% 负载 0/10。排查发现部分失败轨迹先完成初始建表，再在数个 churn 周期后达到核心驱逐链上限。因此这并不代表论文原始的插入阶段失败，也不是其第 5 节高级理论的验证。新版增加 **独立的纯构造＋固定成功/失败查询** 180 组计划运行，保持三篇论文相同初始键和查询流；同时保留原动态失败证据，附配对时间比值与真实可视化。详见 [论文机制与复现边界](docs/BASIC-BUBBLE-UP.md)、[统一实验工作流](.github/workflows/cross-paper-v08.yml)。**任何 HF-Score 必须等测量完整、内存可比、30 配对种子后才能计算。**
 
+## v0.8.2 | 三篇顶会算法首次双赛道实测结果（已验证）
+
+**统一测试矩阵：**SIGMOD 2025 ZombieHT、VLDB 2026 TPHT、SODA 2025 Basic Bubble-up §4 和标准库基线，同一批 8192 槽位实验、70/85/95% 负载、10 配对随机种子。**动态插删 163/180 完成，纯构造＋查询 180/180 完成。** 动态实验 17 次失败均出现在自行扩展的 Basic Bubble-up 直接删除版本，不能据此否定原论文纯插入算法；所有 30 组 Basic Bubble-up **纯构造**实验完成。
+
+**95% 负载动态均值**（10 种子，越低越好）：TPHT Flattened 成功查询 45.69 ns/op、插入 48.36 ns/op、更新 P99 90.50 ns；GZHM Adaptive 分别 63.93 ns/op、556.88 ns/op、1831.20 ns。Basic Bubble-up 的删除扩展 0/10 完成，不列入高负载动态速度排名。
+
+**95% 负载纯构造＋查询均值**（10 种子）：独立 §4 Basic Bubble-up 构造 4054.21 ns/key、成功查询 3481.74 ns/op；TPHT Flattened 分别 49.97 ns/key、48.92 ns/op。该差异含有独立重实现的哈希位置计算与时间测量开销，**不能直接认定原论文本身低效**。当前仍缺统一内存计量和 30 种子，不计算正式 HF-Score。
+
+详细的复现边界、两套完整表格、失败情况与来源追溯：[v0.8.1 实测研究报告](docs/RESULTS-v0.8.1.md)；[v0.8.1 原始实验 Artifact](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39892858371)；[v0.8.2 Release](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.8.2)。
+
+![三篇顶会方法的动态失败查询实测对比](figures/v0.8.1-dynamic-comparison.svg)
+
+![三篇顶会方法的静态成功查询实测对比](figures/v0.8.1-static-comparison.svg)
+
 ## 中文 | 研究目标
 
 ### v0.7.2 | 两篇高水平论文，首次真实同轨迹横向对照（45/45 完整）
