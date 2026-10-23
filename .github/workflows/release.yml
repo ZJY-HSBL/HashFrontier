@@ -43,6 +43,7 @@ jobs:
             v0.8.0) assets=(docs/BASIC-BUBBLE-UP.md); title="SODA 2025 basic bubble-up and three-paper same-trace comparison" ;;
             v0.9.0) assets=(results/v0.9.0-bubble-pilot.csv results/v0.9.0-bubble-summary.csv results/v0.9.0-provenance.json figures/v0.9.0-bubble-compare.svg papers/registry-v0.9.0.csv papers/SCREENING-2025-2026.md); title="SODA advanced bubble-up mechanism pilot and verified literature screening" ;;
             v0.9.1) assets=(results/v0.9.1-appendix-c-pilot.csv results/v0.9.1-appendix-c-summary.csv figures/v0.9.1-appendix-c-insert.svg figures/v0.9.1-appendix-c-rebuild.svg docs/APPENDIX-C-REPRODUCTION.md docs/NEXT-L2-L3-GATES.md); title="SODA Appendix C deletion mechanism and finite L1 validation" ;;
+            v0.9.2) assets=(results/v0.9.2-tpht-native-latency.csv results/v0.9.2-tpht-native-space.csv results/v0.9.2-tpht-upstream-tests.log results/v0.9.2-tpht-ci-environment.txt results/v0.9.2-tpht-source-sha256.txt results/v0.9.2-tpht-measurements-sha256.txt results/v0.9.2-tpht-provenance.json figures/v0.9.2-tpht-native-hits.svg figures/v0.9.2-tpht-native-space.svg docs/TPHT-AUTHOR-NATIVE-PILOT.md); title="TPHT official source tests and native reduced-range benchmarks" ;;
             *) echo "Unexpected version: $tag" >&2; exit 1 ;;
           esac
           if [ "$tag" = "v0.3.0" ]; then

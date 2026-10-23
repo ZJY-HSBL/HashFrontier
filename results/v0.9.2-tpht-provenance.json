@@ -1,0 +1,25 @@
+{
+  "paper": "Succinct and Fast Tiny Pointer Hash Tables",
+  "venue": "PVLDB 19(9), 2026",
+  "doi": "10.14778/3819518.3819542",
+  "author_source": "https://github.com/Xilinion/TPHT",
+  "source_commit": "3c39de26faba11bc1a037a1dfd24e3c633ac8987",
+  "ci_run": "https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39896663610",
+  "artifact_id": 12476848781,
+  "compiler": "GCC 13.3.0",
+  "machine": "AMD EPYC 9V74 virtual, GitHub ubuntu-24.04",
+  "native_commands": [
+    "./tests/run_tpht_tests.sh",
+    "./benchmarks/run_latency.sh 10 17 8 0.85",
+    "./benchmarks/run_space_eff.sh 50000"
+  ],
+  "row_counts": {
+    "latency": 128,
+    "space": 320
+  },
+  "data_sha256": {
+    "tpht_latency.csv": "bd25fac923d7e5e4e8236e780c8118edf28d5a6e7f5c98aa200f4b15fc497a8a",
+    "tpht_space_eff.csv": "0df06edeed0871806e46c8256ca2d071e0df01974261830bbdfa6ffb0413eb32"
+  },
+  "status": "author-native scaled L2 pilot, not complete published figures"
+}

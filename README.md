@@ -1,5 +1,18 @@
 # HashFrontier
 
+## v0.9.2 | TPHT author-native correctness / latency / memory pilots
+
+The unchanged [Xilinion/TPHT](https://github.com/Xilinion/TPHT) C11 source, pinned to commit 3c39de26faba11bc1a037a1dfd24e3c633ac8987, passed its own complete portable/SIMD/threaded/native modular tests on [GitHub Actions](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/39896663610). The original author benchmark scripts yielded **128 measured latency records** and **320 memory records**, with exact source and data SHA-256 retained. This is an **author-native scaled L2 pilot**, NOT complete figure-by-figure L2 and NOT common-trace L3/HF-Score.
+
+At 131,072 keys, 85% target load, 64-bit keys/values: Flattened-TPHT hit 12.08 ns/op, Chained-TPHT 19.50 ns/op. At 50,000 keys under the same target load, author-reported allocation was 26.94 and 19.94 bytes/key respectively (different sample size; no combined score).
+
+[Full original-source experiment audit](docs/TPHT-AUTHOR-NATIVE-PILOT.md) · [raw latency](results/v0.9.2-tpht-native-latency.csv) · [raw space](results/v0.9.2-tpht-native-space.csv)
+
+![Measured TPHT hit query timings](figures/v0.9.2-tpht-native-hits.svg)
+
+![Measured TPHT space](figures/v0.9.2-tpht-native-space.svg)
+
+
 ## v0.9.1 | SODA 2025 Appendix C (mechanism validation only, NOT complete L2)
 
 The SODA 2025 Bubble-up paper's Appendix C prescribes tombstones retained as actual entries in eviction chains, their reactivation on reinsertion, and a full-table rebuild when augmented load reaches a threshold. This release reproduces those mechanisms on top of our separately implemented Section 5.2 insertion engine; it is not a new algorithm.
