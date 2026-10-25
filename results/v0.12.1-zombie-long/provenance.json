@@ -1,0 +1,25 @@
+{
+  "schema": "zombie-author-source-native-long-churn-v0.12.1",
+  "source_commit": "5064a381fd3b7a540594fadd6f7595fdcc748a6c",
+  "instrumentation": "workload-generator-only; author hash-table implementations unchanged",
+  "metric_units": "author clock ticks per operation (NOT ns)",
+  "loads": [
+    85,
+    95
+  ],
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105
+  ],
+  "cycles": 320,
+  "expected_runs": 40,
+  "runs_with_auditable_completion": 40,
+  "complete_runs": 35,
+  "failed_or_incomplete_runs": 5,
+  "matched_trace_rows": 3210,
+  "integrity_errors": [],
+  "note": "Nonformal cloud pilot; not uniform-memory L3, no HF-Score."
+}
