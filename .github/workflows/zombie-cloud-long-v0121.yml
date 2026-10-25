@@ -1,0 +1,119 @@
+name: Zombie Hashing SIGMOD 2025 long-churn 320-cycle author-native verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/zombie-cloud-long-v0121.yml'
+      - 'scripts/report_zombie_long_v0121.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  zombie-long:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 135
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned upstream source and instrument ONLY benchmark generator
+        run: |
+          set -euo pipefail
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git clone --filter=blob:none https://github.com/saltsystemslab/ZombieHT upstream
+          git -C upstream checkout --detach 5064a381fd3b7a540594fadd6f7595fdcc748a6c
+          git -C upstream submodule update --init --recursive
+          mkdir -p native-long results/v0.12.1-zombie-long
+          sha256sum upstream/src/gqf.c upstream/src/hm.c > results/v0.12.1-zombie-long/core-before.sha256
+          sha256sum upstream/bench/hm_churn.cc > results/v0.12.1-zombie-long/bench-before.sha256
+          python3 scripts/patch_zombie_paired.py upstream/bench/hm_churn.cc
+          sha256sum upstream/src/gqf.c upstream/src/hm.c > results/v0.12.1-zombie-long/core-after.sha256
+          diff results/v0.12.1-zombie-long/core-before.sha256 results/v0.12.1-zombie-long/core-after.sha256
+          sha256sum upstream/bench/hm_churn.cc > results/v0.12.1-zombie-long/bench-patched.sha256
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; g++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; free -h; } > results/v0.12.1-zombie-long/environment.txt
+      - name: Build unchanged author RHM TRHM GZHM and GZHM_ADAPTIVE variants
+        run: |
+          set -euo pipefail
+          for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
+            cmake -S upstream -B "build-$variant" -DCMAKE_BUILD_TYPE=Release -DVARIANT="$variant"
+            cmake --build "build-$variant" --target hm_churn -j2
+          done
+      - name: Author source 320-cycle long churn paired 5 seeds (85 / 95 percent)
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          for load in 85 95; do
+            changes=$(( (8192 * load / 100) / 20 ))
+            lookups=$(( changes * 2 ))
+            for seed in 101 102 103 104 105; do
+              for variant in RHM TRHM GZHM GZHM_ADAPTIVE; do
+                dest="native-long/L${load}/S${seed}/${variant}"
+                mkdir -p "$dest"
+                printf 'q=13;load=%d;cycles=320;deletions=%d;insertions=%d;lookups=%d;unpaired=false;seed=%d\n' "$load" "$changes" "$changes" "$lookups" "$seed" > "$dest/protocol.txt"
+                set +e
+                HF_PAIR_SEED="$seed" timeout 190 "build-$variant/hm_churn" -k 64 -q 13 -v 0 -i "$load" -c 320 -w "$changes" -l "$lookups" -s 1 -t 1 -m 0 -g 0 -d "$dest/" > "$dest/stdout.log" 2>&1
+                code=$?
+                set -e
+                printf '%d\n' "$code" > "$dest/exitcode.txt"
+                echo "load=$load seed=$seed variant=$variant exit=$code"
+              done
+            done
+          done
+      - name: Audit all logs; explicitly retain incomplete cycles and matched input traces
+        run: |
+          set -euo pipefail
+          python3 scripts/report_zombie_long_v0121.py --root native-long --out results/v0.12.1-zombie-long --cycles 320
+          python3 - <<'PY'
+          import json,csv,os
+          from pathlib import Path
+          out=Path('results/v0.12.1-zombie-long')
+          info=json.loads((out/'provenance.json').read_text())
+          summary=list(csv.DictReader((out/'summary.csv').open()))
+          completeness=list(csv.DictReader((out/'completion.csv').open()))
+          lines=['# Zombie Hashing SIGMOD 2025 — 320-cycle cloud long-churn replication', '',
+                 '**Authors’ unchanged table implementations; only input generation fixed for reproducible paired operation traces.**', '',
+                 'Real GitHub ubuntu-24.04 ephemeral cloud; pinned ZombieHT commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`. No physical-host ranking, no HF-Score.', '',
+                 f"**Completion:** {info['complete_runs']}/{info['expected_runs']} 320-cycle workloads completed; {info['failed_or_incomplete_runs']} incomplete/failed. All attempts are retained.", '',
+                 '| Load | Variant | Completed seeds/5 | Incomplete seeds |', '|---:|---|---:|---|']
+          for load in (85,95):
+            for v in ('RHM','TRHM','GZHM','GZHM_ADAPTIVE'):
+              arr=[x for x in completeness if int(x['load_pct'])==load and x['variant']==v]
+              completed=[x for x in arr if x['status']=='complete']
+              failures=[f"{x['seed']} ({x['completed_cycles']}/320, exit {x['exit_code']})" for x in arr if x['status']!='complete']
+              lines.append(f"| {load}% | {v} | {len(completed)}/5 | {', '.join(failures) or '—'} |")
+          lines+=['','## Native timing for complete runs only','',
+                  '**Author clock ticks/op, NOT ns.** Median of last 64 of 320 cycles within each seed; median across completed seeds. Do not infer full-cohort superiority when a variant has missing seeds.', '',
+                  '| Load | Variant | Phase | Complete seeds | Median ticks/op |', '|---:|---|---|---:|---:|']
+          for r in summary:
+              lines.append(f"| {r['load_pct']}% | {r['variant']} | {r['phase']} | {r['completed_seeds']} | {float(r['median_last64_ticks_per_op']):.2f} |")
+          lines+=['','![Measured native insert timings](../figures/v0.12.1-zombie-long-insert.svg)', '',
+                  '## Evidence','',
+                  '- [All 40 attempts including crashed/incomplete](../results/v0.12.1-zombie-long/completion.csv)',
+                  '- [Native complete-run observations](../results/v0.12.1-zombie-long/native-complete-timings.csv)',
+                  '- [Full source-native summary](../results/v0.12.1-zombie-long/summary.csv)',
+                  '- [Exact operation fingerprint verification](../results/v0.12.1-zombie-long/trace-integrity.csv)',
+                  '- [CPU/OS/compiler capture](../results/v0.12.1-zombie-long/environment.txt)',
+                  '- [Provenance and failure counts](../results/v0.12.1-zombie-long/provenance.json)',
+                  '', 'These results test longevity and correctness of the author algorithms in a cloud pilot, not L3 memory-comparable 64/64-bit dictionary performance.']
+          doc=Path('docs/RESULTS-v0.12.1-ZOMBIE-LONG.md');doc.parent.mkdir(exist_ok=True)
+          doc.write_text('\n'.join(lines)+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:f.write('\n'.join(lines[:17])+'\n')
+          PY
+      - name: Archive all inputs, logs, failure evidence and real generated figures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zombie-v0.12.1-long-native-raw
+          path: |
+            native-long/
+            results/v0.12.1-zombie-long/
+            figures/v0.12.1-zombie-long-insert.svg
+            docs/RESULTS-v0.12.1-ZOMBIE-LONG.md
+          if-no-files-found: warn
+      - name: Commit audited measured evidence, never generated timings
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.12.1-zombie-long figures/v0.12.1-zombie-long-insert.svg docs/RESULTS-v0.12.1-ZOMBIE-LONG.md
+          git commit -m 'data: preserve all 320-cycle ZombieHT outcomes, including failures'
+          git push origin HEAD:main
