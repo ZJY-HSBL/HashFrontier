@@ -31,6 +31,7 @@ jobs:
             echo "Release $tag exists; not overwriting immutable evidence."
           else
             case "$tag" in
+            v0.12.1) assets=(results/v0.12.1-zombie-long/completion.csv results/v0.12.1-zombie-long/native-complete-timings.csv results/v0.12.1-zombie-long/summary.csv results/v0.12.1-zombie-long/trace-integrity.csv results/v0.12.1-zombie-long/provenance.json results/v0.12.1-zombie-long/environment.txt results/v0.12.1-zombie-long/sha256.txt figures/v0.12.1-zombie-long-insert.svg docs/RESULTS-v0.12.1-ZOMBIE-LONG.md); title="SIGMOD Zombie Hashing author-native 320-cycle long churn and exact TRHM crash audit" ;;
             v0.12.0) assets=(results/v0.12.0-zombie-native/completion.csv results/v0.12.0-zombie-native/native-complete-timings.csv results/v0.12.0-zombie-native/summary.csv results/v0.12.0-zombie-native/trace-integrity.csv results/v0.12.0-zombie-native/provenance.json results/v0.12.0-zombie-native/environment.txt results/v0.12.0-zombie-native/sha256.txt figures/v0.12.0-zombie-native-insert.svg docs/RESULTS-v0.12.0-ZOMBIE.md); title="SIGMOD 2025 Zombie Hashing four-author-variant 36-run cloud evidence" ;;
             v0.11.1) assets=(results/v0.11.0-appendix-b-cloud-pilot.csv results/v0.11.0-appendix-b-summary.csv results/v0.11.0-appendix-b-provenance.json figures/v0.11.0-appendix-b-build.svg figures/v0.11.0-appendix-b-hit.svg docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md); title="SODA 2025 Appendix B independent GitHub cloud reproduction CI fix" ;;
             v0.11.0) assets=(results/v0.11.0-appendix-b-cloud-pilot.csv results/v0.11.0-appendix-b-summary.csv results/v0.11.0-appendix-b-provenance.json figures/v0.11.0-appendix-b-build.svg figures/v0.11.0-appendix-b-hit.svg docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md); title="SODA 2025 Appendix B choice-prime reproduction and measured cloud pilot" ;;
@@ -69,6 +70,14 @@ jobs:
           assert all(rows[v]['complete']=='True' for v in ('RHM','GZHM','GZHM_ADAPTIVE'))
           assert rows['TRHM']['complete']=='False' and int(rows['TRHM']['completed_cycles'])==194
           PY_NATIVE
+          fi
+          if [ "$tag" = "v0.12.1" ]; then
+            mkdir -p long-native-archive
+            gh run download 40176343702 -n zombie-v0.12.1-long-native-raw -D long-native-archive
+            test -f long-native-archive/results/v0.12.1-zombie-long/completion.csv
+            test -f long-native-archive/native-long/L95/S101/TRHM/stdout.log
+            tar -czf results/v0.12.1-zombie-long-raw-logs.tar.gz -C long-native-archive native-long
+            assets+=(results/v0.12.1-zombie-long-raw-logs.tar.gz)
           fi
           if [ "$tag" = "v0.12.0" ]; then
             mkdir -p source-native-archive

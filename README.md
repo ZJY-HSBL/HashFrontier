@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.12.1 | SIGMOD 2025 ZombieHT 320-cycle 长程云端稳定性复现
+
+在**原作者四算法核心代码不变**的条件下，GitHub Actions 实测 85% / 95% 负载、每档 5 个配对种子、每组计划 320 个 Churn 周期、8192 槽：**35/40 组完整完成**。95% 负载下 TRHM 5/5 均以 **退出码 139** 结束（完成 161、191、131、161、161 个周期），RHM、GZHM 和 GZHM_ADAPTIVE 在同样负载下全部 5/5 完成；85% 所有变体 20/20 完成。所有已生成的 3,210 条输入指纹检查无差异。
+
+这说明此前 96 周期的 TRHM 短程成功**不能替代长期稳定性验证**。当前只确认进程以 SIGSEGV 类退出状态失败，尚未定位具体源代码缺陷。原生计时使用作者 **clock ticks/op**，不当成 ns；本轮云端硬件为 AMD EPYC 9V45 虚拟 CPU，不能直接同 v0.12.0 的 EPYC 7763 跨机比较绝对性能，也不计算 HF-Score。
+
+[真实长程实验报告](docs/RESULTS-v0.12.1-ZOMBIE-LONG.md) · [40 组完整/失败明细](results/v0.12.1-zombie-long/completion.csv) · [完整组计时](results/v0.12.1-zombie-long/native-complete-timings.csv) · [汇总数据](results/v0.12.1-zombie-long/summary.csv) · [操作指纹校验](results/v0.12.1-zombie-long/trace-integrity.csv) · [实际环境](results/v0.12.1-zombie-long/environment.txt) · [Github 云端运行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40176343702)。
+
+![ZombieHT 320-cycle real insert data](figures/v0.12.1-zombie-long-insert.svg)
+
+
 ## v0.12.0 | SIGMOD 2025 Zombie Hashing 原作者四算法云端复现
 
 本轮固定 [ZombieHT 官方源码](https://github.com/saltsystemslab/ZombieHT) commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`，在**不修改四种散列表算法核心代码**的前提下，仅为作者 Benchmark 的输入生成器加入可核对的固定种子与每周期操作指纹。GitHub Actions 云端虚拟机（EPYC 7763，Ubuntu 24.04，GCC 13.3）完成 **36/36** 次原生测试（70/85/95% 负载 × 3 种子 × RHM、TRHM、GZHM、GZHM_ADAPTIVE；8192 槽、96 churn 周期）；873 条操作指纹审计无误，测试、分析及数据保存均来自真实运行。

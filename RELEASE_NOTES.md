@@ -1,9 +1,9 @@
-# HashFrontier v0.12.0 — SIGMOD 2025 ZombieHT 原作者实现的真实云端测试
+# HashFrontier v0.12.1 — SIGMOD 2025 Zombie Hashing 320-cycle cloud long-churn
 
-- 官方原版 ZombieHT fixed SHA `5064a381fd3b7a540594fadd6f7595fdcc748a6c`，四种方法 RHM / TRHM / GZHM / GZHM_ADAPTIVE 均为论文作者源码，原核心 `src/gqf.c`、`src/hm.c` SHA-256 与运行时检查一致。
-- 仅给 **Benchmark 工作负载输入**加入固定随机种子、同周期操作指纹，不宣称 Benchmark 源文件未经改动。
-- GitHub Actions 原生构建、Ubuntu 24.04 / GCC 13.3 / AMD EPYC 7763：70%、85%、95% × 3 seeds × 4 implementations，8192 slots / 96 churn cycles，**36/36 组完整、0 中断**。
-- **873 条**分阶段操作指纹匹配，云端计算得到含失败审计的 `completion.csv`、完整运行计时、summary、环境与来源 SHA、SVG 图表。
-- 95% 负载下的插入 clock ticks/op：RHM 595.61；TRHM 215.91；GZHM 629.12；GZHM_ADAPTIVE 522.55（3 seeds，最后 32 周期；真实测量、非 ns）。
-- 注意：历史 95% × 320 周期 TRHM 失败并未由此 96 周期实验排除；此版是**真实云端探索复现**，未计算 HF-Score，也未完成统一 64-bit key/value 对比。
-- Release 上传作者原生完整日志打包，保留源输入指纹校验和可独立复核的实验程序。实验记录 [GitHub Action #40175879142](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40175879142)。
+This release runs the paper authors' RHM, TRHM, GZHM, and GZHM_ADAPTIVE implementations at pinned source `5064a381fd3b7a540594fadd6f7595fdcc748a6c`. Table implementation files are SHA-256 verified unchanged; only the author benchmark's input RNG and operation fingerprint output are instrumented.
+
+**Real 320-cycle paired experiment:** 85% and 95% load × 5 random seeds × 4 algorithms = **40 scheduled runs; 35 complete; 5 incomplete**. The 85% cohort finished 20/20. At 95%, RHM, GZHM and GZHM_ADAPTIVE each finished 5/5. TRHM crashed 5/5 with status **139**, after 161, 191, 131, 161, 161 cycles. 3,210 paired operation fingerprints matched; not one failure was silently excluded from the completion audit.
+
+Native timings are explicitly **author clock ticks/op**, not nanoseconds, and the GitHub ubuntu-24.04 host here uses a different physical CPU model than the shorter v0.12.0 pilot. The current pilot remains a key-only, nonformal, 8192-slot experiment. It does **not** establish formal across-paper HF-Score eligibility. A crash exit status alone does not establish root cause.
+
+Release includes the full raw author-native logs, per-run statuses, complete-run timing CSV, summary, input trace integrity, environment, SHA-256 manifest, SVG, and the paper-aligned analysis. [Verified cloud run](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40176343702).
