@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="450" viewBox="0 0 980 450">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="30" font-family="sans-serif" font-size="19" fill="#172b40">Zombie Hashing — verified complete runs only</text>
+<text x="40" y="48" font-family="sans-serif" font-size="12" fill="#637282">Upstream instrumented benchmark; median last 32 cycles; CLOCK TICKS per op (not nanoseconds)</text>
+<line x1="78" y1="350.00" x2="950" y2="350.00" stroke="#e5e8ea"/>
+<text x="70" y="354.00" font-size="11" text-anchor="end" font-family="sans-serif">0</text>
+<line x1="78" y1="275.50" x2="950" y2="275.50" stroke="#e5e8ea"/>
+<text x="70" y="279.50" font-size="11" text-anchor="end" font-family="sans-serif">285</text>
+<line x1="78" y1="201.00" x2="950" y2="201.00" stroke="#e5e8ea"/>
+<text x="70" y="205.00" font-size="11" text-anchor="end" font-family="sans-serif">569</text>
+<line x1="78" y1="126.50" x2="950" y2="126.50" stroke="#e5e8ea"/>
+<text x="70" y="130.50" font-size="11" text-anchor="end" font-family="sans-serif">854</text>
+<line x1="78" y1="52.00" x2="950" y2="52.00" stroke="#e5e8ea"/>
+<text x="70" y="56.00" font-size="11" text-anchor="end" font-family="sans-serif">1139</text>
+<rect x="115.79" y="327.86" width="46.51" height="22.14" fill="#26639e"/>
+<rect x="171.01" y="327.20" width="46.51" height="22.80" fill="#d38f2f"/>
+<rect x="226.24" y="306.49" width="46.51" height="43.51" fill="#26816b"/>
+<rect x="281.47" y="309.78" width="46.51" height="40.22" fill="#8055ad"/>
+<text x="223.33" y="373" text-anchor="middle" font-family="sans-serif" font-size="13">70% load</text>
+<rect x="406.45" y="305.82" width="46.51" height="44.18" fill="#26639e"/>
+<rect x="461.68" y="319.26" width="46.51" height="30.74" fill="#d38f2f"/>
+<rect x="516.91" y="283.13" width="46.51" height="66.87" fill="#26816b"/>
+<rect x="572.13" y="288.08" width="46.51" height="61.92" fill="#8055ad"/>
+<text x="514.00" y="373" text-anchor="middle" font-family="sans-serif" font-size="13">85% load</text>
+<rect x="697.12" y="194.11" width="46.51" height="155.89" fill="#26639e"/>
+<rect x="752.35" y="293.49" width="46.51" height="56.51" fill="#d38f2f"/>
+<rect x="807.57" y="185.34" width="46.51" height="164.66" fill="#26816b"/>
+<rect x="862.80" y="213.23" width="46.51" height="136.77" fill="#8055ad"/>
+<text x="804.67" y="373" text-anchor="middle" font-family="sans-serif" font-size="13">95% load</text>
+<rect x="78" y="400" width="14" height="14" fill="#26639e"/>
+<text x="99" y="412" font-size="12" font-family="sans-serif">RHM</text>
+<rect x="293" y="400" width="14" height="14" fill="#d38f2f"/>
+<text x="314" y="412" font-size="12" font-family="sans-serif">TRHM</text>
+<rect x="508" y="400" width="14" height="14" fill="#26816b"/>
+<text x="529" y="412" font-size="12" font-family="sans-serif">GZHM</text>
+<rect x="723" y="400" width="14" height="14" fill="#8055ad"/>
+<text x="744" y="412" font-size="12" font-family="sans-serif">GZHM_ADAPTIVE</text>
+<text x="55" y="390" font-size="12" font-family="sans-serif" fill="#637282">Bars exclude any incomplete run; no survivor-only claim for the full cohort</text>
+</svg>
