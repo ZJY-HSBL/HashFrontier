@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.14.0 | STOC 2025 Partner Hashing §3.1 子模块与真实云端测试
+
+论文 [Optimal Non-Oblivious Open Addressing](https://arxiv.org/html/2503.13628) 的 **Algorithms 1–3 配对编码 / ReadRAM / WriteRAM** 已作为独立 C++20 模块实现。随机正确性 **136,125 次检查通过**；GitHub Actions Intel Xeon Platinum 8573C 虚拟机 **45/45 组实测完成**，真实 CSV、环境指纹、失败审计与 SVG 已保存。**注意：这不是完整的 Partner Hashing 表。** 外部检索映射、§4/§5 尚未完成，也不参与 HF-Score。
+
+[云端完整结果](docs/STOC25-PARTNER-RESULTS-v0.14.0.md) · [代码范围](docs/STOC25-PARTNER-REPRODUCTION.md) · [原始 CSV](results/stoc25-partner-section3/raw.csv) · [GitHub CI](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40180896046)
+
+![Real ReadRAM cloud measurement](figures/stoc25-partner-section3-read.svg)
+
+![Real WriteRAM cloud measurement](figures/stoc25-partner-section3-write.svg)
+
+
 ## v0.13.0 | PVLDB 2026 TPHT 原作者云端多参数复现
 
 使用固定作者原始源码完整运行测试套件及 Chained/Flattened TPHT 基准，收集 **576 条延迟与 640 条空间实测数据（共 1216 条）**。本次涵盖 70%/85%/95% 负载、32/64 位 Key、1/2/4/8-byte Value 与不同数据规模。对于 262144 个 64/64-bit 键值，85% 负载 Flattened 成功查询 **12.14 ns/op**，Chained 为 **21.86 ns/op**；空间上 200000 键时 Chained 为 **19.92 bytes/key**，Flattened 为 **25.07 bytes/key**。全部属于真实 GitHub Actions 云端测量，尚非固定硬件正式比较。

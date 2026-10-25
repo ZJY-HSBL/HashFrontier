@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(HashFrontier VERSION 0.12.1 LANGUAGES CXX)
+project(HashFrontier VERSION 0.14.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -59,3 +59,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_appendix_b_benchmark PRIVATE -O3 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME appendix_b_collision_phase_and_oracle COMMAND hf_test_appendix_b)
+
+# STOC 2025 §3.1 Partner Hashing: RAM pair-encoding (NOT full dictionary).
+add_executable(hf_test_partner_section3 tests/test_partner_section3.cpp)
+target_link_libraries(hf_test_partner_section3 PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_partner_section3 PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME partner_ram_section3_permutation_oracle COMMAND hf_test_partner_section3)
