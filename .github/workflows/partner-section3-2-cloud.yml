@@ -1,0 +1,104 @@
+name: STOC25 Partner Hashing section 3.2 oracle-backed cloud reproduction
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/partner_dictionary_section3.hpp'
+      - 'tests/test_partner_dictionary_section3.cpp'
+      - 'tests/test_partner_report_section3.py'
+      - 'src/bench_partner_dictionary_section3.cpp'
+      - 'scripts/report_partner_dictionary_section3.py'
+      - '.github/workflows/partner-section3-2-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  section-3-2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build author-paper section 3.2 oracle-backed implementation
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/hf-stoc25 results/stoc25-partner-section3-2 figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_partner_dictionary_section3.cpp -o /tmp/hf-stoc25/test
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_partner_dictionary_section3.cpp -o /tmp/hf-stoc25/bench
+      - name: Execute randomized permutation / oracle differential tests
+        run: |
+          set -euo pipefail
+          /tmp/hf-stoc25/test | tee results/stoc25-partner-section3-2/tests.log
+          python3 -m unittest discover -s tests -p 'test_partner_report_section3.py' -v
+      - name: Actual cloud benchmark and strict evidence audit
+        run: |
+          set -euo pipefail
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/stoc25-partner-section3-2/environment.txt
+          /tmp/hf-stoc25/bench 5 > results/stoc25-partner-section3-2/raw.csv
+          python3 scripts/report_partner_dictionary_section3.py \
+            --raw results/stoc25-partner-section3-2/raw.csv \
+            --out results/stoc25-partner-section3-2 --figures figures --seeds 5 \
+            --environment results/stoc25-partner-section3-2/environment.txt
+          sha256sum include/hashfrontier/partner_dictionary_section3.hpp \
+            tests/test_partner_dictionary_section3.cpp src/bench_partner_dictionary_section3.cpp \
+            results/stoc25-partner-section3-2/raw.csv \
+            results/stoc25-partner-section3-2/summary.csv > results/stoc25-partner-section3-2/sha256.txt
+          python3 - <<'PY'
+          import csv
+          from pathlib import Path
+          r=Path('results/stoc25-partner-section3-2')
+          rows=list(csv.DictReader((r/'summary.csv').open()))
+          assert len(rows)==12
+          lines=['# STOC 2025 Partner Hashing §3.2 / Algorithms 6–8: cloud pilot', '',
+                 '**Partial oracle-backed implementation, not full partner hashing.**', '',
+                 'Pinned paper: Bender, Kuszmaul, Zhou, [arXiv:2503.13628](https://arxiv.org/abs/2503.13628).', '',
+                 '**60/60** measured configurations; 4 bin counts × 3 bin sizes × 5 seeds.', '',
+                 '## Actual GitHub Actions timings (B = 32; five-seed median, ns/attempt)', '',
+                 '| Bins | Hit | Miss | RAM write | Delete including O(n) rollback snapshot | Insert |',
+                 '|---:|---:|---:|---:|---:|---:|']
+          for x in rows:
+            if int(x['bin_size'])==32:
+              lines.append('| {} | {:.2f} | {:.2f} | {:.2f} | {:.2f} | {:.2f} |'.format(
+                x['bins'],*(float(x[k+'_median']) for k in ('hit_ns_op','miss_ns_op',
+                'ram_write_ns_attempt','delete_ns_attempt','insert_ns_attempt'))))
+          lines+=['','![Actual hit timings](../figures/hit_ns_op.svg)',
+                  '![Actual RAM write timings](../figures/ram_write_ns_attempt.svg)',
+                  '![Actual rollback-aware delete timings](../figures/delete_ns_attempt.svg)',
+                  '', '## Scope and important deviations','',
+                  '- Retrieval map, bin counts and random masks remain external: Algorithms 4–5 are **not implemented**.',
+                  '- Keys are preselected to balance initial bin occupancy; this is a finite-test setup.',
+                  '- Failed pairing writes are retained in the counts. Delete uses full-copy rollback, so the measured delete time does **not** reflect the paper’s O(1) bound.',
+                  '- §4 fixed-size strong theorem, §5 resizing and the complete no-metadata table are **not reproduced**.',
+                  '- These are cloud-VM exploration results, **not HF-Score** or a cross-paper ranking.', '',
+                  '[Original rows](../results/stoc25-partner-section3-2/raw.csv) · '
+                  '[Strict summary](../results/stoc25-partner-section3-2/summary.csv) · '
+                  '[Provenance](../results/stoc25-partner-section3-2/audit.json) · '
+                  '[Environment](../results/stoc25-partner-section3-2/environment.txt)']
+          p=Path('docs/STOC25-PARTNER-SECTION3-2-CLOUD-v0.15.0.md')
+          p.parent.mkdir(exist_ok=True)
+          p.write_text('\n'.join(lines)+'\n',encoding='utf-8')
+          PY
+      - name: Preserve all raw results even on unsuccessful run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stoc25-partner-section3-2-cloud-raw
+          path: |
+            results/stoc25-partner-section3-2/
+            figures/hit_ns_op.svg
+            figures/ram_write_ns_attempt.svg
+            figures/delete_ns_attempt.svg
+            docs/STOC25-PARTNER-SECTION3-2-CLOUD-v0.15.0.md
+          if-no-files-found: warn
+      - name: Commit ONLY genuinely measured, verified GitHub-run evidence
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/stoc25-partner-section3-2/ figures/hit_ns_op.svg \
+            figures/ram_write_ns_attempt.svg figures/delete_ns_attempt.svg \
+            docs/STOC25-PARTNER-SECTION3-2-CLOUD-v0.15.0.md
+          git diff --cached --quiet || {
+            git commit -m 'data: archive genuine STOC25 partner section 3.2 cloud measurements';
+            git push origin HEAD:main;
+          }

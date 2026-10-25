@@ -67,3 +67,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_partner_section3 PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME partner_ram_section3_permutation_oracle COMMAND hf_test_partner_section3)
+
+# STOC 2025 §3.2 Algorithms 6–8: external-retrieval oracle-backed finite module.
+# This is NOT the paper's Algorithms 4–5 or the fully implicit §4–5 hash table.
+add_executable(hf_test_partner_dictionary_section3 tests/test_partner_dictionary_section3.cpp)
+target_link_libraries(hf_test_partner_dictionary_section3 PRIVATE hashfrontier)
+add_test(NAME partner_section3_2_dynamic_oracle COMMAND hf_test_partner_dictionary_section3)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_partner_dictionary_section3 PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
