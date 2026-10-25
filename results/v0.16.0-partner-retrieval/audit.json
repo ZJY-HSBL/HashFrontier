@@ -1,0 +1,8 @@
+{
+  "status": "verified conditional subroutine only",
+  "observed_rows": 60,
+  "expected_rows": 60,
+  "raw_sha256": "e1ab6ba2ef87c5d16628fe7ece0109f294080d3e60530dfc9395458358ac9d0a",
+  "full_paper_reproduced": false,
+  "formal_hf_score": false
+}

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" width="900" height="480">
+<rect width="900" height="480" fill="white"/>
+<text x="40" y="35" font-family="sans-serif" font-size="19">STOC 2025 | conditional deferred batch updates, ns/batch</text>
+<line x1="100" y1="380.0" x2="850" y2="380.0" stroke="#ddd"/>
+<text x="92" y="385.0" text-anchor="end" font-family="sans-serif" font-size="12">0</text>
+<line x1="100" y1="305.0" x2="850" y2="305.0" stroke="#ddd"/>
+<text x="92" y="310.0" text-anchor="end" font-family="sans-serif" font-size="12">118</text>
+<line x1="100" y1="230.0" x2="850" y2="230.0" stroke="#ddd"/>
+<text x="92" y="235.0" text-anchor="end" font-family="sans-serif" font-size="12">236</text>
+<line x1="100" y1="155.0" x2="850" y2="155.0" stroke="#ddd"/>
+<text x="92" y="160.0" text-anchor="end" font-family="sans-serif" font-size="12">355</text>
+<line x1="100" y1="80.0" x2="850" y2="80.0" stroke="#ddd"/>
+<text x="92" y="85.0" text-anchor="end" font-family="sans-serif" font-size="12">473</text>
+<circle cx="110.00" cy="141.87" r="5" fill="#006f78"/>
+<circle cx="345.00" cy="137.99" r="5" fill="#006f78"/>
+<circle cx="580.00" cy="136.53" r="5" fill="#006f78"/>
+<circle cx="815.00" cy="131.36" r="5" fill="#006f78"/>
+<polyline fill="none" stroke="#006f78" stroke-width="2.5" points="110.00,141.87 345.00,137.99 580.00,136.53 815.00,131.36"/>
+<text x="115" y="454" fill="#006f78" font-family="sans-serif">B=16</text>
+<circle cx="110.00" cy="148.97" r="5" fill="#e4892b"/>
+<circle cx="345.00" cy="143.15" r="5" fill="#e4892b"/>
+<circle cx="580.00" cy="131.88" r="5" fill="#e4892b"/>
+<circle cx="815.00" cy="125.49" r="5" fill="#e4892b"/>
+<polyline fill="none" stroke="#e4892b" stroke-width="2.5" points="110.00,148.97 345.00,143.15 580.00,131.88 815.00,125.49"/>
+<text x="355" y="454" fill="#e4892b" font-family="sans-serif">B=32</text>
+<circle cx="110.00" cy="150.25" r="5" fill="#7351ae"/>
+<circle cx="345.00" cy="135.01" r="5" fill="#7351ae"/>
+<circle cx="580.00" cy="121.22" r="5" fill="#7351ae"/>
+<circle cx="815.00" cy="119.13" r="5" fill="#7351ae"/>
+<polyline fill="none" stroke="#7351ae" stroke-width="2.5" points="110.00,150.25 345.00,135.01 580.00,121.22 815.00,119.13"/>
+<text x="595" y="454" fill="#7351ae" font-family="sans-serif">B=64</text>
+<text x="110" y="405" text-anchor="middle" font-family="sans-serif">8 bins</text>
+<text x="345" y="405" text-anchor="middle" font-family="sans-serif">16 bins</text>
+<text x="580" y="405" text-anchor="middle" font-family="sans-serif">32 bins</text>
+<text x="815" y="405" text-anchor="middle" font-family="sans-serif">64 bins</text>
+</svg>
