@@ -52,4 +52,17 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add results/v0.17.0-partner-batch figures/v0.17.0-partner-batch-*.svg
-          git diff --cached --quiet || { git commit -m 'data: archive STOC25 paper Algorithm 5 finite cloud batch evidence'; git push origin HEAD:main; }
+          if ! git diff --cached --quiet; then
+            git commit -m 'data: archive STOC25 paper Algorithm 5 finite cloud batch evidence'
+            for attempt in 1 2 3 4 5; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                echo "Genuine cloud evidence committed."
+                exit 0
+              fi
+              echo "Concurrent push; retrying with latest main."
+            done
+            echo "Could not archive actual measurements after five attempts." >&2
+            exit 1
+          fi
