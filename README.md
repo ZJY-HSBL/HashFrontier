@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.17.0 | STOC 2025 Partner Hashing 算法 5 批量更新 / atomic batch reproduction
+
+基于论文 Algorithm 5 的**更新前状态读取、延迟搬移、统一提交**规则，新增支持同一事务复用已释放 partner 位置的有限实现。作者的隐式 DMPP06 retrieval 黑盒、§4 无外部元数据完整表及 §5 扩容**尚未实现**。GitHub Actions [真实云端实验](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40199001986) **54/54 组完成**，AMD EPYC 9V45 / Ubuntu 24.04 / GCC 13.3。旧版不能完成满 bin 跨区域的实际变更请求，新版完成所有 **40,500** 次真实变更批次；二者完成工作量不同，**不可直接用尝试耗时判定谁更快**。没有 HF-Score。
+
+[完整复现说明](docs/STOC25-PARTNER-BATCH-v0.17.0.md) · [全部原始结果](results/v0.17.0-partner-batch/raw.csv) · [汇总](results/v0.17.0-partner-batch/summary.csv) · [环境](results/v0.17.0-partner-batch/environment.txt) · [发布](https://github.com/ZJY-HSBL/HashFrontier/releases/tag/v0.17.0)
+
+![Real accepted mutating batches](figures/v0.17.0-partner-batch-success.svg)
+
+![Per-attempt latency — not equal completed work](figures/v0.17.0-partner-batch-attempt.svg)
+
+
 ## v0.16.0 | STOC 2025 Partner Hashing Algorithms 4–5 条件性机制复现
 
 复现论文第 3 节 **Algorithm 4 的 encoded-RAM retrieval 查询路径**与 **Algorithm 5 的更新前快照、先规划再提交搬移**。当前仅支持固定键域和互不重叠的批量迁移，外部 key-to-word 索引仍存在；**不是完整的隐式 retrieval 或 Partner Hashing 散列表**，不计算 HF-Score。

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(HashFrontier VERSION 0.16.0 LANGUAGES CXX)
+project(HashFrontier VERSION 0.17.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -81,3 +81,11 @@ endif()
 add_executable(hf_test_partner_retrieval tests/test_partner_retrieval_section3.cpp)
 target_link_libraries(hf_test_partner_retrieval PRIVATE hashfrontier)
 add_test(NAME partner_alg4_5_conditional_oracle COMMAND hf_test_partner_retrieval)
+
+# STOC25 Algorithm 5: staged freed-partner reuse, explicitly finite.
+add_executable(hf_test_partner_batch_reuse tests/test_partner_batch_reuse.cpp)
+target_link_libraries(hf_test_partner_batch_reuse PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_partner_batch_reuse PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME partner_algorithm5_atomic_full_bin_reuse COMMAND hf_test_partner_batch_reuse)
