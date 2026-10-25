@@ -134,6 +134,74 @@ public:
         ++stats_.changed_words;
         return true;
     }
+
+    // STOC 2025 Algorithm 5: finite *restricted* batch staging. All reads
+    // and candidate selection use the unchanged pre-update physical array.
+    // Overlapping movements abort unchanged; no DMPP06 retrieval claims.
+    struct BatchStats {
+        std::uint64_t committed=0, rejected=0, planned_swaps=0, prestate_reads=0;
+    };
+private:
+    BatchStats batches_{};
+public:
+    BatchStats batch_stats() const { return batches_; }
+    std::size_t destination_bin(std::size_t word,std::size_t value) const {
+        if(word>=num_words()||value>=half_)throw std::out_of_range("destination bin");
+        return partner_bin(value^static_cast<std::size_t>(masks_[word]));
+    }
+    bool write_batch(const std::vector<std::pair<std::size_t,std::optional<std::size_t>>>& requests) {
+        struct Plan {std::size_t index,old_partner,new_partner;bool had_old,has_new;};
+        std::vector<Plan> plan;
+        std::unordered_set<std::size_t> touched,seen;
+        touched.reserve(requests.size()*4+1);
+        seen.reserve(requests.size()*2+1);
+        for(auto [word,value]:requests){
+            if(word>=num_words())throw std::out_of_range("batch word");
+            if(value && *value>=half_)throw std::out_of_range("batch value");
+            if(!seen.insert(word).second)throw std::invalid_argument("duplicate batch word");
+        }
+        plan.reserve(requests.size());
+        for(auto [word,value]:requests){
+            const auto old=read(word);
+            ++batches_.prestate_reads;
+            if(old==value)continue;
+            const auto index=index_slot(word);
+            const auto old_slot=old?original_slot(physical_[index]):index;
+            if(old && old_slot==index)throw std::logic_error("broken prior coupling");
+            auto target=index;
+            if(value){
+                const auto wanted=destination_bin(word,*value);
+                const auto start=rand64()%B_;
+                bool found=false;
+                for(std::size_t k=0;k<B_;++k){
+                    const auto pos=wanted*B_+(start+k)%B_;
+                    if(!touched.contains(pos) && pos!=index && pos!=old_slot && is_self_loop(pos)){
+                        target=pos;found=true;break;
+                    }
+                }
+                if(!found){++batches_.rejected;return false;}
+            }
+            if(touched.contains(index)||(old && touched.contains(old_slot))||
+               (value && touched.contains(target))){
+                ++batches_.rejected;return false;
+            }
+            touched.insert(index);
+            if(old)touched.insert(old_slot);
+            if(value)touched.insert(target);
+            plan.push_back({index,old_slot,target,old.has_value(),value.has_value()});
+        }
+        // This is the commit boundary: no slot was moved during staging.
+        for(const auto& p:plan){
+            if(p.had_old){std::swap(physical_[p.index],physical_[p.old_partner]);++stats_.swaps;}
+            if(p.has_new){std::swap(physical_[p.index],physical_[p.new_partner]);++stats_.swaps;}
+            if(p.had_old&&!p.has_new)--populated_words_;
+            if(!p.had_old&&p.has_new)++populated_words_;
+            ++stats_.changed_words;
+            batches_.planned_swaps+=p.had_old+p.has_new;
+        }
+        ++batches_.committed;
+        return true;
+    }
     bool verify(const std::vector<std::optional<std::size_t>>& expected) const {
         if(expected.size()!=num_words())return false;
         for(std::size_t i=0;i<num_words();++i)if(read(i)!=expected[i])return false;

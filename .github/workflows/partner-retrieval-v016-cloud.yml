@@ -1,0 +1,25 @@
+name: STOC25 Algorithms 4 and 5 conditional retrieval correctness gate
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/partner_ram_section3.hpp'
+      - 'include/hashfrontier/partner_retrieval_section3.hpp'
+      - 'tests/test_partner_retrieval_section3.cpp'
+      - '.github/workflows/partner-retrieval-v016-cloud.yml'
+  workflow_dispatch:
+jobs:
+  verify-retrieval:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce restricted Algorithm 4/5 tests
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure
+      - name: Run address and undefined behavior checks
+        run: |
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_partner_retrieval_section3.cpp -o /tmp/hf-partner-retrieval-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/hf-partner-retrieval-asan

@@ -76,3 +76,8 @@ add_test(NAME partner_section3_2_dynamic_oracle COMMAND hf_test_partner_dictiona
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_partner_dictionary_section3 PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
+
+# STOC 2025 Algorithms 4/5: conditional read-via-RAM and deferred disjoint relocation.
+add_executable(hf_test_partner_retrieval tests/test_partner_retrieval_section3.cpp)
+target_link_libraries(hf_test_partner_retrieval PRIVATE hashfrontier)
+add_test(NAME partner_alg4_5_conditional_oracle COMMAND hf_test_partner_retrieval)
