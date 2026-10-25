@@ -1,0 +1,1 @@
+checks=900 atomic_mutations=3600 old_rejections=36 capacity_rejections=36 PASS

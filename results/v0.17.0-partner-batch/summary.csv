@@ -1,0 +1,7 @@
+method,B,seeded_runs,mutation_attempts,mutation_committed,mutation_completion_pct,median_ns_per_attempt
+disjoint_old,16,9,6768,0,0.0,146.394
+disjoint_old,32,9,6876,0,0.0,189.565
+disjoint_old,64,9,6912,0,0.0,266.215
+prestate_reuse,16,9,13500,13500,100.0,403.067
+prestate_reuse,32,9,13500,13500,100.0,585.061
+prestate_reuse,64,9,13500,13500,100.0,971.337
