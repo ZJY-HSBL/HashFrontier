@@ -1,0 +1,17 @@
+{
+  "schema": "partner-hashing-section-3.1-finite-pilot-v1",
+  "paper": "STOC 2025 Optimal Non-Oblivious Open Addressing",
+  "coverage": "Section 3.1 Algorithms 1/2/3 only: partner swaps & RAM encoding",
+  "not_implemented": [
+    "retrieval data structure internally encoded",
+    "Section 4 RAM & backyard",
+    "Section 5 dynamic resizing",
+    "paper O(1) theorem"
+  ],
+  "data_rows": 45,
+  "configurations": 9,
+  "seeds": 5,
+  "all_checks_passed": true,
+  "failed_write_attempts": 0,
+  "warning": "external logical-slot oracle and masks are allocated in RAM outside the physical table; do not label this full-space partner hashing."
+}
