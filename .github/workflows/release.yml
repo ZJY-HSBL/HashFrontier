@@ -31,6 +31,7 @@ jobs:
             echo "Release $tag exists; not overwriting immutable evidence."
           else
             case "$tag" in
+            v0.12.0) assets=(results/v0.12.0-zombie-native/completion.csv results/v0.12.0-zombie-native/native-complete-timings.csv results/v0.12.0-zombie-native/summary.csv results/v0.12.0-zombie-native/trace-integrity.csv results/v0.12.0-zombie-native/provenance.json results/v0.12.0-zombie-native/environment.txt results/v0.12.0-zombie-native/sha256.txt figures/v0.12.0-zombie-native-insert.svg docs/RESULTS-v0.12.0-ZOMBIE.md); title="SIGMOD 2025 Zombie Hashing four-author-variant 36-run cloud evidence" ;;
             v0.11.1) assets=(results/v0.11.0-appendix-b-cloud-pilot.csv results/v0.11.0-appendix-b-summary.csv results/v0.11.0-appendix-b-provenance.json figures/v0.11.0-appendix-b-build.svg figures/v0.11.0-appendix-b-hit.svg docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md); title="SODA 2025 Appendix B independent GitHub cloud reproduction CI fix" ;;
             v0.11.0) assets=(results/v0.11.0-appendix-b-cloud-pilot.csv results/v0.11.0-appendix-b-summary.csv results/v0.11.0-appendix-b-provenance.json figures/v0.11.0-appendix-b-build.svg figures/v0.11.0-appendix-b-hit.svg docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md); title="SODA 2025 Appendix B choice-prime reproduction and measured cloud pilot" ;;
             v0.1.0) assets=(results/v0.1.0-local.csv results/v0.1.0-summary.csv); title="research baseline" ;;
@@ -68,6 +69,14 @@ jobs:
           assert all(rows[v]['complete']=='True' for v in ('RHM','GZHM','GZHM_ADAPTIVE'))
           assert rows['TRHM']['complete']=='False' and int(rows['TRHM']['completed_cycles'])==194
           PY_NATIVE
+          fi
+          if [ "$tag" = "v0.12.0" ]; then
+            mkdir -p source-native-archive
+            gh run download 40175879142 -n zombie-v0.12.0-native-raw-and-audit -D source-native-archive
+            test -f source-native-archive/results/v0.12.0-zombie-native/completion.csv
+            test -f source-native-archive/native-logs/L95/S103/TRHM/churn_thrput.txt
+            tar -czf results/v0.12.0-zombie-native-raw-logs.tar.gz -C source-native-archive native-logs
+            assets+=(results/v0.12.0-zombie-native-raw-logs.tar.gz)
           fi
           if [ "$tag" = "v0.7.2" ]; then
             mkdir -p result-archive

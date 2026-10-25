@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.12.0 | SIGMOD 2025 Zombie Hashing 原作者四算法云端复现
+
+本轮固定 [ZombieHT 官方源码](https://github.com/saltsystemslab/ZombieHT) commit `5064a381fd3b7a540594fadd6f7595fdcc748a6c`，在**不修改四种散列表算法核心代码**的前提下，仅为作者 Benchmark 的输入生成器加入可核对的固定种子与每周期操作指纹。GitHub Actions 云端虚拟机（EPYC 7763，Ubuntu 24.04，GCC 13.3）完成 **36/36** 次原生测试（70/85/95% 负载 × 3 种子 × RHM、TRHM、GZHM、GZHM_ADAPTIVE；8192 槽、96 churn 周期）；873 条操作指纹审计无误，测试、分析及数据保存均来自真实运行。
+
+95% 负载时，插入 clock ticks/op 的跨种子中位数为 RHM **595.61**、TRHM **215.91**、GZHM **629.12**、GZHM_ADAPTIVE **522.55**。这是**作者原生 clock ticks，不是纳秒**；作者 Benchmark 使用键集合语义（64-bit key / 0-bit value），不参与最终的键值字典 HF-Score。TRHM 在本次 96 周期全部完成，**不推翻历史 320 周期高负载失败记录**。下一项任务是同源更长 churn 和更大规模验证。
+
+[详细实验报告](docs/RESULTS-v0.12.0-ZOMBIE.md) · [全部运行及失败记录](results/v0.12.0-zombie-native/completion.csv) · [原始完整运行计时](results/v0.12.0-zombie-native/native-complete-timings.csv) · [汇总 CSV](results/v0.12.0-zombie-native/summary.csv) · [操作指纹校验](results/v0.12.0-zombie-native/trace-integrity.csv) · [实验来源记录](results/v0.12.0-zombie-native/provenance.json) · [GitHub 原始运行](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40175879142)。
+
+![Real ZombieHT insert timings](figures/v0.12.0-zombie-native-insert.svg)
+
+
 **v0.11.1**: Independent GitHub Actions chart generation now uses standard-library SVG without Matplotlib, while preserving the original measured 120-run CSV. [Cloud reproduction workflow](.github/workflows/bubble-appendix-b.yml) · [Appendix B results](docs/APPENDIX-B-CLOUD-REPRODUCTION-v0.11.0.md).
 
 ## v0.11.0 | SODA 2025 Appendix B 机制复现与云端实测
