@@ -1,5 +1,18 @@
 # HashFrontier
 
+## v0.16.0 | STOC 2025 Partner Hashing Algorithms 4–5 条件性机制复现
+
+复现论文第 3 节 **Algorithm 4 的 encoded-RAM retrieval 查询路径**与 **Algorithm 5 的更新前快照、先规划再提交搬移**。当前仅支持固定键域和互不重叠的批量迁移，外部 key-to-word 索引仍存在；**不是完整的隐式 retrieval 或 Partner Hashing 散列表**，不计算 HF-Score。
+
+GitHub Actions [独立云端复现](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40184160034) 通过 CMake 差分、ASan/UBSan 和容量失败回滚测试，并实测 **60/60** 组：72 万次批量更新与 600 万次查询。Intel Xeon Platinum 8573C、Ubuntu 24.04、GCC 13.3。B=32 时，16 bins：**373.24 ns/批次更新、34.49 ns/查询**（5 种子中位数）。
+
+[完整实测与限制](docs/STOC25-PARTNER-RESULTS-v0.16.0.md) · [算法实现范围](docs/STOC25-PARTNER-RETRIEVAL-v0.16.0.md) · [原始数据](results/v0.16.0-partner-retrieval/cloud-raw.csv)
+
+![Actual conditional batch update](figures/v0.16.0-partner-retrieval-update.svg)
+
+![Actual encoded retrieval query](figures/v0.16.0-partner-retrieval-query.svg)
+
+
 ## v0.15.0 | STOC 2025 Partner Hashing §3.2 Algorithms 6–8 云端复现（部分）
 
 新增论文第 3.2 节的键查询、bin 前缀插入、配对解耦与删除后 RAM 字重编码机制；**外部 retrieval 映射仍存在，Algorithms 4–5、§4、§5 尚未复现，不能称为完整 Partner Hashing。** 本地 95,257 次正确性检查和 ASan/UBSan 通过；GitHub Actions 原生云端环境 **60/60 组实验完成**（4 组 bin 数 × 3 组 bin 大小 × 5 种子）；作者论文未提供对应这套有限配置的原生性能图。
