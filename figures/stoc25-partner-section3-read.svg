@@ -6,27 +6,27 @@
 <path d="M74 446.0 H925" stroke="#e2e8f0"/>
 <text x="65" y="451.0" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">0</text>
 <path d="M74 376.8 H925" stroke="#e2e8f0"/>
-<text x="65" y="381.8" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">10</text>
+<text x="65" y="381.8" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">11</text>
 <path d="M74 307.6 H925" stroke="#e2e8f0"/>
-<text x="65" y="312.6" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">20</text>
+<text x="65" y="312.6" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">21</text>
 <path d="M74 238.4 H925" stroke="#e2e8f0"/>
-<text x="65" y="243.4" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">29</text>
+<text x="65" y="243.4" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">32</text>
 <path d="M74 169.2 H925" stroke="#e2e8f0"/>
-<text x="65" y="174.2" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">39</text>
+<text x="65" y="174.2" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">42</text>
 <path d="M74 100.0 H925" stroke="#e2e8f0"/>
-<text x="65" y="105.0" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">49</text>
+<text x="65" y="105.0" text-anchor="end" font-size="12" font-family="sans-serif" fill="#334155">53</text>
 <text x="157.6" y="471" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#334155">2,048</text>
-<line x1="157.6" y1="446" x2="157.6" y2="263.8" stroke="#2563eb" stroke-width="12"/>
+<line x1="157.6" y1="446" x2="157.6" y2="309.0" stroke="#2563eb" stroke-width="12"/>
 <text x="324.8" y="471" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#334155">4,096</text>
-<line x1="315.8" y1="446" x2="315.8" y2="247.4" stroke="#2563eb" stroke-width="12"/>
-<line x1="333.8" y1="446" x2="333.8" y2="247.5" stroke="#d97706" stroke-width="12"/>
+<line x1="315.8" y1="446" x2="315.8" y2="300.2" stroke="#2563eb" stroke-width="12"/>
+<line x1="333.8" y1="446" x2="333.8" y2="298.1" stroke="#d97706" stroke-width="12"/>
 <text x="492.0" y="471" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#334155">8,192</text>
-<line x1="474.0" y1="446" x2="474.0" y2="230.3" stroke="#2563eb" stroke-width="12"/>
-<line x1="492.0" y1="446" x2="492.0" y2="231.7" stroke="#d97706" stroke-width="12"/>
-<line x1="510.0" y1="446" x2="510.0" y2="234.8" stroke="#059669" stroke-width="12"/>
+<line x1="474.0" y1="446" x2="474.0" y2="283.7" stroke="#2563eb" stroke-width="12"/>
+<line x1="492.0" y1="446" x2="492.0" y2="272.7" stroke="#d97706" stroke-width="12"/>
+<line x1="510.0" y1="446" x2="510.0" y2="282.1" stroke="#059669" stroke-width="12"/>
 <text x="659.2" y="471" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#334155">16,384</text>
-<line x1="650.2" y1="446" x2="650.2" y2="208.0" stroke="#d97706" stroke-width="12"/>
-<line x1="668.2" y1="446" x2="668.2" y2="208.6" stroke="#059669" stroke-width="12"/>
+<line x1="650.2" y1="446" x2="650.2" y2="238.2" stroke="#d97706" stroke-width="12"/>
+<line x1="668.2" y1="446" x2="668.2" y2="237.7" stroke="#059669" stroke-width="12"/>
 <text x="826.4" y="471" text-anchor="middle" font-size="12" font-family="sans-serif" fill="#334155">32,768</text>
 <line x1="826.4" y1="446" x2="826.4" y2="157.7" stroke="#059669" stroke-width="12"/>
 <text x="480.0" y="512" font-size="15" text-anchor="middle" font-family="sans-serif">Physical slots (n)</text>
