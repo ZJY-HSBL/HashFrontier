@@ -1,5 +1,20 @@
 # HashFrontier
 
+## v0.15.0 | STOC 2025 Partner Hashing §3.2 Algorithms 6–8 云端复现（部分）
+
+新增论文第 3.2 节的键查询、bin 前缀插入、配对解耦与删除后 RAM 字重编码机制；**外部 retrieval 映射仍存在，Algorithms 4–5、§4、§5 尚未复现，不能称为完整 Partner Hashing。** 本地 95,257 次正确性检查和 ASan/UBSan 通过；GitHub Actions 原生云端环境 **60/60 组实验完成**（4 组 bin 数 × 3 组 bin 大小 × 5 种子）；作者论文未提供对应这套有限配置的原生性能图。
+
+云端采用 AMD EPYC 9V74、Ubuntu 24.04、GCC 13.3.0；测量包含 24,000 次 RAM 写入尝试（23,983 次成功）及 14,400 次删除尝试（均成功）。当前删除含整表快照回滚，**不代表原论文的 O(1) 理论删除时间**。只保留真实云端 CSV、环境、SHA 与 SVG，不计算 HF-Score。
+
+[完整云端报告](docs/STOC25-PARTNER-SECTION3-2-CLOUD-v0.15.0.md) · [复现范围与差异](docs/STOC25-PARTNER-SECTION3-2-REPRODUCTION.md) · [原始 CSV](results/stoc25-partner-section3-2/raw.csv) · [执行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40182871464)
+
+![真实命中查询测量](figures/hit_ns_op.svg)
+
+![真实 RAM 写入测量](figures/ram_write_ns_attempt.svg)
+
+![真实删除与快照回滚开销](figures/delete_ns_attempt.svg)
+
+
 ## v0.14.0 | STOC 2025 Partner Hashing §3.1 子模块与真实云端测试
 
 论文 [Optimal Non-Oblivious Open Addressing](https://arxiv.org/html/2503.13628) 的 **Algorithms 1–3 配对编码 / ReadRAM / WriteRAM** 已作为独立 C++20 模块实现。随机正确性 **136,125 次检查通过**；GitHub Actions Intel Xeon Platinum 8573C 虚拟机 **45/45 组实测完成**，真实 CSV、环境指纹、失败审计与 SVG 已保存。**注意：这不是完整的 Partner Hashing 表。** 外部检索映射、§4/§5 尚未完成，也不参与 HF-Score。

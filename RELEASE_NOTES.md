@@ -1,7 +1,10 @@
-# HashFrontier v0.14.0 — STOC 2025 Partner Hashing §3.1 subroutine reproduction
+# HashFrontier v0.15.0 — STOC 2025 Partner Hashing §3.2 partial reproduction
 
-- **Partial scope only:** implemented and tested paper Algorithms 1–3, explicit external logical-position oracle, XOR-masked RAM words encoded as index/partner key swaps.
-- 136,125 local and GitHub CI checks; 69 finite-case unrepresentable writes intentionally rejected with old values unchanged. ASan/UBSan local test passed.
-- Actual GitHub Actions cloud (Intel Xeon Platinum 8573C, Ubuntu 24.04, GCC 13.3.0): 45/45 runs verified with raw CSV, test log, compiler fingerprint, SHA-256, complete 9-row aggregate, real SVG.
-- No claim to complete the STOC hash table's metadata-free property, load-factor guarantee, §4 fixed-size construction, §5 resizing or O(1) bound; no HF-Score.
-- Real cloud run: https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40180896046.
+- Added external-retrieval/oracle-backed C++20 finite reproduction of Section 3.2 Algorithms 6–8 (query, packed-bin insert, decouple/delete/reencode), plus regression tests and reversible finite-size handling.
+- Preserved distinctions: **Algorithms 4–5 retrieval structure embedded into RAM is not implemented**, nor Section 4 fixed-size fully implicit construction, nor Section 5 dynamic resizing.
+- Verified randomized correctness: 95,257 checks, 57,600 state mutations and 5,008 real pair decouplings. Local ASan/UBSan passed.
+- GitHub Actions run 40182871464 completed 60/60 independently measured configurations, original CSV, SHA-256, CPU/compiler record, verified plots and audit; 23,983 successful of 24,000 RAM writes; 14,400/14,400 completed delete attempts.
+- The deletion implementation uses O(n) snapshot rollback; its timing **cannot validate** the paper's O(1) deletion theorem. Bench inputs precondition balanced bin occupancy and keep external retrieval map, counts and random masks.
+- Does not calculate HF-Score. The cloud results are engineering measurements of only the partial module, not a cross-paper performance ranking.
+
+Paper: Bender, Kuszmaul, Zhou, *Optimal Non-Oblivious Open Addressing*, STOC 2025, DOI: 10.1145/3717823.3718215.
