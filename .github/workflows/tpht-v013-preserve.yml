@@ -1,0 +1,40 @@
+name: Preserve measured TPHT v0.13 author-native evidence
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tpht-v013-preserve.yml'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download measured evidence from exact successful benchmark run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: 40179300855
+        run: |
+          set -euo pipefail
+          mkdir -p downloaded results/v0.13.0-tpht
+          gh run download "$SOURCE_RUN" -n tpht-v0.13-cloud-author-source-matrix-raw -D downloaded
+          if test -d downloaded/raw; then d=downloaded; else d=downloaded/native-tpht-results; fi
+          test -f "$d/raw/latency-L95-V8.csv"
+          test -f "$d/raw/space-N200000.csv"
+          cp -r "$d/raw" results/v0.13.0-tpht/raw
+          cp "$d/environment.txt" results/v0.13.0-tpht/environment.txt
+          cp "$d/source-files-sha256.txt" results/v0.13.0-tpht/source-files-sha256.txt
+          cp "$d/upstream-tests.log" results/v0.13.0-tpht/upstream-tests.log
+          sha256sum results/v0.13.0-tpht/raw/*.csv > results/v0.13.0-tpht/sha256.txt
+      - name: Commit unmodified raw original-source output
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.13.0-tpht
+          git commit -m 'data: preserve 1216 TPHT native multi-configuration observations'
+          git push origin HEAD:main
