@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="470" viewBox="0 0 840 470"><rect width="100%" height="100%" fill="#ffffff"/><text x="93" y="31" font-family="DejaVu Sans,Arial" font-weight="bold" font-size="20" fill="#162e44">delete ns attempt</text><text x="93" y="51" font-family="DejaVu Sans,Arial" font-size="12" fill="#53657b">Measured benchmark, B=32, 5 seeds; min–max whiskers and median</text><line x1="93" x2="810" y1="393.00" y2="393.00" stroke="#dce6f0"/>
+<text x="80" y="397.00" text-anchor="end" fill="#53657b" font-size="14">0.0</text>
+<line x1="93" x2="810" y1="309.25" y2="309.25" stroke="#dce6f0"/>
+<text x="80" y="313.25" text-anchor="end" fill="#53657b" font-size="14">11782.8</text>
+<line x1="93" x2="810" y1="225.50" y2="225.50" stroke="#dce6f0"/>
+<text x="80" y="229.50" text-anchor="end" fill="#53657b" font-size="14">23565.7</text>
+<line x1="93" x2="810" y1="141.75" y2="141.75" stroke="#dce6f0"/>
+<text x="80" y="145.75" text-anchor="end" fill="#53657b" font-size="14">35348.5</text>
+<line x1="93" x2="810" y1="58.00" y2="58.00" stroke="#dce6f0"/>
+<text x="80" y="62.00" text-anchor="end" fill="#53657b" font-size="14">47131.3</text>
+<line x1="93.00" x2="93.00" y1="353.72" y2="352.31" stroke="#0072bc" stroke-width="2"/>
+<circle cx="93.00" cy="352.86" r="6" fill="#0072bc"/>
+<text x="93.00" y="422" text-anchor="middle" font-size="15" fill="#243e55">8</text>
+<line x1="332.00" x2="332.00" y1="312.67" y2="307.57" stroke="#0072bc" stroke-width="2"/>
+<circle cx="332.00" cy="310.18" r="6" fill="#0072bc"/>
+<text x="332.00" y="422" text-anchor="middle" font-size="15" fill="#243e55">16</text>
+<line x1="571.00" x2="571.00" y1="231.95" y2="230.62" stroke="#0072bc" stroke-width="2"/>
+<circle cx="571.00" cy="231.12" r="6" fill="#0072bc"/>
+<text x="571.00" y="422" text-anchor="middle" font-size="15" fill="#243e55">32</text>
+<line x1="810.00" x2="810.00" y1="88.65" y2="82.81" stroke="#0072bc" stroke-width="2"/>
+<circle cx="810.00" cy="85.83" r="6" fill="#0072bc"/>
+<text x="810.00" y="422" text-anchor="middle" font-size="15" fill="#243e55">64</text><polyline points="93.0,352.9 332.0,310.2 571.0,231.1 810.0,85.8" fill="none" stroke="#0072bc" stroke-width="3"/><text x="451.5" y="448" text-anchor="middle" font-family="DejaVu Sans,Arial" font-size="15" fill="#53657b">Number of bins</text><text transform="translate(22,225.5) rotate(-90)" text-anchor="middle" font-family="DejaVu Sans,Arial" font-size="14" fill="#53657b">ns / attempted operation</text></svg>

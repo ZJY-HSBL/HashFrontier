@@ -1,0 +1,23 @@
+{
+  "research_status": "partial_section_3_2_oracle_not_complete_partner_hashing",
+  "measurement_context": "finite-cloud-pilot_not_paper_theorem_or_HFScore",
+  "operation_counts": {
+    "rows": 60,
+    "writes": 24000,
+    "completed_writes": 23983,
+    "deletes": 14400,
+    "completed_deletes": 14400
+  },
+  "sha256_raw": "b0bfec1edad28f5d9b304d736d794a087377121de40485dede8753e0eaadf4ac",
+  "source_reference": "https://arxiv.org/pdf/2503.13628",
+  "known_deviations": [
+    "external retrieval unordered_map and per-bin counts",
+    "external random masks",
+    "balanced preconditioned inputs",
+    "full-vector rollback on deletion (O(n) worst case)",
+    "bounded self-loop rejection",
+    "Algorithms 4 and 5 not implemented",
+    "Section 4 and 5 not implemented"
+  ],
+  "environment_text": "2026-10-25T09:59:07Z\nLinux runnervmtai0g 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux\nc++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nArchitecture:                            x86_64\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nModel name:                              AMD EPYC 9V74 80-Core Processor\n"
+}
