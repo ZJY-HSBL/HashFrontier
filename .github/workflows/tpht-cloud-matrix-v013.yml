@@ -1,0 +1,89 @@
+name: PVLDB TPHT original-source scaled latency and space matrix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tpht-cloud-matrix-v013.yml'
+  workflow_dispatch:
+jobs:
+  author-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin the official TPHT author's implementation
+        run: |
+          set -euo pipefail
+          git clone https://github.com/Xilinion/TPHT upstream-tpht
+          git -C upstream-tpht checkout --detach 3c39de26faba11bc1a037a1dfd24e3c633ac8987
+          test "$(git -C upstream-tpht rev-parse HEAD)" = '3c39de26faba11bc1a037a1dfd24e3c633ac8987'
+          mkdir -p native-tpht-results
+          git -C upstream-tpht rev-parse HEAD > native-tpht-results/source-sha.txt
+          sha256sum upstream-tpht/tpht.c upstream-tpht/tpht.h > native-tpht-results/source-files-sha256.txt
+          { c++ --version | head -n 1; uname -a; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -n 4; } > native-tpht-results/environment.txt
+      - name: Execute upstream TPHT full correctness / SIMD test runner
+        run: |
+          set -euo pipefail
+          cd upstream-tpht
+          ./tests/run_tpht_tests.sh | tee ../native-tpht-results/upstream-tests.log
+      - name: Run original source multi-load and multi-value-width native benchmark
+        run: |
+          set -euo pipefail
+          mkdir -p native-tpht-results/raw
+          for args in "70 8" "85 8" "95 8" "85 1"; do
+            read -r load value_bytes <<< "$args"
+            dirname="$GITHUB_WORKSPACE/native-tpht-results/work-L$load-V$value_bytes"
+            mkdir -p "$dirname"
+            (cd upstream-tpht && RESULT_DIR="$dirname" PYTHON=/usr/bin/python3 ./benchmarks/run_latency.sh 10 18 "$value_bytes" "0.$load")
+            cp "$dirname/tpht_latency.csv" "native-tpht-results/raw/latency-L$load-V$value_bytes.csv"
+          done
+          for n in 100000 200000; do
+            dirname="$GITHUB_WORKSPACE/native-tpht-results/work-N$n"
+            mkdir -p "$dirname"
+            (cd upstream-tpht && RESULT_DIR="$dirname" ./benchmarks/run_space_eff.sh "$n" > /dev/null)
+            cp "$dirname/tpht_space_eff.csv" "native-tpht-results/raw/space-N$n.csv"
+          done
+          sha256sum native-tpht-results/raw/*.csv > native-tpht-results/raw-sha256.txt
+      - name: Verify author matrix completeness and successful insertion
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv,math
+          from pathlib import Path
+          root=Path('native-tpht-results/raw')
+          variants=('chained-tpht','flatten-tpht')
+          phases=('insert','lookup_hit','lookup_miss','remove')
+          for load,value in ((70,8),(85,8),(95,8),(85,1)):
+            path=root/f'latency-L{load}-V{value}.csv'
+            with path.open() as f: rows=list(csv.DictReader(f))
+            expected={(v,k,value*8,2**e,p) for v in variants for k in (32,64) for e in range(10,19) for p in phases}
+            seen=set()
+            for r in rows:
+              t=(r['variant'],int(r['key_bits']),int(r['value_bits']),int(r['keys']),r['phase'])
+              assert t in expected and t not in seen,(path,t)
+              seen.add(t)
+              assert abs(float(r['load_factor'])-load/100)<1e-5
+              assert math.isfinite(float(r['ns_per_op'])) and float(r['ns_per_op'])>0
+              assert int(r['memory_bytes'])>0
+            assert seen==expected,(path,len(seen),len(expected))
+          loads=tuple(range(5,100,5))+(99,)
+          for n in (100000,200000):
+            path=root/f'space-N{n}.csv'
+            with path.open() as f: rows=list(csv.DictReader(f))
+            expected={(v,k,b,l) for v in variants for k in (32,64) for b in (8,16,32,64) for l in loads}
+            seen=set()
+            for r in rows:
+              t=(r['variant'],int(r['key_bits']),int(r['value_bits']),round(100*float(r['target_load'])))
+              assert t in expected and t not in seen,(path,t)
+              seen.add(t)
+              assert int(r['inserted'])==n,(path,t,'incomplete build')
+              assert int(r['memory_bytes'])>0
+            assert seen==expected,(path,len(seen),len(expected))
+          print('Validated original TPHT source: 576 latency and 640 space records')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tpht-v0.13-cloud-author-source-matrix-raw
+          path: native-tpht-results/
+          if-no-files-found: warn
