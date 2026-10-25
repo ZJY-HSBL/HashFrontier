@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.13.0 | PVLDB 2026 TPHT 原作者云端多参数复现
+
+使用固定作者原始源码完整运行测试套件及 Chained/Flattened TPHT 基准，收集 **576 条延迟与 640 条空间实测数据（共 1216 条）**。本次涵盖 70%/85%/95% 负载、32/64 位 Key、1/2/4/8-byte Value 与不同数据规模。对于 262144 个 64/64-bit 键值，85% 负载 Flattened 成功查询 **12.14 ns/op**，Chained 为 **21.86 ns/op**；空间上 200000 键时 Chained 为 **19.92 bytes/key**，Flattened 为 **25.07 bytes/key**。全部属于真实 GitHub Actions 云端测量，尚非固定硬件正式比较。
+
+[本轮报告与完整原始 CSV](docs/TPHT-CLOUD-MATRIX-v0.13.0.md) · [云端执行记录](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40179300855)
+
+![TPHT real hit latency](figures/v0.13.0-tpht-hit.svg)
+
+![TPHT real memory](figures/v0.13.0-tpht-space.svg)
+
+
 ## v0.12.1 | SIGMOD 2025 ZombieHT 320-cycle 长程云端稳定性复现
 
 在**原作者四算法核心代码不变**的条件下，GitHub Actions 实测 85% / 95% 负载、每档 5 个配对种子、每组计划 320 个 Churn 周期、8192 槽：**35/40 组完整完成**。95% 负载下 TRHM 5/5 均以 **退出码 139** 结束（完成 161、191、131、161、161 个周期），RHM、GZHM 和 GZHM_ADAPTIVE 在同样负载下全部 5/5 完成；85% 所有变体 20/20 完成。所有已生成的 3,210 条输入指纹检查无差异。

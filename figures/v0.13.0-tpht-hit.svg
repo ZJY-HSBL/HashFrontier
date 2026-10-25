@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="590" viewBox="0 0 1040 590">
+<rect width="1040" height="590" fill="#fff"/>
+<text x="110" y="40" fill="#25354a" font-size="21" font-family="Arial,sans-serif">TPHT · Success lookup · 85% load · 64-bit key/value</text>
+<text x="110" y="65" fill="#627187" font-size="12">Actual original-author C11 benchmark data · GitHub Actions cloud VM · 2026-10-25</text>
+<line x1="110" y1="490.0" x2="975" y2="490.0" stroke="#e4e9ef"/>
+<text x="101" y="494.0" font-size="12" fill="#607080" text-anchor="end">0.0</text>
+<line x1="110" y1="413.0" x2="975" y2="413.0" stroke="#e4e9ef"/>
+<text x="101" y="417.0" font-size="12" fill="#607080" text-anchor="end">5.0</text>
+<line x1="110" y1="336.0" x2="975" y2="336.0" stroke="#e4e9ef"/>
+<text x="101" y="340.0" font-size="12" fill="#607080" text-anchor="end">10.1</text>
+<line x1="110" y1="259.0" x2="975" y2="259.0" stroke="#e4e9ef"/>
+<text x="101" y="263.0" font-size="12" fill="#607080" text-anchor="end">15.1</text>
+<line x1="110" y1="182.0" x2="975" y2="182.0" stroke="#e4e9ef"/>
+<text x="101" y="186.0" font-size="12" fill="#607080" text-anchor="end">20.1</text>
+<line x1="110" y1="105.0" x2="975" y2="105.0" stroke="#e4e9ef"/>
+<text x="101" y="109.0" font-size="12" fill="#607080" text-anchor="end">25.1</text>
+<text x="110.0" y="518" font-size="12" fill="#607080" text-anchor="middle">1,024</text>
+<text x="218.1" y="518" font-size="12" fill="#607080" text-anchor="middle">2,048</text>
+<text x="326.3" y="518" font-size="12" fill="#607080" text-anchor="middle">4,096</text>
+<text x="434.4" y="518" font-size="12" fill="#607080" text-anchor="middle">8,192</text>
+<text x="542.5" y="518" font-size="12" fill="#607080" text-anchor="middle">16,384</text>
+<text x="650.6" y="518" font-size="12" fill="#607080" text-anchor="middle">32,768</text>
+<text x="758.8" y="518" font-size="12" fill="#607080" text-anchor="middle">65,536</text>
+<text x="866.9" y="518" font-size="12" fill="#607080" text-anchor="middle">131,072</text>
+<text x="975.0" y="518" font-size="12" fill="#607080" text-anchor="middle">262,144</text>
+<path d="M110.0,331.2 L218.1,326.4 L326.3,323.2 L434.4,319.2 L542.5,309.9 L650.6,285.2 L758.8,218.9 L866.9,176.0 L975.0,155.2" fill="none" stroke="#1d63a6" stroke-width="3"/>
+<circle cx="110.0" cy="331.2" r="3.5" fill="#1d63a6"/>
+<circle cx="218.1" cy="326.4" r="3.5" fill="#1d63a6"/>
+<circle cx="326.3" cy="323.2" r="3.5" fill="#1d63a6"/>
+<circle cx="434.4" cy="319.2" r="3.5" fill="#1d63a6"/>
+<circle cx="542.5" cy="309.9" r="3.5" fill="#1d63a6"/>
+<circle cx="650.6" cy="285.2" r="3.5" fill="#1d63a6"/>
+<circle cx="758.8" cy="218.9" r="3.5" fill="#1d63a6"/>
+<circle cx="866.9" cy="176.0" r="3.5" fill="#1d63a6"/>
+<circle cx="975.0" cy="155.2" r="3.5" fill="#1d63a6"/>
+<rect x="110" y="547" width="12" height="12" fill="#1d63a6"/>
+<text x="130" y="558" font-size="13" fill="#263648">chained-tpht</text>
+<path d="M110.0,362.6 L218.1,359.5 L326.3,356.8 L434.4,354.9 L542.5,347.1 L650.6,333.9 L758.8,311.6 L866.9,303.2 L975.0,304.1" fill="none" stroke="#c3552d" stroke-width="3"/>
+<circle cx="110.0" cy="362.6" r="3.5" fill="#c3552d"/>
+<circle cx="218.1" cy="359.5" r="3.5" fill="#c3552d"/>
+<circle cx="326.3" cy="356.8" r="3.5" fill="#c3552d"/>
+<circle cx="434.4" cy="354.9" r="3.5" fill="#c3552d"/>
+<circle cx="542.5" cy="347.1" r="3.5" fill="#c3552d"/>
+<circle cx="650.6" cy="333.9" r="3.5" fill="#c3552d"/>
+<circle cx="758.8" cy="311.6" r="3.5" fill="#c3552d"/>
+<circle cx="866.9" cy="303.2" r="3.5" fill="#c3552d"/>
+<circle cx="975.0" cy="304.1" r="3.5" fill="#c3552d"/>
+<rect x="370" y="547" width="12" height="12" fill="#c3552d"/>
+<text x="390" y="558" font-size="13" fill="#263648">flatten-tpht</text>
+<text x="542.5" y="522" font-size="14" text-anchor="middle">Number of keys (log2 horizontal scale)</text>
+<text transform="translate(25,297.5) rotate(-90)" text-anchor="middle" font-size="14">Native latency (ns/op)</text>
+</svg>
