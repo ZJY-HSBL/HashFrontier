@@ -139,7 +139,7 @@ public:
     // and candidate selection use the unchanged pre-update physical array.
     // Overlapping movements abort unchanged; no DMPP06 retrieval claims.
     struct BatchStats {
-        std::uint64_t committed=0, rejected=0, planned_swaps=0, prestate_reads=0;
+        std::uint64_t committed=0, rejected=0, planned_swaps=0, prestate_reads=0, reused_freed_partner=0;
     };
 private:
     BatchStats batches_{};
@@ -149,7 +149,7 @@ public:
         if(word>=num_words()||value>=half_)throw std::out_of_range("destination bin");
         return partner_bin(value^static_cast<std::size_t>(masks_[word]));
     }
-    bool write_batch(const std::vector<std::pair<std::size_t,std::optional<std::size_t>>>& requests) {
+    bool write_batch_disjoint(const std::vector<std::pair<std::size_t,std::optional<std::size_t>>>& requests) {
         struct Plan {std::size_t index,old_partner,new_partner;bool had_old,has_new;};
         std::vector<Plan> plan;
         std::unordered_set<std::size_t> touched,seen;
@@ -202,6 +202,82 @@ public:
         ++batches_.committed;
         return true;
     }
+
+    // STOC 2025 Algorithm 5 finite prestate simulation. Old partner positions
+    // released by ANY write in the same batch may be reused after all old
+    // couples have been broken. This still relies on EXTERNAL retrieval maps;
+    // it is not DMPP06, not the full metadata-free hash table, and the
+    // finite bin scan is not claimed to be worst-case O(1).
+    bool write_batch_reuse(const std::vector<std::pair<std::size_t,std::optional<std::size_t>>>& requests){
+        struct Move {std::size_t index,old_partner,new_partner; bool had_old,has_new,reused;};
+        std::vector<Move> moves;
+        std::unordered_set<std::size_t> seen,freed,reserved;
+        moves.reserve(requests.size());
+        for(const auto& [word,value]:requests){
+            if(word>=num_words())throw std::out_of_range("batch word");
+            if(value && *value>=half_)throw std::out_of_range("batch value");
+            if(!seen.insert(word).second)throw std::invalid_argument("duplicate batch word");
+        }
+        // Read every old word and every old partner from the UNCHANGED array.
+        for(const auto& [word,value]:requests){
+            const auto old=read(word);++batches_.prestate_reads;
+            if(old==value)continue;
+            const auto idx=index_slot(word);
+            const auto partner=old?original_slot(physical_[idx]):idx;
+            if(old && (idx==partner || original_slot(physical_[partner])!=idx))
+                throw std::logic_error("invalid prestate pairing");
+            moves.push_back({idx,partner,idx,old.has_value(),value.has_value(),false});
+            if(old && !freed.insert(partner).second)
+                throw std::logic_error("prestate partner unexpectedly reused");
+        }
+        std::size_t next=0;
+        for(const auto& [word,value]:requests){
+            const auto old=read(word);
+            if(old==value)continue;
+            auto &p=moves.at(next++);
+            if(!value)continue;
+            const auto wanted=destination_bin(word,*value);
+            const auto start=rand64()%B_;
+            bool found=false;
+            for(std::size_t j=0;j<B_;++j){
+                const auto slot=wanted*B_+(start+j)%B_;
+                if(reserved.contains(slot))continue;
+                if(is_self_loop(slot) || freed.contains(slot)){
+                    p.new_partner=slot;
+                    p.reused=freed.contains(slot);
+                    reserved.insert(slot);
+                    found=true;break;
+                }
+            }
+            if(!found){++batches_.rejected;return false;}
+        }
+        // Logical commit boundary: no physical mutation before this point.
+        for(const auto& p:moves)if(p.had_old){
+            std::swap(physical_[p.index],physical_[p.old_partner]);
+            ++stats_.swaps;
+        }
+        for(const auto& p:moves){
+            if(p.has_new){
+                if(!is_self_loop(p.new_partner))
+                    throw std::logic_error("staged destination not free after decoupling");
+                std::swap(physical_[p.index],physical_[p.new_partner]);
+                ++stats_.swaps;
+            }
+            if(p.had_old&&!p.has_new)--populated_words_;
+            if(!p.had_old&&p.has_new)++populated_words_;
+            ++stats_.changed_words;
+            batches_.planned_swaps+=p.had_old+p.has_new;
+            batches_.reused_freed_partner+=p.reused;
+        }
+        ++batches_.committed;
+        return true;
+    }
+    // Backward-compatible entry point; the old restricted planner is retained
+    // explicitly as write_batch_disjoint for strict experimental comparison.
+    bool write_batch(const std::vector<std::pair<std::size_t,std::optional<std::size_t>>>& updates){
+        return write_batch_reuse(updates);
+    }
+
     bool verify(const std::vector<std::optional<std::size_t>>& expected) const {
         if(expected.size()!=num_words())return false;
         for(std::size_t i=0;i<num_words();++i)if(read(i)!=expected[i])return false;

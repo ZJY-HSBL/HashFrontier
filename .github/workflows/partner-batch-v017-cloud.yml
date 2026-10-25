@@ -1,0 +1,55 @@
+name: STOC25 Algorithm 5 simulated atomic freed-partner reuse
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/partner_ram_section3.hpp'
+      - 'tests/test_partner_batch_reuse.cpp'
+      - 'src/bench_partner_batch_reuse.cpp'
+      - 'scripts/report_partner_batch_v017.py'
+      - '.github/workflows/partner-batch-v017-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  finite-batch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run randomized/full-bin verification
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.17.0-partner-batch figures
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_partner_batch_reuse.cpp -o /tmp/batch-test
+          /tmp/batch-test | tee results/v0.17.0-partner-batch/tests.log
+      - name: Address and UB sanitizers
+        run: |
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_partner_batch_reuse.cpp -o /tmp/batch-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/batch-asan
+      - name: Actually execute 54 finite cloud benchmarks
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_partner_batch_reuse.cpp -o /tmp/batch-bench
+          /tmp/batch-bench 3 1500 > results/v0.17.0-partner-batch/raw.csv
+          python3 scripts/report_partner_batch_v017.py results/v0.17.0-partner-batch/raw.csv results/v0.17.0-partner-batch
+          cp results/v0.17.0-partner-batch/success.svg figures/v0.17.0-partner-batch-success.svg
+          cp results/v0.17.0-partner-batch/attempt.svg figures/v0.17.0-partner-batch-attempt.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; g++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.17.0-partner-batch/environment.txt
+          sha256sum include/hashfrontier/partner_ram_section3.hpp src/bench_partner_batch_reuse.cpp results/v0.17.0-partner-batch/raw.csv > results/v0.17.0-partner-batch/sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stoc25-partner-alg5-v017-cloud
+          path: |
+            results/v0.17.0-partner-batch/
+            figures/v0.17.0-partner-batch-*.svg
+          if-no-files-found: warn
+      - name: Commit authentic cloud evidence
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.17.0-partner-batch figures/v0.17.0-partner-batch-*.svg
+          git diff --cached --quiet || { git commit -m 'data: archive STOC25 paper Algorithm 5 finite cloud batch evidence'; git push origin HEAD:main; }
