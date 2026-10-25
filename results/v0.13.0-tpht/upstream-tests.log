@@ -1,0 +1,20 @@
+[tpht] build scalar_fallback
+[tpht] run scalar_fallback
+tpht modular exhaustive tests passed
+[tpht] build portable_simd
+[tpht] run portable_simd
+tpht modular exhaustive tests passed
+[tpht] build forced_sse2
+[tpht] run forced_sse2
+tpht modular exhaustive tests passed
+[tpht] run forced_avx2
+tpht modular exhaustive tests passed
+[tpht] run forced_avx512
+tpht modular exhaustive tests passed
+[tpht] skip forced_neon: target does not define __ARM_NEON
+[tpht] run threaded
+tpht modular exhaustive tests passed
+[tpht] run native
+tpht modular exhaustive tests passed
+[tpht] config-branch tripwire clean
+[tpht] all requested test modes completed

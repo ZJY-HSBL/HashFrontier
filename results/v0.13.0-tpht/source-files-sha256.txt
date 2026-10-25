@@ -1,0 +1,2 @@
+b4a207c128a0d517bea86652e4a69df4bb7ede4c51d6446f08de63888d106ef2  upstream-tpht/tpht.c
+ff207919d21776817630e47c14242a8cbeb72afcd1ae710c753697d290e5d47b  upstream-tpht/tpht.h
