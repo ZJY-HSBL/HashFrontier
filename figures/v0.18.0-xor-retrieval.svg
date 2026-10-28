@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="450" viewBox="0 0 920 450">
+<rect width="920" height="450" fill="#fff"/>
+<text x="50" y="42" font-size="21" font-family="Arial" font-weight="bold">Successful retrieval: finite XOR encoded RAM</text>
+<text x="50" y="62" font-size="13" fill="#555" font-family="Arial">Actual temporary Linux / GitHub results; NOT DMPP06 and not formal cross-paper ranking</text>
+<path d="M94,85V370H885" stroke="#333" stroke-width="1.5" fill="none"/>
+<path d="M94,370.0H885" stroke="#ddd"/>
+<text x="86" y="374.0" text-anchor="end" font-size="12" font-family="Arial">0</text>
+<path d="M94,298.8H885" stroke="#ddd"/>
+<text x="86" y="302.8" text-anchor="end" font-size="12" font-family="Arial">19</text>
+<path d="M94,227.5H885" stroke="#ddd"/>
+<text x="86" y="231.5" text-anchor="end" font-size="12" font-family="Arial">38</text>
+<path d="M94,156.2H885" stroke="#ddd"/>
+<text x="86" y="160.2" text-anchor="end" font-size="12" font-family="Arial">56</text>
+<path d="M94,85.0H885" stroke="#ddd"/>
+<text x="86" y="89.0" text-anchor="end" font-size="12" font-family="Arial">75</text>
+<text x="94.0" y="391" text-anchor="middle" font-size="12" font-family="Arial">512</text>
+<text x="357.7" y="391" text-anchor="middle" font-size="12" font-family="Arial">1024</text>
+<text x="621.3" y="391" text-anchor="middle" font-size="12" font-family="Arial">2048</text>
+<text x="885.0" y="391" text-anchor="middle" font-size="12" font-family="Arial">4096</text>
+<polyline points="94.0,140.6 357.7,144.0 621.3,133.9" fill="none" stroke="#1c629b" stroke-width="2.5"/>
+<circle cx="94.0" cy="140.6" r="5" fill="#1c629b"/>
+<circle cx="357.7" cy="144.0" r="5" fill="#1c629b"/>
+<circle cx="621.3" cy="133.9" r="5" fill="#1c629b"/>
+<text x="94" y="420" fill="#1c629b" font-size="14" font-family="Arial">B=32</text>
+<polyline points="357.7,138.8 621.3,126.2 885.0,122.2" fill="none" stroke="#c45623" stroke-width="2.5"/>
+<circle cx="357.7" cy="138.8" r="5" fill="#c45623"/>
+<circle cx="621.3" cy="126.2" r="5" fill="#c45623"/>
+<circle cx="885.0" cy="122.2" r="5" fill="#c45623"/>
+<text x="274" y="420" fill="#c45623" font-size="14" font-family="Arial">B=64</text>
+<text x="460" y="398" text-anchor="middle" font-size="14" font-family="Arial">Encoded RAM words</text>
+</svg>

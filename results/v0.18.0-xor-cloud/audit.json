@@ -1,0 +1,9 @@
+{
+  "label": "NON-DMPP06 control / NOT complete STOC Partner Hashing reproduction",
+  "total_rows": 18,
+  "expected_rows": 18,
+  "complete": true,
+  "seed_count": 3,
+  "external_index_included": true,
+  "dynamic_update_method": "whole-layout 3-hash XOR peel and RAM batch rewrite"
+}

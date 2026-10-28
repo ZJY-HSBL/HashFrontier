@@ -1,0 +1,3 @@
+2f0417d2ccddd83b3fb3a43a5320efa6d3a804d168797eb5997cd41f9a93f831  include/hashfrontier/partner_xor_retrieval.hpp
+89098d9517a9a19a68bb629c6411965d389d2737175ffa42858ab07375a53006  src/bench_partner_xor_retrieval.cpp
+db66050eaced48987921da7fa4a90fa5fd8184214a3746c6dd6924e1986b72f2  results/v0.18.0-xor-cloud/raw.csv
