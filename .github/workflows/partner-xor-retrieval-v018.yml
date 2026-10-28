@@ -1,0 +1,64 @@
+name: STOC25 Partner RAM XOR retrieval diagnostic - not DMPP06 reproduction
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/partner_xor_retrieval.hpp'
+      - 'tests/test_partner_xor_retrieval.cpp'
+      - 'tests/test_partner_xor_report.py'
+      - 'src/bench_partner_xor_retrieval.cpp'
+      - 'scripts/report_partner_xor_v018.py'
+      - '.github/workflows/partner-xor-retrieval-v018.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run randomized retrieval/rebuild oracle tests
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.18.0-xor-cloud figures
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_partner_xor_retrieval.cpp -o /tmp/hf-xor-test
+          /tmp/hf-xor-test | tee results/v0.18.0-xor-cloud/tests.log
+          python3 -m unittest discover -s tests -p 'test_partner_xor_report.py' -v
+      - name: Independent address/undefined-behavior sanitizer test
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_partner_xor_retrieval.cpp -o /tmp/hf-xor-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/hf-xor-asan
+      - name: Run 18 real finite-size cloud trials and strict report
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_partner_xor_retrieval.cpp -o /tmp/hf-xor-bench
+          /tmp/hf-xor-bench 3 > results/v0.18.0-xor-cloud/raw.csv
+          python3 scripts/report_partner_xor_v018.py --raw results/v0.18.0-xor-cloud/raw.csv --out results/v0.18.0-xor-cloud --seeds 3
+          cp results/v0.18.0-xor-cloud/retrieval.svg figures/v0.18.0-xor-retrieval.svg
+          cp results/v0.18.0-xor-cloud/update.svg figures/v0.18.0-xor-update.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; g++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; free -h; } > results/v0.18.0-xor-cloud/environment.txt
+          sha256sum include/hashfrontier/partner_xor_retrieval.hpp src/bench_partner_xor_retrieval.cpp results/v0.18.0-xor-cloud/raw.csv > results/v0.18.0-xor-cloud/sha256.txt
+          cat results/v0.18.0-xor-cloud/summary.csv >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve full real evidence (including any failed attempts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stoc25-partner-xor-diagnostic-v018-evidence
+          path: |
+            results/v0.18.0-xor-cloud/
+            figures/v0.18.0-xor-*.svg
+          if-no-files-found: warn
+      - name: Commit only actually executed cloud data
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.18.0-xor-cloud figures/v0.18.0-xor-*.svg
+          git diff --cached --quiet || {
+            git commit -m 'data: archive real finite XOR-in-PartnerRAM cloud diagnostic';
+            git pull --rebase origin main;
+            git push origin HEAD:main;
+          }

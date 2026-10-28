@@ -89,3 +89,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_partner_batch_reuse PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME partner_algorithm5_atomic_full_bin_reuse COMMAND hf_test_partner_batch_reuse)
+
+# Experimental XOR retrieval encoded in Partner RAM. NOT DMPP06 or full Partner Hashing.
+add_executable(hf_test_partner_xor_retrieval tests/test_partner_xor_retrieval.cpp)
+target_link_libraries(hf_test_partner_xor_retrieval PRIVATE hashfrontier)
+add_test(NAME partner_xor_encoded_retrieval_control COMMAND hf_test_partner_xor_retrieval)

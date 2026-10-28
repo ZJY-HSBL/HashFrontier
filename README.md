@@ -1,5 +1,10 @@
 # HashFrontier
 
+## Diagnostic in progress — STOC 2025 retrieval encoding (non-DMPP06)
+
+A finite **XOR retrieval control** has been added to verify reading values physically encoded in PartnerRAM, with randomized tests and a real cloud Benchmark workflow. **This is NOT the DMPP06 dynamic succinct retrieval algorithm, NOT a full Partner Hashing reproduction, and NOT eligible for HF-Score.** [Scope and reproduction boundary](docs/STOC25-PARTNER-XOR-DIAGNOSTIC-v0.18.0.md). Cloud experiment is automated; only archived executed results may be cited as measurements.
+
+
 ## v0.17.0 | STOC 2025 Partner Hashing 算法 5 批量更新 / atomic batch reproduction
 
 基于论文 Algorithm 5 的**更新前状态读取、延迟搬移、统一提交**规则，新增支持同一事务复用已释放 partner 位置的有限实现。作者的隐式 DMPP06 retrieval 黑盒、§4 无外部元数据完整表及 §5 扩容**尚未实现**。GitHub Actions [真实云端实验](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40199001986) **54/54 组完成**，AMD EPYC 9V45 / Ubuntu 24.04 / GCC 13.3。旧版不能完成满 bin 跨区域的实际变更请求，新版完成所有 **40,500** 次真实变更批次；二者完成工作量不同，**不可直接用尝试耗时判定谁更快**。没有 HF-Score。
