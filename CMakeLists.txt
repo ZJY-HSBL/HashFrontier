@@ -94,3 +94,8 @@ add_test(NAME partner_algorithm5_atomic_full_bin_reuse COMMAND hf_test_partner_b
 add_executable(hf_test_partner_xor_retrieval tests/test_partner_xor_retrieval.cpp)
 target_link_libraries(hf_test_partner_xor_retrieval PRIVATE hashfrontier)
 add_test(NAME partner_xor_encoded_retrieval_control COMMAND hf_test_partner_xor_retrieval)
+
+# LATIN 2006 DMPP06 Section 2.1 + Section 3.1 first-level only.
+add_executable(hf_test_dmpp06_first_level tests/test_dmpp06_first_level.cpp)
+target_link_libraries(hf_test_dmpp06_first_level PRIVATE hashfrontier)
+add_test(NAME dmpp06_finite_affine_quotient_first_level COMMAND hf_test_dmpp06_first_level)

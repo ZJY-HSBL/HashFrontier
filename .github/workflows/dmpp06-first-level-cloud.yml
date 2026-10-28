@@ -1,0 +1,61 @@
+name: DMPP06 LATIN 2006 exact first-level filter finite cloud reproduction
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_first_level.hpp'
+      - 'tests/test_dmpp06_first_level.cpp'
+      - 'src/bench_dmpp06_first_level.cpp'
+      - 'scripts/report_dmpp06_first_level.py'
+      - 'tests/test_dmpp06_report.py'
+      - '.github/workflows/dmpp06-first-level-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  dmpp06-first-level:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and verify affine permutation and original first-level bucket policy
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/hf-dmpp06 results/v0.19.0-dmpp06 figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_first_level.cpp -o /tmp/hf-dmpp06/test
+          /tmp/hf-dmpp06/test | tee results/v0.19.0-dmpp06/tests.log
+      - name: Verify native reference sanitizer safety
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O1 -g -fsanitize=undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_first_level.cpp -o /tmp/hf-dmpp06/ubsan
+          /tmp/hf-dmpp06/ubsan
+      - name: Run real 72-configuration cloud benchmark and strict audit
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_first_level.cpp -o /tmp/hf-dmpp06/bench
+          /tmp/hf-dmpp06/bench > results/v0.19.0-dmpp06/raw.csv
+          python3 scripts/report_dmpp06_first_level.py results/v0.19.0-dmpp06/raw.csv results/v0.19.0-dmpp06
+          cp results/v0.19.0-dmpp06/hit.svg figures/v0.19.0-dmpp06-hit.svg
+          cp results/v0.19.0-dmpp06/overflow.svg figures/v0.19.0-dmpp06-overflow.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.19.0-dmpp06/environment.txt
+          sha256sum include/hashfrontier/dmpp06_first_level.hpp results/v0.19.0-dmpp06/raw.csv > results/v0.19.0-dmpp06/sha256.txt
+      - name: Test report rejection checks
+        run: |
+          python3 -m unittest discover -s tests -p test_dmpp06_report.py -v
+      - name: Preserve all actual observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmpp06-v0.19.0-first-level-cloud-evidence
+          path: |
+            results/v0.19.0-dmpp06/
+            figures/v0.19.0-dmpp06-*.svg
+          if-no-files-found: warn
+      - name: Commit only measured evidence after audit succeeds
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.19.0-dmpp06 figures/v0.19.0-dmpp06-*.svg
+          git diff --cached --quiet || { git commit -m 'data: measured LATIN 2006 DMPP first-level cloud evidence'; git pull --rebase origin main; git push origin HEAD:main; }
