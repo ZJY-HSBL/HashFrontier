@@ -1,9 +1,16 @@
 # HashFrontier
 
-## Diagnostic in progress — STOC 2025 retrieval encoding (non-DMPP06)
+## v0.18.0 | STOC 2025 retrieval-value encoding: controlled diagnostic, NOT DMPP06
 
-A finite **XOR retrieval control** has been added to verify reading values physically encoded in PartnerRAM, with randomized tests and a real cloud Benchmark workflow. **This is NOT the DMPP06 dynamic succinct retrieval algorithm, NOT a full Partner Hashing reproduction, and NOT eligible for HF-Score.** [Scope and reproduction boundary](docs/STOC25-PARTNER-XOR-DIAGNOSTIC-v0.18.0.md). Cloud experiment is automated; only archived executed results may be cited as measurements.
+This release verifies that a 3-hash XOR retrieval layout can store and recover its **values** from the physical permutations of the existing Partner RAM. **It does not implement the DMPP06 dynamic succinct retrieval primitive required by the STOC paper and is not a reproduction of the complete Partner Hashing hash table.** An external active-key registry and logical-slot metadata remain; inserts/deletes rebuild the entire XOR layout. No O(1) update guarantee and no HF-Score.
 
+Real GitHub Actions [run 40624353966](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40624353966) (EPYC 9V45, Ubuntu 24.04, GCC 13.3): **18/18** capacity/seed combinations completed, **403,660** oracle checks and **5,600** update operations passed, ASan/UBSan passed. With 512 RAM words, successful retrieval median **60.52 ns/op** and whole-rebuild update median **86.80 us/op**; with 4,096 RAM words, retrieval **65.39 ns/op** and whole-rebuild update **543.41 us/op**. The changing update cost is expected for the control, not a claim about the original paper.
+
+[Full source and limitations](docs/STOC25-PARTNER-XOR-DIAGNOSTIC-v0.18.0.md) · [real raw CSV](results/v0.18.0-xor-cloud/raw.csv) · [summary CSV](results/v0.18.0-xor-cloud/summary.csv) · [environment](results/v0.18.0-xor-cloud/environment.txt) · [audit](results/v0.18.0-xor-cloud/audit.json)
+
+![Actual physically encoded retrieval times](figures/v0.18.0-xor-retrieval.svg)
+
+![Actual costly whole-layout rebuild update times](figures/v0.18.0-xor-update.svg)
 
 ## v0.17.0 | STOC 2025 Partner Hashing 算法 5 批量更新 / atomic batch reproduction
 

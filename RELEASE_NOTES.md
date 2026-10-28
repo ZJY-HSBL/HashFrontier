@@ -1,7 +1,6 @@
-# HashFrontier v0.17.0 — STOC25 Algorithm 5 finite transactional partner reuse
+# HashFrontier v0.18.0 — STOC 2025 PartnerRAM retrieval-value encoding diagnostic
 
-- Reproduces prestate reads, two-pass decouple/recouple and atomic reject on oversubscribed partner bins. Preserves the old restricted planner for audit.
-- Verified 3,600 full-bin cross-swap updates and correctness/sanitizer checks.
-- Real [GitHub cloud run 40199001986](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40199001986): all 54/54 batches of 1,500 attempts, 3 seeds per configuration; actual CSV and SVG archived with SHA256 and environment.
-- Cloud runner: AMD EPYC 9V45, Ubuntu 24.04, GCC 13.3.0. Across new planner configurations, 40,500/40,500 actual mutating batches committed; the disjoint predecessor commits zero actual mutating batches. Old versus new timings are NOT equivalent-work comparison.
-- Limitations: DMPP06 dynamic succinct retrieval, metadata-free Section 4 and resizing Section 5 are not implemented. This release is a tested paper-subroutine reproduction, not full Partner Hashing or formal L3 / HF-Score.
+- Verified a finite 3-hash XOR retrieval control whose values are physically encoded in PartnerRAM swaps, **without** accessing the external key-to-word index for retrieval reads.
+- Cloud run: https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40624353966. 18/18 real trials complete; randomized verification 403,660 checks / 5,600 update operations; ASan/UBSan passed.
+- Original CSV, actual environment, SHA-256 provenance, strict completeness audit and SVG plots are attached.
+- **Not the DMPP06 dynamic succinct retrieval algorithm** used in Bender, Kuszmaul and Zhou (STOC 2025). Active keys, logical slots and masks still use external memory. Every update triggers a whole-XOR-layout rebuild; no asymptotic O(1) or metadata-free claim. This is not a complete paper reproduction and must not enter HF-Score.
