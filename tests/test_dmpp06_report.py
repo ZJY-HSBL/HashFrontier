@@ -6,7 +6,8 @@ from report_dmpp06_first_level import analyze
 class ReportTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.real=ROOT/'results/cloud-local.csv'
+        cls.real=ROOT/'results/v0.19.0-dmpp06/raw.csv'
+        if not cls.real.exists():cls.real=ROOT/'results/cloud-local.csv'
     def test_full(self):
         with tempfile.TemporaryDirectory() as t:
             r=analyze(self.real,Path(t));self.assertEqual(len(r),18)
