@@ -1,5 +1,18 @@
 # HashFrontier
 
+## v0.20.0 | LATIN 2006 DMPP06 §3.2 第二级多层 Tile 过滤器实测
+
+已按 [原论文 §3.2](https://people.csail.mit.edu/mip/papers/dyndict/dyndict.pdf) 完成有限的多层 tile 机制：桶内可逆置换、逐层减半 tile、区内偏移存储、stable perfect-hash code、删除和第三级溢出交接。GitHub Actions **72/72 组真实云端实验完成**，随机检查 **298,141 项通过**，ASan/UBSan、主 CI、数据完整性验证均通过。**这是 DMPP06 原论文组件的有限机制复现，不是其高概率 hash-family、紧凑 word-packing、三级完整动态 retrieval 或 STOC 2025 完整 Partner Hashing。**
+
+在 **256 桶、8192 个尝试插入键、4 个种子**的云端实验中，首层 tile 数为 16/32/64 时，插入溢出率中位数分别为 **16.4185% / 0.1709% / 0%**，命中查询中位数分别为 **36.55 / 35.74 / 29.67 ns/op**。溢出不是插入成功；结果仅说明有限容量实验趋势，不作高概率理论推断。
+
+[真实实验报告](docs/STOC25-DMPP06-SECOND-LEVEL-RESULTS-v0.20.0.md) · [原始 CSV](results/v0.20.0-dmpp06/raw.csv) · [72 组实验审核](results/v0.20.0-dmpp06/audit.json) · [复现范围与代码说明](docs/STOC25-DMPP06-SECOND-LEVEL-v0.20.0.md) · [云端 Actions](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40630812596)
+
+![DMPP06 second-level observed overflow](figures/v0.20.0-dmpp06-second-overflow.svg)
+
+![DMPP06 second-level observed hit latency](figures/v0.20.0-dmpp06-second-hit.svg)
+
+
 ## v0.19.0 | DMPP06 LATIN 2006 引用算法的有限复现
 
 STOC 2025 Partner Hashing 所引用的 DMPP06 论文 [*De Dictionariis Dynamicis Pauco Spatio Utentibus*](https://doi.org/10.1007/11682462_34) 已复现 **§2.1 有限域仿射可逆商哈希**与 **§3.1 第一级稳定码过滤器**。随机／不变量检查 **2,763,711 项通过**，独立 GitHub Actions 云端 Benchmark **72/72 组完成**，完整性审计通过。论文所需的高概率商哈希族及多级紧凑动态检索结构**尚未实现**；本组件使用显式桶内哈希表，**不能当作完整 DMPP06 或 STOC 2025 Partner Hashing**，不参与最终 HF-Score。

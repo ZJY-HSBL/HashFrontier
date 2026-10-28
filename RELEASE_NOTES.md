@@ -1,11 +1,9 @@
-# HashFrontier v0.19.0 — DMPP06 LATIN 2006 first-level dependency reproduction
+# HashFrontier v0.20.0 — DMPP06 §3.2 tile-filter reproduction
 
-This release continues the reproduction of STOC 2025 *Optimal Non-Oblivious Open Addressing* by tackling its cited **DMPP06** retrieval dependency at source-section level.
+Faithfully modelled §3.2's finite multi-filter placement and stable tile identifiers using invertible affine finite permutations. Preserves explicit overflow to an unimplemented third level.
 
-**Implemented:** LATIN 2006 §2.1 finite `GF(2^16)` affine quotient permutation and inverse, and §3.1 first-level per-bucket filter using stable local hashcodes, free-code lists, explicit overflow, retrieval/update/deletion, plus exhaustive finite permutation checks.
+**Actually verified:** 298,141 randomized correctness/invariant checks; ASan/UBSan; strict CSV parser tests; independent GitHub Actions runner [40630812596](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40630812596) completed 72 real benchmark configurations with source, raw CSV, hashes, compiler/CPU environment, summary and generated SVG.
 
-**Verified:** 2,763,711 C++ randomized/invariant checks, 65,535 nonzero multiplicative coefficients passing inverse verification, ASan/UBSan locally, and 72/72 independent GitHub Actions cloud observations with 4-seed 18-group summary, genuine CSV/SVG, actual environment log and SHA-256 audit.
+**Key finite observation:** 256 bins, 8192 attempts, 4 seeds; 16/32/64 base tiles show median overflow 16.4185% / 0.1709% / 0%. Do not combine cloud timings with other hardware or score as HF-Score.
 
-**Key limitation:** The full DMPP06 Theorem 5 high-probability quotient construction, multi-level filters and succinct implementation are NOT reproduced. This code uses an explicit standard-library map inside buckets and does not satisfy the space bound. It is NOT a complete DMPP06 retrieval data structure, and it is NOT the full STOC 2025 Partner Hashing. Overflow is marked as failure of this filter and must be delegated to later levels in a full implementation. No HF-Score.
-
-Evidence: `docs/STOC25-DMPP06-DEPENDENCY-v0.19.0.md`, `results/v0.19.0-dmpp06/{raw.csv,summary.csv,audit.json,environment.txt,sha256.txt,tests.log}`, `figures/v0.19.0-dmpp06-{hit,overflow}.svg`.
+**Not implemented:** DMPP06 §2.2 Theorem 5 full high-probability quotient family, original packed constant-time space representation, §3.2 third-level high-performance dictionary, complete dynamic retrieval, or full STOC25 Partner Hashing.
