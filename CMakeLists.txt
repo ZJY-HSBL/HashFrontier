@@ -99,3 +99,11 @@ add_test(NAME partner_xor_encoded_retrieval_control COMMAND hf_test_partner_xor_
 add_executable(hf_test_dmpp06_first_level tests/test_dmpp06_first_level.cpp)
 target_link_libraries(hf_test_dmpp06_first_level PRIVATE hashfrontier)
 add_test(NAME dmpp06_finite_affine_quotient_first_level COMMAND hf_test_dmpp06_first_level)
+
+# LATIN 2006 DMPP06 Section 3.2: finite multi-filter tile mechanism (not full DMPP06).
+add_executable(hf_test_dmpp06_second_level tests/test_dmpp06_second_level.cpp)
+target_link_libraries(hf_test_dmpp06_second_level PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_dmpp06_second_level PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME dmpp06_second_level_tiles_stable_codes COMMAND hf_test_dmpp06_second_level)

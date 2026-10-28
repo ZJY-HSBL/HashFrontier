@@ -1,0 +1,61 @@
+name: DMPP06 LATIN 2006 second-level multi-filter tile cloud reproduction
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_second_level.hpp'
+      - 'tests/test_dmpp06_second_level.cpp'
+      - 'tests/test_dmpp06_second_report.py'
+      - 'src/bench_dmpp06_second_level.cpp'
+      - 'scripts/report_dmpp06_second_level.py'
+      - '.github/workflows/dmpp06-second-level-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  finite-tiles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and verify Section 3.2 stable tile hashcodes and overflow
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.20.0-dmpp06 figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_second_level.cpp -o /tmp/dmpp06-second-test
+          /tmp/dmpp06-second-test | tee results/v0.20.0-dmpp06/tests.log
+          python3 -m unittest discover -s tests -p 'test_dmpp06_second_report.py' -v
+      - name: ASan and UBSan
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_second_level.cpp -o /tmp/dmpp06-second-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/dmpp06-second-asan
+      - name: Original paper Section 3.2 finite tile mechanism — 72 real cloud experiments
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_second_level.cpp -o /tmp/dmpp06-second-bench
+          /tmp/dmpp06-second-bench > results/v0.20.0-dmpp06/raw.csv
+          python3 scripts/report_dmpp06_second_level.py results/v0.20.0-dmpp06/raw.csv results/v0.20.0-dmpp06
+          cp results/v0.20.0-dmpp06/overflow.svg figures/v0.20.0-dmpp06-second-overflow.svg
+          cp results/v0.20.0-dmpp06/hit.svg figures/v0.20.0-dmpp06-second-hit.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.20.0-dmpp06/environment.txt
+          sha256sum include/hashfrontier/dmpp06_second_level.hpp src/bench_dmpp06_second_level.cpp results/v0.20.0-dmpp06/raw.csv > results/v0.20.0-dmpp06/sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dmpp06-v0.20.0-finite-second-level-real
+          path: |
+            results/v0.20.0-dmpp06/
+            figures/v0.20.0-dmpp06-second-*.svg
+          if-no-files-found: warn
+      - name: Commit measured evidence only after successful audit
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.20.0-dmpp06 figures/v0.20.0-dmpp06-second-*.svg
+          git diff --cached --quiet || {
+            git commit -m 'data: archive real DMPP06 second-level cloud observations';
+            git push origin HEAD:main;
+          }
