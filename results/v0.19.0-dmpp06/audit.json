@@ -1,0 +1,12 @@
+{
+  "scope": "DMPP06 LATIN 2006 Section 2.1 finite GF(2^16) 2-independent permutation + Section 3.1 first-level filter ONLY",
+  "completed_runs": 72,
+  "expected_runs": 72,
+  "passes": true,
+  "source_restrictions": [
+    "finite GF(2^16) experiment, not DMPP06 theorem 5 concentration family",
+    "explicit unordered_map per bucket, not succinct storage",
+    "no second/third levels, no complete retrieval guarantees"
+  ],
+  "raw_sha256": "345955d8dff2db01612e86f026addebcf893242318f23cc2c2d0aa9d19952a18"
+}

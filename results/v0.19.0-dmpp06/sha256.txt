@@ -1,0 +1,2 @@
+abad756d951282a6e8c2ecab911ab5247e9b091531232a8eccefcb8ed2d12e59  include/hashfrontier/dmpp06_first_level.hpp
+345955d8dff2db01612e86f026addebcf893242318f23cc2c2d0aa9d19952a18  results/v0.19.0-dmpp06/raw.csv
