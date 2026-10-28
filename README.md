@@ -1,5 +1,16 @@
 # HashFrontier
 
+## v0.19.0 | DMPP06 LATIN 2006 引用算法的有限复现
+
+STOC 2025 Partner Hashing 所引用的 DMPP06 论文 [*De Dictionariis Dynamicis Pauco Spatio Utentibus*](https://doi.org/10.1007/11682462_34) 已复现 **§2.1 有限域仿射可逆商哈希**与 **§3.1 第一级稳定码过滤器**。随机／不变量检查 **2,763,711 项通过**，独立 GitHub Actions 云端 Benchmark **72/72 组完成**，完整性审计通过。论文所需的高概率商哈希族及多级紧凑动态检索结构**尚未实现**；本组件使用显式桶内哈希表，**不能当作完整 DMPP06 或 STOC 2025 Partner Hashing**，不参与最终 HF-Score。
+
+[复现范围](docs/STOC25-DMPP06-DEPENDENCY-v0.19.0.md) · [云端原始 CSV](results/v0.19.0-dmpp06/raw.csv) · [统计汇总](results/v0.19.0-dmpp06/summary.csv) · [审计](results/v0.19.0-dmpp06/audit.json) · [云端环境](results/v0.19.0-dmpp06/environment.txt) · [Actions](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40626913230)
+
+![DMPP06 first-level hit timings](figures/v0.19.0-dmpp06-hit.svg)
+
+![DMPP06 first-level insertion overflow](figures/v0.19.0-dmpp06-overflow.svg)
+
+
 ## v0.18.0 | STOC 2025 retrieval-value encoding: controlled diagnostic, NOT DMPP06
 
 This release verifies that a 3-hash XOR retrieval layout can store and recover its **values** from the physical permutations of the existing Partner RAM. **It does not implement the DMPP06 dynamic succinct retrieval primitive required by the STOC paper and is not a reproduction of the complete Partner Hashing hash table.** An external active-key registry and logical-slot metadata remain; inserts/deletes rebuild the entire XOR layout. No O(1) update guarantee and no HF-Score.
