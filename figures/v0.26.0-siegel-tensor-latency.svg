@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 360" width="1000" height="360">
+<rect width="1000" height="360" fill="white"/>
+<text x="32" y="31" font-family="Arial" font-size="21" font-weight="bold">Siegel Lemma 6: factorized / expanded latency ratio</text>
+<path d="M 80 60 V 285 H 966" stroke="#475467" stroke-width="1.5" fill="none"/>
+<rect x="139.0" y="131.2" width="56.0" height="153.8" fill="#4777b6"/>
+<text x="167.0" y="123.2" text-anchor="middle" font-size="12" font-family="Arial">3.49</text>
+<text x="167.0" y="307" text-anchor="middle" font-size="12" font-family="Arial">u=4 p=2</text>
+<rect x="313.0" y="109.8" width="56.0" height="175.2" fill="#4777b6"/>
+<text x="341.0" y="101.8" text-anchor="middle" font-size="12" font-family="Arial">3.97</text>
+<text x="341.0" y="307" text-anchor="middle" font-size="12" font-family="Arial">u=4 p=3</text>
+<rect x="487.0" y="128.9" width="56.0" height="156.1" fill="#4777b6"/>
+<text x="515.0" y="120.9" text-anchor="middle" font-size="12" font-family="Arial">3.54</text>
+<text x="515.0" y="307" text-anchor="middle" font-size="12" font-family="Arial">u=6 p=2</text>
+<rect x="661.0" y="113.3" width="56.0" height="171.7" fill="#4777b6"/>
+<text x="689.0" y="105.3" text-anchor="middle" font-size="12" font-family="Arial">3.89</text>
+<text x="689.0" y="307" text-anchor="middle" font-size="12" font-family="Arial">u=6 p=3</text>
+<rect x="835.0" y="129.7" width="56.0" height="155.3" fill="#4777b6"/>
+<text x="863.0" y="121.7" text-anchor="middle" font-size="12" font-family="Arial">3.52</text>
+<text x="863.0" y="307" text-anchor="middle" font-size="12" font-family="Arial">u=8 p=2</text>
+<text x="500" y="343" text-anchor="middle" font-size="12" font-family="Arial" fill="#475467">ratio; lower is better; payload excludes vector overhead and common independent right-side table</text></svg>

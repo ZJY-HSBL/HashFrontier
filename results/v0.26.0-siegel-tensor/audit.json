@@ -1,0 +1,15 @@
+{
+  "valid": true,
+  "raw_rows": 100,
+  "pair_count": 50,
+  "summary_configs": 10,
+  "all_checksum_pairs_equal": true,
+  "exact_certificate_per_run": true,
+  "temporary_full_adjacency_used_for_certification": true,
+  "measured_graph_payload_is_lower_bound": true,
+  "independent_right_table_required": true,
+  "siegel_large_scale_explicit_constructor_implemented": false,
+  "claim_full_siegel_construction": false,
+  "lemma6_finite_tensor_product": true,
+  "total_exhaustive_subsets": 8155270
+}
