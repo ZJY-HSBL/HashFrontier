@@ -1,5 +1,21 @@
 # HashFrontier
 
+## v0.25.0 | Siegel 2004 Lemma 2.6 有限图精确证书与 XOR 随机表
+
+依据 Siegel *On Universal Classes of Extremely Random Constant-Time Hash Functions*（SIAM J. Comput. 2004，Lemma 2.6）新增 **k-peelable 图 + 随机表 XOR 求值**的有限规模忠实机制验证。穷举验证 4,416,204 个非空键子集都存在 unique neighbor；另对一个小图枚举所有随机表位赋值，精确验证至多三个键的输出联合均匀性。
+
+[独立 GitHub Actions 云端实验](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40848770409) **40/40 组完成**，原始 CSV、严格审计、环境、SHA-256、测试日志与 SVG 均归档。AMD EPYC 9V74、Ubuntu 24.04、GCC 13.3.0。64 键时，degree=3/4 的哈希求值中位数为 **2.227 / 2.566 ns/key**，有限图邻接最小字节数分别为 384/512 B，随机 64-bit 表需 1024 B；邻接大小未计算 C++ vector 管理和容量开销。
+
+**严格限制：** 图通过有限随机采样并以完整邻接表显式保存，**不是 Siegel 原论文的大规模显式图生成或次线性存储构造**。软件测试用可重复的伪随机数，真正的 k-wise 独立性定理以独立均匀随机表值为条件；当前穷举的完全随机性仅覆盖有限 1-bit 模型。尚不能接入 DMPP06 并宣称同等保证，亦不计算 HF-Score。
+
+[复现范围与数学原理](docs/SIEGEL-2004-LEMMA2.6-FINITE-v0.25.0.md) · [40 组原始数据](results/v0.25.0-siegel-finite/raw.csv) · [审计记录](results/v0.25.0-siegel-finite/audit.json)
+
+![Actual finite XOR evaluation timings](figures/v0.25.0-siegel-finite-hash.svg)
+
+![Measured finite lower-bound metadata footprint](figures/v0.25.0-siegel-finite-memory.svg)
+
+---
+
 ## v0.24.0 | DMPP06 §2.2 Transformation 4 有限分组排列
 
 按照 LATIN 2006 原论文 **b<n** 分支，实现每组共享的随机一级 Tile 排列，并保持列及 Tile 内残余偏移不变，支持完整逆映射。**13,893,153 项排列/双向恢复检查通过**；GitHub Actions [300/300 组真实云端实测](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40845661999) 已审计并归档，其中 **240 条属于严格的 b<n** 配置。环境：AMD EPYC 7763、Ubuntu 24.04、GCC 13.3.0。

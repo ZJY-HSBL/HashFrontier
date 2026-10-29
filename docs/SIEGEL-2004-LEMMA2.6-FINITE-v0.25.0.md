@@ -30,6 +30,27 @@ python3 -m unittest discover -s tests -p test_siegel_finite_report.py -v
 
 Cloud protocol: {16,24,32,64} left keys × {3,4} distinct neighbors × 5 graph seeds, right-side size = 2u, k=4. Each entry certifies all nonempty key subsets sizes ≤4, then times 120,000 actual XOR evaluations. Records include exact enumerated-subset counts, successful graph-search attempts, minimum graph adjacency size (excluding vector overhead), random word-table bytes, checksums, timings, and machine identity. Cloud evidence is archived only after the job succeeds.
 
-## Cloud results
+## Independently verified cloud results — v0.25.0
 
-Populated only after the independent GitHub Actions job succeeds. No manually estimated timings are reported in advance.
+[GitHub Actions run 40848770409](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40848770409) succeeded: 40/40 observations, eight configurations × five seeds, 4,416,204 subsets certified in the C++ test, 130 exact tiny-graph joint-uniformity cells; ASan/UBSan and strict CSV regression tests passed.
+
+Environment: AMD EPYC 9V74 (4 vCPUs), Ubuntu 24.04, GCC 13.3.0.
+
+| Keys | Degree | Minimum graph bytes | 64-bit table bytes | Median ns/eval |
+|---:|---:|---:|---:|---:|
+| 16 | 3 | 96 | 256 | 2.21068 |
+| 16 | 4 | 128 | 256 | 2.56703 |
+| 24 | 3 | 144 | 384 | 2.26609 |
+| 24 | 4 | 192 | 384 | 2.56720 |
+| 32 | 3 | 192 | 512 | 2.21342 |
+| 32 | 4 | 256 | 512 | 2.61744 |
+| 64 | 3 | 384 | 1024 | 2.22687 |
+| 64 | 4 | 512 | 1024 | 2.56612 |
+
+**Measurement interpretation**: the graph byte count is only the raw unsigned 16-bit adjacency payload, not actual C++ container memory use; the 64-bit table is separate. The timing is the evaluation of a pre-generated fully stored graph, not the work required to generate it. No extrapolation to Siegel's asymptotic performance or space is justified.
+
+[Raw CSV](../results/v0.25.0-siegel-finite/raw.csv) · [Statistics](../results/v0.25.0-siegel-finite/summary.csv) · [Audit](../results/v0.25.0-siegel-finite/audit.json) · [Provenance](../results/v0.25.0-siegel-finite/environment.txt) · [SHA-256](../results/v0.25.0-siegel-finite/sha256.txt)
+
+![Genuine cloud XOR evaluation timings](../figures/v0.25.0-siegel-finite-hash.svg)
+![Finite graph memory lower bound](../figures/v0.25.0-siegel-finite-memory.svg)
+

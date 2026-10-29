@@ -1,9 +1,9 @@
-# HashFrontier v0.24.0 — DMPP06 §2.2 Transformation 4 finite grouped permutations
+# HashFrontier v0.25.0 — SIAM J. Computing 2004 Siegel Lemma 2.6 finite graph mechanism
 
-- Strictly paper-defined *group-shared uniform random permutation of first-order buckets*, plus exact inverse. Finite 16-bit scaling; no Siegel-family implementation or theorem claims.
-- 13,893,153 full-domain and grouping checks pass, ASan/UBSan and five CSV-audit unit tests pass.
-- [Independent GitHub Actions cloud run 40845661999](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40845661999): 300 complete raw records, 240 with b<n, 60 configurations and five paired seeds, raw CSV/SVG/provenance archived.
-- AMD EPYC 7763, GCC 13.3.0. n=8192, b=1024, shuffled inputs: over-threshold keys 373→350, median hash latency 1.92206→4.36252 ns/key, metadata 1024→1536 bytes.
-- Correct scope: finite transformation mechanism only. DMPP06 Theorem 5, Siegel high-independence row shifts, full DMPP06 space guarantees and STOC 2025 Partner Hashing remain outstanding. No HF-Score.
+- Exact finite *k-peelable* neighbor graph certification and XOR of independent random right-side table cells (Siegel 2004, Lemma 2.6; cross-checked with Thorup FOCS 2013 §I.B).
+- 4,416,204 exact nonempty subset certificates; 130 exhaustive tiny-graph joint distribution checks; 1,683 additional invariants; ASan/UBSan passed.
+- [Independent cloud benchmark run 40848770409](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40848770409): 40/40 raw rows, eight configurations × five seeds; GitHub Actions AMD EPYC 9V74, GCC 13.3.0.
+- 64-key examples: degree 3 → 2.22687 ns/eval and minimum 384 B adjacency; degree 4 → 2.56612 ns/eval and minimum 512 B adjacency; each includes a separate 1,024 B random-word table.
+- **Not the full Siegel explicit construction**, no sublinear adjacency storage, no large-universe k=n^Ω(1) proof; the benchmark uses pseudorandom test table data. Not full DMPP06 or STOC 2025 Partner Hashing. No HF-Score.
 
-See docs/STOC25-DMPP06-TRANSFORMATION4-v0.24.0.md.
+See docs/SIEGEL-2004-LEMMA2.6-FINITE-v0.25.0.md.
