@@ -1,10 +1,9 @@
-# HashFrontier v0.21.0 — DMPP06 three-tier finite cloud reproduction
+# HashFrontier v0.22.0 — DMPP06 Section 2.2 finite reversible column quotient hash
 
-- LATIN 2006 DMPP06 Section 3: route insert/query/update/delete through first/second/third tiers; preserve stable disjoint codes; explicit no-space failure.
-- Third tier uses a standard-library map with free-code recycling; not the theoretical compact high-performance dictionary.
-- GitHub Actions Ubuntu 24.04, GCC 13.3.0, Intel Xeon Platinum 8573C virtual CPU: 96 genuine measurements, 32 fully audited parameter groups.
-- 115,200 randomized operations; 676,373 checks; 255,374 stable-code checks; AddressSanitizer and UndefinedBehaviorSanitizer passed.
-- Actual CSV, summaries, provenance SHA-256, environment, tests and SVG are included in release assets.
-- NOT complete DMPP06, NOT complete STOC25 Partner Hashing, no final HF-Score.
+- Implemented §2.2 Transformation 2 (per-row circular shifts) and Transformation 3 (independently seeded bijective per-column permutation, finite modular-affine substitute).
+- Verified 12,583,011 full-domain permutation and inverse checks; AddressSanitizer/UBSan pass.
+- Independent GitHub Actions run 40838246871: 160/160 measured configurations, 16 summaries, raw CSV/SVG/environment/source SHA-256 all preserved; AMD EPYC 7763 cloud VM, Ubuntu 24.04, GCC 13.3.0.
+- Ten-seed median collision-participating keys for 1,024 contiguous keys: 530.5 / 255 / 134.5 at 1,024 / 2,048 / 4,096 buckets.
+- **NOT** the paper's Siegel high-independence row-shift hash family or its field-based 2-universal per-column permutation. Theorem 5, succinct representation, cited 1990 high-performance dictionary, full DMPP06 and STOC 2025 Partner Hashing remain unimplemented. No HF-Score.
 
-See docs/STOC25-DMPP06-THREE-LEVEL-v0.21.0.md for exact scope.
+See docs/STOC25-DMPP06-COLUMN-v0.22.0.md for exact reproduction boundary.

@@ -24,3 +24,13 @@ Reproduce:
     python3 scripts/report_dmpp06_column_quotient.py /tmp/d22.csv /tmp/d22-out
 
 The SVG is generated directly from validated observations. These observations cannot be compared as formal L3 or HF-Score measurements.
+
+## Independently verified cloud evidence — v0.22.0
+
+[GitHub Actions run 40838246871](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40838246871) finished successfully on Ubuntu 24.04, GCC 13.3.0, AMD EPYC 7763 virtual hardware. **160/160 observed rows are complete** across 16 parameter/distribution configurations and 10 seeds. All 12,583,011 full-domain bijection tests and ASan/UBSan passed.
+
+Measured 1024 contiguous keys (10-seed median): bucket count 1024/2048/4096 corresponds to 530.5/255/134.5 keys belonging to buckets with occupancy ≥2. This is a finite observation, not an empirical validation of Theorem 5's tail bound. 16-bit test/permutation inputs and full provenance are preserved.
+
+![Real cloud collision observations](../figures/v0.22.0-dmpp06-column-collisions.svg)
+
+[Raw](../results/v0.22.0-dmpp06-column/raw.csv) · [Summary](../results/v0.22.0-dmpp06-column/summary.csv) · [Audit](../results/v0.22.0-dmpp06-column/audit.json) · [Source/data SHA-256](../results/v0.22.0-dmpp06-column/sha256.txt)

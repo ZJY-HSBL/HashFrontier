@@ -1,8 +1,10 @@
 # HashFrontier
 
-## DMPP06 §2.2 逐行移位和逐列置换（有限模型，v0.22.0 开发阶段）
+## v0.22.0 | DMPP06 §2.2 可逆商哈希的有限云端复现
 
-基于 LATIN 2006 §2.2 的明确构造，新增 16-bit **row-shift / column-permutation** 双向商哈希。当前本地 12,583,011 项精确检查通过，160 组有限模型实测完整；[复现边界](docs/STOC25-DMPP06-COLUMN-v0.22.0.md)。**本实现不是 Siegel 高独立性族，未达到 Theorem 5，不代替第三级高性能字典。** 独立 GitHub Actions 将生成其自身的原始数据和 SVG。
+基于 LATIN 2006 §2.2 的明确构造，新增 16-bit **row-shift / column-permutation** 双向商哈希。**12,583,011 项完整域检查通过，GitHub Actions 160/160 组真实云端测试通过**；[复现边界](docs/STOC25-DMPP06-COLUMN-v0.22.0.md)。**本实现不是 Siegel 高独立性族，未达到 Theorem 5，不代替第三级高性能字典。** [原始云端数据](results/v0.22.0-dmpp06-column/raw.csv)、[汇总](results/v0.22.0-dmpp06-column/summary.csv)、[环境与来源](results/v0.22.0-dmpp06-column/environment.txt)与[实际工作流](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40838246871)均已核实。
+
+![DMPP06 real cloud collision count](figures/v0.22.0-dmpp06-column-collisions.svg)
 
 
 ## v0.21.0 | LATIN 2006 DMPP06 finite three-tier routing cloud reproduction
