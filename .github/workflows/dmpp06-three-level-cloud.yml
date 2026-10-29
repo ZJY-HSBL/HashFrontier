@@ -1,0 +1,59 @@
+name: DMPP06 LATIN 2006 three-tier finite cloud reproduction
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_three_level.hpp'
+      - 'tests/test_dmpp06_three_level.cpp'
+      - 'src/bench_dmpp06_three_level.cpp'
+      - 'scripts/report_dmpp06_three_level.py'
+      - '.github/workflows/dmpp06-three-level-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  three-tier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and exercise 115200 randomized three-tier operations
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/hf-dmp3 results/v0.21.0-dmpp06-three figures
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_three_level.cpp -o /tmp/hf-dmp3/test
+          /tmp/hf-dmp3/test | tee results/v0.21.0-dmpp06-three/tests.log
+          python3 -m unittest discover -s tests -p 'test_dmpp06_three_level_report.py' -v
+      - name: ASan and UBSan
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_three_level.cpp -o /tmp/hf-dmp3/test-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/hf-dmp3/test-asan
+      - name: Actual 96-run cloud experiment and strict audit
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_three_level.cpp -o /tmp/hf-dmp3/bench
+          /tmp/hf-dmp3/bench > results/v0.21.0-dmpp06-three/raw.csv
+          python3 scripts/report_dmpp06_three_level.py results/v0.21.0-dmpp06-three/raw.csv results/v0.21.0-dmpp06-three
+          cp results/v0.21.0-dmpp06-three/third.svg figures/v0.21.0-dmpp06-third.svg
+          cp results/v0.21.0-dmpp06-three/overflow.svg figures/v0.21.0-dmpp06-overflow.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; g++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.21.0-dmpp06-three/environment.txt
+          sha256sum include/hashfrontier/dmpp06_first_level.hpp include/hashfrontier/dmpp06_second_level.hpp include/hashfrontier/dmpp06_three_level.hpp results/v0.21.0-dmpp06-three/raw.csv > results/v0.21.0-dmpp06-three/sha256.txt
+          test "$(wc -l < results/v0.21.0-dmpp06-three/raw.csv)" -eq 97
+          test "$(wc -l < results/v0.21.0-dmpp06-three/summary.csv)" -eq 33
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dmpp06-v0.21.0-three-tier-cloud-raw
+          path: |
+            results/v0.21.0-dmpp06-three/
+            figures/v0.21.0-dmpp06-*.svg
+          if-no-files-found: warn
+      - name: Commit only validated actual cloud data
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.21.0-dmpp06-three figures/v0.21.0-dmpp06-*.svg
+          git diff --cached --quiet || { git commit -m 'data: preserve actual DMPP06 three-tier cloud evidence'; git push origin HEAD:main; }

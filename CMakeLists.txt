@@ -107,3 +107,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_dmpp06_second_level PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME dmpp06_second_level_tiles_stable_codes COMMAND hf_test_dmpp06_second_level)
+
+# LATIN 2006 DMPP06 Section 3 finite three-level orchestration (not full theoretical dictionary).
+add_executable(hf_test_dmpp06_three_level tests/test_dmpp06_three_level.cpp)
+target_link_libraries(hf_test_dmpp06_three_level PRIVATE hashfrontier)
+add_test(NAME dmpp06_three_tier_stable_code_differential COMMAND hf_test_dmpp06_three_level)
