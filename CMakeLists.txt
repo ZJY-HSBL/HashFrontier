@@ -131,3 +131,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_dmpp06_grouped_quotient PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME dmpp06_transformation4_grouped_permutation_oracle COMMAND hf_test_dmpp06_grouped_quotient)
+
+# SIAM J Comput 2004 (Siegel Lemma 2.6): exactly verified finite peelable graph.
+# Finite subroutine, NOT explicit asymptotic Siegel construction.
+add_executable(hf_test_siegel_peelable_finite tests/test_siegel_peelable_finite.cpp)
+target_link_libraries(hf_test_siegel_peelable_finite PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_siegel_peelable_finite PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME siegel_finite_peelability_and_exact_joint_uniformity COMMAND hf_test_siegel_peelable_finite)
