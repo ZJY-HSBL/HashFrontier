@@ -1,0 +1,61 @@
+name: DMPP06 LATIN 2006 finite Section 2.2 independent cloud verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_column_quotient.hpp'
+      - 'tests/test_dmpp06_column_quotient.cpp'
+      - 'src/bench_dmpp06_column_quotient.cpp'
+      - 'scripts/report_dmpp06_column_quotient.py'
+      - 'tests/test_dmpp06_column_report.py'
+      - '.github/workflows/dmpp06-column-v022-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  finite-quotient:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: 16-bit exact bijection and randomized inverse checks
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.22.0-dmpp06-column figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_column_quotient.cpp -o /tmp/hf-d22-test
+          /tmp/hf-d22-test | tee results/v0.22.0-dmpp06-column/tests.log
+          python3 -m unittest discover -s tests -p test_dmpp06_column_report.py -v
+      - name: Independently verify UB and memory integrity
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_column_quotient.cpp -o /tmp/hf-d22-san
+          ASAN_OPTIONS=detect_leaks=1 /tmp/hf-d22-san
+      - name: Run 160 real cloud measurements, strict audit and SVG
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_column_quotient.cpp -o /tmp/hf-d22-bench
+          /tmp/hf-d22-bench 10 > results/v0.22.0-dmpp06-column/raw.csv
+          python3 scripts/report_dmpp06_column_quotient.py results/v0.22.0-dmpp06-column/raw.csv results/v0.22.0-dmpp06-column
+          cp results/v0.22.0-dmpp06-column/collisions.svg figures/v0.22.0-dmpp06-column-collisions.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.22.0-dmpp06-column/environment.txt
+          sha256sum include/hashfrontier/dmpp06_column_quotient.hpp src/bench_dmpp06_column_quotient.cpp results/v0.22.0-dmpp06-column/raw.csv > results/v0.22.0-dmpp06-column/sha256.txt
+      - name: Upload cloud raw observations, regardless of success
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmpp06-v0.22.0-finite-column-cloud-raw
+          path: |
+            results/v0.22.0-dmpp06-column/
+            figures/v0.22.0-dmpp06-column-collisions.svg
+          if-no-files-found: warn
+      - name: Commit measured cloud-only evidence to repository
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.22.0-dmpp06-column figures/v0.22.0-dmpp06-column-collisions.svg
+          git diff --cached --quiet || {
+            git commit -m 'data: preserve 160 DMPP06 finite quotient cloud observations'
+            git push origin HEAD:main
+          }

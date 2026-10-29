@@ -1,5 +1,10 @@
 # HashFrontier
 
+## DMPP06 §2.2 逐行移位和逐列置换（有限模型，v0.22.0 开发阶段）
+
+基于 LATIN 2006 §2.2 的明确构造，新增 16-bit **row-shift / column-permutation** 双向商哈希。当前本地 12,583,011 项精确检查通过，160 组有限模型实测完整；[复现边界](docs/STOC25-DMPP06-COLUMN-v0.22.0.md)。**本实现不是 Siegel 高独立性族，未达到 Theorem 5，不代替第三级高性能字典。** 独立 GitHub Actions 将生成其自身的原始数据和 SVG。
+
+
 ## v0.21.0 | LATIN 2006 DMPP06 finite three-tier routing cloud reproduction
 
 本轮按照 DMPP06 第 3 节将第一级稳定码桶过滤、第二级多层 Tile Filter 和第三级兜底字典串接成一套可运行的查询、插入、更新、删除流程。**GitHub Actions 真实 96/96 组云端实测通过；C++ 676,373 项正确性检查、115,200 次随机操作、ASan/UBSan 全通过。** 保留三级独立稳定 hashcode 空间及满容量拒绝记录。
