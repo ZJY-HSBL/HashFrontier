@@ -13,3 +13,16 @@ Measurement: v0.22 explicit vs k=2,8,16; 8/10/12 bucket bits, 1,024/4,096 keys, 
 [Raw data](../results/v0.23.0-dmpp06-poly/raw.csv) · [Summary](../results/v0.23.0-dmpp06-poly/summary.csv) · [Audit](../results/v0.23.0-dmpp06-poly/audit.json) · [Collision SVG](../figures/v0.23.0-dmpp06-poly-collisions.svg) · [Timing SVG](../figures/v0.23.0-dmpp06-poly-hash-cost.svg)
 
 The cited DMPP06 third-tier high-performance dictionary and Partner Hashing fully implicit retrieval are still missing. No final HF-Score.
+
+## Actual GitHub cloud results
+
+[Workflow run 40841729087](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40841729087), AMD EPYC 9V74, Ubuntu 24.04, GCC 13.3.0. Strict completeness audit: **240/240** real rows, **48** seed-paired summaries. Measured 4,096 shuffled keys, 1,024 buckets, five-seed medians:
+
+| Method | Metadata bytes | ns/hash | Collision-involved keys |
+|---|---:|---:|---:|
+| v0.22 explicit table | 1024 | 2.237 | 4027 |
+| Polynomial k=2 | 770 | 24.954 | 4029 |
+| Polynomial k=8 | 776 | 74.945 | 4026 |
+| Polynomial k=16 | 784 | 143.542 | 4027 |
+
+The observed collision counts are very similar, whereas polynomial evaluation incurs a large cost. No high-probability theorem validation is inferred.

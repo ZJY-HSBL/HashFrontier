@@ -1,5 +1,22 @@
 # HashFrontier
 
+## v0.23.0 | DMPP06 §2.2 有限域多项式移位与双独立列置换
+
+已使用 GF(256) 的 k 次系数多项式（k=2/8/16）代替逐行显式移位表，并使用 GF(256) 有限域仿射双独立置换代替 v0.22 的模 256 奇数仿射置换。**GitHub Actions 独立实测 240/240 组有效、48 个统计配置、5 个随机种子；完整 16 位域双向排列与差分测试通过。** 使用 AMD EPYC 9V74、Ubuntu 24.04、GCC 13.3.0。
+
+4,096 个均匀打乱的键、1,024 个桶时，旧版哈希时间中位数 **2.237 ns**、元数据 1,024 B；新版 k=2/8/16 分别为 **24.954 / 74.945 / 143.542 ns**，元数据 **770 / 776 / 784 B**。这揭示了有限元数据节省与求值成本增加的代价，不把结果当成无条件性能改进。
+
+**限制：这里不是原论文的 Siegel n^Omega(1) 高独立性常数时间构造；不满足 Theorem 5 的可宣称范围。DMPP06 第三级高性能字典、完整 Partner Hashing、HF-Score 均未完成。**
+
+[论文范围和命令](docs/STOC25-DMPP06-GF256-v0.23.0.md) · [240 条云端原始数据](results/v0.23.0-dmpp06-poly/raw.csv) · [统计表](results/v0.23.0-dmpp06-poly/summary.csv) · [源数据 SHA](results/v0.23.0-dmpp06-poly/sha256.txt) · [真实云端运行](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40841729087)
+
+![Actual finite GF256 hash timing](figures/v0.23.0-dmpp06-poly-hash-cost.svg)
+
+![Actual finite GF256 collision records](figures/v0.23.0-dmpp06-poly-collisions.svg)
+
+---
+
+
 ## v0.22.0 | DMPP06 §2.2 可逆商哈希的有限云端复现
 
 基于 LATIN 2006 §2.2 的明确构造，新增 16-bit **row-shift / column-permutation** 双向商哈希。**12,583,011 项完整域检查通过，GitHub Actions 160/160 组真实云端测试通过**；[复现边界](docs/STOC25-DMPP06-COLUMN-v0.22.0.md)。**本实现不是 Siegel 高独立性族，未达到 Theorem 5，不代替第三级高性能字典。** [原始云端数据](results/v0.22.0-dmpp06-column/raw.csv)、[汇总](results/v0.22.0-dmpp06-column/summary.csv)、[环境与来源](results/v0.22.0-dmpp06-column/environment.txt)与[实际工作流](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40838246871)均已核实。

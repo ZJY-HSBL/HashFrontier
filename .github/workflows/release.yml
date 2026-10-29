@@ -20,6 +20,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_paired_native.py" -v
           python3 -m unittest discover -s tests -p "test_cross_paper_report.py" -v
           python3 -m unittest discover -s tests -p "test_hf_score.py" -v
+          python3 -m unittest discover -s tests -p "test_dmpp06_poly_report.py" -v
           python3 scripts/verify_l3_plan.py
           python3 -m unittest discover -s tests -p "test_reproduction_protocol.py" -v
       - name: Publish tagged source and evidence
@@ -31,6 +32,7 @@ jobs:
             echo "Release $tag exists; not overwriting immutable evidence."
           else
             case "$tag" in
+            v0.23.0) assets=(results/v0.23.0-dmpp06-poly/raw.csv results/v0.23.0-dmpp06-poly/summary.csv results/v0.23.0-dmpp06-poly/audit.json results/v0.23.0-dmpp06-poly/environment.txt results/v0.23.0-dmpp06-poly/sha256.txt results/v0.23.0-dmpp06-poly/tests.log figures/v0.23.0-dmpp06-poly-collisions.svg figures/v0.23.0-dmpp06-poly-hash-cost.svg docs/STOC25-DMPP06-GF256-v0.23.0.md); title="LATIN 2006 DMPP06 finite GF256 k-wise row shifts and column field-affine real 240-run cloud verification" ;;
             v0.22.0) assets=(results/v0.22.0-dmpp06-column/raw.csv results/v0.22.0-dmpp06-column/summary.csv results/v0.22.0-dmpp06-column/audit.json results/v0.22.0-dmpp06-column/environment.txt results/v0.22.0-dmpp06-column/sha256.txt results/v0.22.0-dmpp06-column/tests.log figures/v0.22.0-dmpp06-column-collisions.svg docs/STOC25-DMPP06-COLUMN-v0.22.0.md); title="LATIN 2006 DMPP06 Section 2.2 finite row shifts and reversible per-column permutations - 160 real cloud trials" ;;
             v0.21.0) assets=(results/v0.21.0-dmpp06-three/raw.csv results/v0.21.0-dmpp06-three/summary.csv results/v0.21.0-dmpp06-three/audit.json results/v0.21.0-dmpp06-three/environment.txt results/v0.21.0-dmpp06-three/sha256.txt results/v0.21.0-dmpp06-three/tests.log figures/v0.21.0-dmpp06-third.svg figures/v0.21.0-dmpp06-overflow.svg docs/STOC25-DMPP06-THREE-LEVEL-v0.21.0.md); title="LATIN 2006 DMPP06 real cloud 96-run finite three-tier routing with stable codes" ;;
             v0.20.0) assets=(results/v0.20.0-dmpp06/raw.csv results/v0.20.0-dmpp06/summary.csv results/v0.20.0-dmpp06/audit.json results/v0.20.0-dmpp06/environment.txt results/v0.20.0-dmpp06/sha256.txt results/v0.20.0-dmpp06/tests.log figures/v0.20.0-dmpp06-second-overflow.svg figures/v0.20.0-dmpp06-second-hit.svg docs/STOC25-DMPP06-SECOND-LEVEL-RESULTS-v0.20.0.md docs/STOC25-DMPP06-SECOND-LEVEL-v0.20.0.md); title="LATIN 2006 DMPP06 second-level multi-filter finite mechanism real cloud reproduction" ;;

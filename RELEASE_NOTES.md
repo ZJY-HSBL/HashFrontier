@@ -1,9 +1,9 @@
-# HashFrontier v0.22.0 — DMPP06 Section 2.2 finite reversible column quotient hash
+# HashFrontier v0.23.0 — finite DMPP06 §2.2 GF256 polynomial and field-affine model
 
-- Implemented §2.2 Transformation 2 (per-row circular shifts) and Transformation 3 (independently seeded bijective per-column permutation, finite modular-affine substitute).
-- Verified 12,583,011 full-domain permutation and inverse checks; AddressSanitizer/UBSan pass.
-- Independent GitHub Actions run 40838246871: 160/160 measured configurations, 16 summaries, raw CSV/SVG/environment/source SHA-256 all preserved; AMD EPYC 7763 cloud VM, Ubuntu 24.04, GCC 13.3.0.
-- Ten-seed median collision-participating keys for 1,024 contiguous keys: 530.5 / 255 / 134.5 at 1,024 / 2,048 / 4,096 buckets.
-- **NOT** the paper's Siegel high-independence row-shift hash family or its field-based 2-universal per-column permutation. Theorem 5, succinct representation, cited 1990 high-performance dictionary, full DMPP06 and STOC 2025 Partner Hashing remain unimplemented. No HF-Score.
+- k-wise polynomial row shifts over GF(256) for finite k = 2, 8, 16, and independently seeded field-affine 2-independent column permutations.
+- Full 65,536-element permutation/inverse verification; exhaustive two-row polynomial pair independence; CTest and bounded ASan/UBSan passed.
+- [GitHub Actions 40841729087](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40841729087): 240/240 genuine experimental records, 48 groups (5 seeds), strict audit, CSV, SVG and SHA-256. Cloud machine AMD EPYC 9V74.
+- Representative 4,096 shuffled keys, 1,024 buckets: v0.22 2.237 ns/hash and 1,024 B metadata; polynomial k=2/8/16 24.954 / 74.945 / 143.542 ns/hash and 770 / 776 / 784 B.
+- **Not Siegel hashing, not DMPP06 Theorem 5, not full Partner Hashing; no HF-Score.** The finite polynomial has O(k) evaluation.
 
-See docs/STOC25-DMPP06-COLUMN-v0.22.0.md for exact reproduction boundary.
+Source/limits: docs/STOC25-DMPP06-GF256-v0.23.0.md.
