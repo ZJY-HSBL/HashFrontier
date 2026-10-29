@@ -1,0 +1,4 @@
+fc30a41c1e0d27c5e6918706f7aac585ae5aa3d431d27c7c9d3f492e38f52fdc  include/hashfrontier/dmpp06_polynomial_quotient.hpp
+c44a064700ad7ea7d69d217e989719d245e0ca674d7905d6087f711b57d22416  src/bench_dmpp06_polynomial_quotient.cpp
+6554284d361741c5e4aface372bd1fe3310e12183c9d57458e89adf3ec206813  results/v0.23.0-dmpp06-poly/raw.csv
+22e3f4ae5d52db47ca95e8aefcbc68bdc3ff29c93d0ccc9b8e3ae8407066a7d6  results/v0.23.0-dmpp06-poly/summary.csv

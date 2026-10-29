@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="345" viewBox="0 0 920 345">
+<rect width="920" height="345" fill="white"/>
+<text x="25" y="34" font-family="Arial" font-size="20">Collision-involved keys — 4096 keys, 1024 buckets, uniform</text>
+<line x1="60" y1="275" x2="900" y2="275" stroke="#333"/>
+<rect x="88" y="109.90" width="130" height="165.10" fill="#326b94" rx="4"/>
+<text x="153" y="101.90" text-anchor="middle" font-size="13" font-family="Arial">4027.00</text>
+<text x="153" y="300" text-anchor="middle" font-size="15" font-family="Arial">v0.22</text>
+<rect x="293" y="109.82" width="130" height="165.18" fill="#326b94" rx="4"/>
+<text x="358" y="101.82" text-anchor="middle" font-size="13" font-family="Arial">4029.00</text>
+<text x="358" y="300" text-anchor="middle" font-size="15" font-family="Arial">k=2</text>
+<rect x="498" y="109.94" width="130" height="165.06" fill="#326b94" rx="4"/>
+<text x="563" y="101.94" text-anchor="middle" font-size="13" font-family="Arial">4026.00</text>
+<text x="563" y="300" text-anchor="middle" font-size="15" font-family="Arial">k=8</text>
+<rect x="703" y="109.90" width="130" height="165.10" fill="#326b94" rx="4"/>
+<text x="768" y="101.90" text-anchor="middle" font-size="13" font-family="Arial">4027.00</text>
+<text x="768" y="300" text-anchor="middle" font-size="15" font-family="Arial">k=16</text>
+<text x="25" y="330" font-family="Arial" font-size="12" fill="#666">Actual five-seed medians; finite model, not the Siegel high-probability theorem.</text></svg>

@@ -1,0 +1,9 @@
+{
+  "expected": 240,
+  "observed": 240,
+  "summary_groups": 48,
+  "seeds": 5,
+  "source_csv_sha256": "6554284d361741c5e4aface372bd1fe3310e12183c9d57458e89adf3ec206813",
+  "status": "complete",
+  "formal_theorem_verified": false
+}
