@@ -1,5 +1,22 @@
 # HashFrontier
 
+## v0.21.0 | LATIN 2006 DMPP06 finite three-tier routing cloud reproduction
+
+本轮按照 DMPP06 第 3 节将第一级稳定码桶过滤、第二级多层 Tile Filter 和第三级兜底字典串接成一套可运行的查询、插入、更新、删除流程。**GitHub Actions 真实 96/96 组云端实测通过；C++ 676,373 项正确性检查、115,200 次随机操作、ASan/UBSan 全通过。** 保留三级独立稳定 hashcode 空间及满容量拒绝记录。
+
+本轮硬件为 Intel Xeon Platinum 8573C 云端虚拟机、Ubuntu 24.04、GCC 13.3.0。代表参数 first/second bucket bits=6/6、first codes=4、second tiles=4 时，第三层容量 64→512 的总体 overflow 中位数由 **897→450**（每次 1,600 次插入尝试）；successful hit 查询分别 **48.03→52.63 ns/op**。不能跨机器拼接旧结果评价。代码/原始 CSV/汇总/环境/校验均在 [三级复现报告](docs/STOC25-DMPP06-THREE-LEVEL-v0.21.0.md) 与 [原始数据](results/v0.21.0-dmpp06-three/raw.csv) 中。
+
+**边界：第三级使用 std::unordered_map 代替论文引用的高性能字典；一、二级亦为有限 16 位工程实现。未实现正式紧凑空间/高概率时间保证，仍不是完整 DMPP06 或 STOC 2025 Partner Hashing，不计算 HF-Score。**
+
+![Actual third-tier admissions](figures/v0.21.0-dmpp06-third.svg)
+
+![Actual all-tier overflow](figures/v0.21.0-dmpp06-overflow.svg)
+
+[GitHub 真实云端实验](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40835711365) · [32 组统计汇总](results/v0.21.0-dmpp06-three/summary.csv) · [环境记录](results/v0.21.0-dmpp06-three/environment.txt)
+
+---
+
+
 ## v0.20.0 | LATIN 2006 DMPP06 §3.2 第二级多层 Tile 过滤器实测
 
 已按 [原论文 §3.2](https://people.csail.mit.edu/mip/papers/dyndict/dyndict.pdf) 完成有限的多层 tile 机制：桶内可逆置换、逐层减半 tile、区内偏移存储、stable perfect-hash code、删除和第三级溢出交接。GitHub Actions **72/72 组真实云端实验完成**，随机检查 **298,141 项通过**，ASan/UBSan、主 CI、数据完整性验证均通过。**这是 DMPP06 原论文组件的有限机制复现，不是其高概率 hash-family、紧凑 word-packing、三级完整动态 retrieval 或 STOC 2025 完整 Partner Hashing。**

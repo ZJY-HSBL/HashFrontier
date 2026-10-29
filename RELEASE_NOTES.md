@@ -1,9 +1,10 @@
-# HashFrontier v0.20.0 — DMPP06 §3.2 tile-filter reproduction
+# HashFrontier v0.21.0 — DMPP06 three-tier finite cloud reproduction
 
-Faithfully modelled §3.2's finite multi-filter placement and stable tile identifiers using invertible affine finite permutations. Preserves explicit overflow to an unimplemented third level.
+- LATIN 2006 DMPP06 Section 3: route insert/query/update/delete through first/second/third tiers; preserve stable disjoint codes; explicit no-space failure.
+- Third tier uses a standard-library map with free-code recycling; not the theoretical compact high-performance dictionary.
+- GitHub Actions Ubuntu 24.04, GCC 13.3.0, Intel Xeon Platinum 8573C virtual CPU: 96 genuine measurements, 32 fully audited parameter groups.
+- 115,200 randomized operations; 676,373 checks; 255,374 stable-code checks; AddressSanitizer and UndefinedBehaviorSanitizer passed.
+- Actual CSV, summaries, provenance SHA-256, environment, tests and SVG are included in release assets.
+- NOT complete DMPP06, NOT complete STOC25 Partner Hashing, no final HF-Score.
 
-**Actually verified:** 298,141 randomized correctness/invariant checks; ASan/UBSan; strict CSV parser tests; independent GitHub Actions runner [40630812596](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40630812596) completed 72 real benchmark configurations with source, raw CSV, hashes, compiler/CPU environment, summary and generated SVG.
-
-**Key finite observation:** 256 bins, 8192 attempts, 4 seeds; 16/32/64 base tiles show median overflow 16.4185% / 0.1709% / 0%. Do not combine cloud timings with other hardware or score as HF-Score.
-
-**Not implemented:** DMPP06 §2.2 Theorem 5 full high-probability quotient family, original packed constant-time space representation, §3.2 third-level high-performance dictionary, complete dynamic retrieval, or full STOC25 Partner Hashing.
+See docs/STOC25-DMPP06-THREE-LEVEL-v0.21.0.md for exact scope.
