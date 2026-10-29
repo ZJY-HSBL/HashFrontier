@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430">
+<rect width="760" height="430" fill="#fff"/>
+<text x="45" y="42" font-size="22" font-family="sans-serif">DMPP06 finite column quotient hashing</text>
+<text x="45" y="68" font-size="14" fill="#555" font-family="sans-serif">Contiguous 1024-key input, median of 10 seeds; colliding keys</text>
+<text x="55" y="136" font-size="16" font-family="sans-serif">1024 buckets</text>
+<rect x="220" y="112" width="484" height="40" rx="5" fill="#295c8e"/>
+<text x="714" y="138" font-size="15" fill="#222" font-family="sans-serif">530.5</text>
+<text x="55" y="222" font-size="16" font-family="sans-serif">2048 buckets</text>
+<rect x="220" y="198" width="232" height="40" rx="5" fill="#295c8e"/>
+<text x="462" y="224" font-size="15" fill="#222" font-family="sans-serif">255</text>
+<text x="55" y="308" font-size="16" font-family="sans-serif">4096 buckets</text>
+<rect x="220" y="284" width="122" height="40" rx="5" fill="#295c8e"/>
+<text x="352" y="310" font-size="15" fill="#222" font-family="sans-serif">134.5</text>
+<text x="45" y="400" font-size="12" fill="#666" font-family="sans-serif">Finite local/VM tests only; NOT a high-probability theorem claim.</text></svg>

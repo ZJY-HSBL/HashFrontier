@@ -1,0 +1,8 @@
+{
+  "input_rows": 160,
+  "expected_rows": 160,
+  "all_correct": true,
+  "configuration_count": 16,
+  "raw_sha256": "d198bfc3307379c0a3c8f8da7393647e2c5a5a58a838ff000f8a85522fe4a45b",
+  "scope": "DMPP06 finite shifts and column permutations; NOT Siegel / Theorem 5"
+}

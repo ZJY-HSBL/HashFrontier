@@ -1,0 +1,3 @@
+1300681ca20b9eedd76e44eb6b2332639107584be33dc95678f6ff93dcfb6f41  include/hashfrontier/dmpp06_column_quotient.hpp
+a03055c3c1e97d19d712b65397c230e9f3fb48debde2483d6288c1cf65d5f883  src/bench_dmpp06_column_quotient.cpp
+d198bfc3307379c0a3c8f8da7393647e2c5a5a58a838ff000f8a85522fe4a45b  results/v0.22.0-dmpp06-column/raw.csv
