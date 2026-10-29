@@ -1,0 +1,17 @@
+{
+  "valid": true,
+  "rows": 40,
+  "configurations": 8,
+  "seeds_per_configuration": 5,
+  "certified_k": 4,
+  "only_finite_graph_instance": true,
+  "full_Siegel_graph_construction": false,
+  "graph_adjacency_explicit": true,
+  "theorem_asymptotics_claimed": false,
+  "certified_nonempty_subsets_each_trial": {
+    "16": 2516,
+    "24": 12950,
+    "32": 41448,
+    "64": 679120
+  }
+}

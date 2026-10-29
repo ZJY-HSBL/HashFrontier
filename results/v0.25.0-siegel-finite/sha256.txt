@@ -1,0 +1,3 @@
+3b87951c586a47ad57500c3c5ccc71d27a83db0e5589d69cbfe587ecd9ec15d9  include/hashfrontier/siegel_peelable_finite.hpp
+baeb7a1c52b5658641818a87880caa6dedc78a0dd073a9dc08236f62e1afdd85  src/bench_siegel_peelable_finite.cpp
+a318fb91abb0112cb82fe649af71f1f712207c82a531672ee7cc7d0af30dfb75  results/v0.25.0-siegel-finite/raw.csv
