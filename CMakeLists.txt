@@ -140,3 +140,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hf_test_siegel_peelable_finite PRIVATE -O2 -Wall -Wextra -Wpedantic)
 endif()
 add_test(NAME siegel_finite_peelability_and_exact_joint_uniformity COMMAND hf_test_siegel_peelable_finite)
+
+# Siegel 2004 Lemma 6 — finite tensor powers of certified graphs (not complete Siegel).
+add_executable(hf_test_siegel_tensor_product tests/test_siegel_tensor_product_finite.cpp)
+target_link_libraries(hf_test_siegel_tensor_product PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_siegel_tensor_product PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME siegel_lemma6_tensor_product_oracle COMMAND hf_test_siegel_tensor_product)

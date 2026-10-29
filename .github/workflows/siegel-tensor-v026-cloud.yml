@@ -1,0 +1,62 @@
+name: Siegel 2004 Lemma 6 tensor graph exact finite cloud verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/siegel_tensor_product_finite.hpp'
+      - 'tests/test_siegel_tensor_product_finite.cpp'
+      - 'tests/test_siegel_tensor_report.py'
+      - 'src/bench_siegel_tensor_product_finite.cpp'
+      - 'scripts/report_siegel_tensor_v026.py'
+      - '.github/workflows/siegel-tensor-v026-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  siegel-lemma6-finite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and exhaustively check finite Siegel tensor product
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.26.0-siegel-tensor figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_siegel_tensor_product_finite.cpp -o /tmp/hf-v026-test
+          /tmp/hf-v026-test | tee results/v0.26.0-siegel-tensor/tests.log
+          python3 -m unittest discover -s tests -p 'test_siegel_tensor_report.py' -v
+      - name: Independent ASan and UBSan validation
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_siegel_tensor_product_finite.cpp -o /tmp/hf-v026-asan
+          ASAN_OPTIONS=detect_leaks=1 /tmp/hf-v026-asan
+      - name: Real paired cloud timing and strict 100-row audit
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_siegel_tensor_product_finite.cpp -o /tmp/hf-v026-bench
+          /tmp/hf-v026-bench > results/v0.26.0-siegel-tensor/raw.csv
+          python3 scripts/report_siegel_tensor_v026.py results/v0.26.0-siegel-tensor/raw.csv results/v0.26.0-siegel-tensor
+          cp results/v0.26.0-siegel-tensor/latency.svg figures/v0.26.0-siegel-tensor-latency.svg
+          cp results/v0.26.0-siegel-tensor/adjacency.svg figures/v0.26.0-siegel-tensor-adjacency.svg
+          { date -u '+%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.26.0-siegel-tensor/environment.txt
+          sha256sum include/hashfrontier/siegel_tensor_product_finite.hpp tests/test_siegel_tensor_product_finite.cpp src/bench_siegel_tensor_product_finite.cpp results/v0.26.0-siegel-tensor/raw.csv > results/v0.26.0-siegel-tensor/sha256.txt
+      - name: Upload immutable run-level evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: siegel-v026-tensor-finite-cloud
+          path: |
+            results/v0.26.0-siegel-tensor/
+            figures/v0.26.0-siegel-tensor-*.svg
+          if-no-files-found: warn
+      - name: Commit only verified actual cloud observations
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.26.0-siegel-tensor figures/v0.26.0-siegel-tensor-*.svg
+          git diff --cached --quiet || {
+            git commit -m 'data: preserve Siegel Lemma 6 100 paired cloud observations'
+            git push origin HEAD:main
+          }
