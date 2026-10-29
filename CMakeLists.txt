@@ -122,3 +122,12 @@ add_test(NAME dmpp06_finite_column_quotient_bijection COMMAND hf_test_dmpp06_col
 add_executable(hf_test_dmpp06_polynomial_quotient tests/test_dmpp06_polynomial_quotient.cpp)
 target_link_libraries(hf_test_dmpp06_polynomial_quotient PRIVATE hashfrontier)
 add_test(NAME dmpp06_polynomial_GF256_exhaustive COMMAND hf_test_dmpp06_polynomial_quotient)
+
+# LATIN 2006 §2.2 Transformation 4 finite grouped first-order bucket permutations.
+# Not the Siegel independence construction, not the complete Partner Hashing.
+add_executable(hf_test_dmpp06_grouped_quotient tests/test_dmpp06_grouped_quotient.cpp)
+target_link_libraries(hf_test_dmpp06_grouped_quotient PRIVATE hashfrontier)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(hf_test_dmpp06_grouped_quotient PRIVATE -O2 -Wall -Wextra -Wpedantic)
+endif()
+add_test(NAME dmpp06_transformation4_grouped_permutation_oracle COMMAND hf_test_dmpp06_grouped_quotient)

@@ -1,0 +1,60 @@
+name: DMPP06 LATIN 2006 finite Transformation 4 cloud experiment
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_grouped_quotient.hpp'
+      - 'include/hashfrontier/dmpp06_column_quotient.hpp'
+      - 'tests/test_dmpp06_grouped_quotient.cpp'
+      - 'tests/test_dmpp06_group_report.py'
+      - 'src/bench_dmpp06_grouped_quotient.cpp'
+      - 'scripts/report_dmpp06_group_v024.py'
+      - '.github/workflows/dmpp06-group-v024-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  grouped-permutation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run full-domain permutation and grouped-sharing tests
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.24.0-dmpp06-group figures
+          g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_grouped_quotient.cpp -o /tmp/dmpp24-test
+          /tmp/dmpp24-test | tee results/v0.24.0-dmpp06-group/tests.log
+          python3 -m unittest discover -s tests -p test_dmpp06_group_report.py -v
+      - name: Verify sanitizer safety
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_grouped_quotient.cpp -o /tmp/dmpp24-san
+          ASAN_OPTIONS=detect_leaks=1 /tmp/dmpp24-san
+      - name: Execute 300 paired cloud observations with strict audit
+        run: |
+          set -euo pipefail
+          g++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_grouped_quotient.cpp -o /tmp/dmpp24-bench
+          /tmp/dmpp24-bench > results/v0.24.0-dmpp06-group/raw.csv
+          python3 scripts/report_dmpp06_group_v024.py results/v0.24.0-dmpp06-group/raw.csv results/v0.24.0-dmpp06-group
+          cp results/v0.24.0-dmpp06-group/collisions.svg figures/v0.24.0-dmpp06-group-collisions.svg
+          cp results/v0.24.0-dmpp06-group/latency.svg figures/v0.24.0-dmpp06-group-latency.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; g++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.24.0-dmpp06-group/environment.txt
+          sha256sum include/hashfrontier/dmpp06_grouped_quotient.hpp include/hashfrontier/dmpp06_column_quotient.hpp src/bench_dmpp06_grouped_quotient.cpp results/v0.24.0-dmpp06-group/raw.csv > results/v0.24.0-dmpp06-group/sha256.txt
+      - name: Always preserve actual cloud outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmpp06-v024-transformation4-evidence
+          path: |
+            results/v0.24.0-dmpp06-group/
+            figures/v0.24.0-dmpp06-group-*.svg
+          if-no-files-found: warn
+      - name: Commit independently measured results
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.24.0-dmpp06-group figures/v0.24.0-dmpp06-group-*.svg
+          git diff --cached --quiet || { git commit -m 'data: preserve DMPP06 Transformation 4 measured cloud results'; git push origin HEAD:main; }
