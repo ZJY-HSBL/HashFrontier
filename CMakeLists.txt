@@ -112,3 +112,8 @@ add_test(NAME dmpp06_second_level_tiles_stable_codes COMMAND hf_test_dmpp06_seco
 add_executable(hf_test_dmpp06_three_level tests/test_dmpp06_three_level.cpp)
 target_link_libraries(hf_test_dmpp06_three_level PRIVATE hashfrontier)
 add_test(NAME dmpp06_three_tier_stable_code_differential COMMAND hf_test_dmpp06_three_level)
+
+# DMPP06 LATIN 2006 §2.2 finite row-shift/column-permutation quotient mechanism.
+add_executable(hf_test_dmpp06_column tests/test_dmpp06_column_quotient.cpp)
+target_link_libraries(hf_test_dmpp06_column PRIVATE hashfrontier)
+add_test(NAME dmpp06_finite_column_quotient_bijection COMMAND hf_test_dmpp06_column)
