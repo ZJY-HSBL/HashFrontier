@@ -1,0 +1,62 @@
+name: DMPP06 finite GF256 polynomial shifts and field-affine column cloud evidence
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'include/hashfrontier/dmpp06_polynomial_quotient.hpp'
+      - 'tests/test_dmpp06_polynomial_quotient.cpp'
+      - 'tests/test_dmpp06_poly_report.py'
+      - 'src/bench_dmpp06_polynomial_quotient.cpp'
+      - 'scripts/report_dmpp06_poly_v023.py'
+      - '.github/workflows/dmpp06-poly-v023-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify-gf256:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exhaustive finite-domain correctness and report tests
+        run: |
+          set -euo pipefail
+          mkdir -p results/v0.23.0-dmpp06-poly figures
+          c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Iinclude tests/test_dmpp06_polynomial_quotient.cpp -o /tmp/d23-test
+          /tmp/d23-test | tee results/v0.23.0-dmpp06-poly/tests.log
+          python3 -m unittest discover -s tests -p test_dmpp06_poly_report.py -v
+      - name: ASan UBSan bounded test plus exhaustive finite-pair GF test
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O1 -g -DHF_SAN_FAST -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/test_dmpp06_polynomial_quotient.cpp -o /tmp/d23-san
+          ASAN_OPTIONS=detect_leaks=1 /tmp/d23-san
+      - name: Real 240-case benchmark and strict audit
+        run: |
+          set -euo pipefail
+          c++ -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Iinclude src/bench_dmpp06_polynomial_quotient.cpp -o /tmp/d23-bench
+          /tmp/d23-bench > results/v0.23.0-dmpp06-poly/raw.csv
+          python3 scripts/report_dmpp06_poly_v023.py results/v0.23.0-dmpp06-poly/raw.csv results/v0.23.0-dmpp06-poly
+          cp results/v0.23.0-dmpp06-poly/collisions.svg figures/v0.23.0-dmpp06-poly-collisions.svg
+          cp results/v0.23.0-dmpp06-poly/hash-cost.svg figures/v0.23.0-dmpp06-poly-hash-cost.svg
+          { date -u +'%Y-%m-%dT%H:%M:%SZ'; uname -a; c++ --version | head -1; lscpu | grep -E 'Model name|Architecture|CPU\(s\)' | head -4; } > results/v0.23.0-dmpp06-poly/environment.txt
+          sha256sum include/hashfrontier/dmpp06_polynomial_quotient.hpp src/bench_dmpp06_polynomial_quotient.cpp results/v0.23.0-dmpp06-poly/raw.csv results/v0.23.0-dmpp06-poly/summary.csv > results/v0.23.0-dmpp06-poly/sha256.txt
+      - name: Retain exact logs even when failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmpp06-v023-finite-gf256-cloud-raw
+          path: |
+            results/v0.23.0-dmpp06-poly/
+            figures/v0.23.0-dmpp06-poly-*.svg
+          if-no-files-found: warn
+      - name: Commit only measured cloud results
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add results/v0.23.0-dmpp06-poly figures/v0.23.0-dmpp06-poly-*.svg
+          git diff --cached --quiet || {
+            git commit -m 'data: archive actual v0.23.0 DMPP06 finite GF256 cloud evidence'
+            git push origin HEAD:main
+          }
