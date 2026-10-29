@@ -1,0 +1,39 @@
+{
+  "valid": true,
+  "raw_rows": 300,
+  "configurations": 60,
+  "seeds_per_configuration": 5,
+  "strictly_b_lt_n_rows": 240,
+  "single_machine_comparison_only": true,
+  "theorem5_claimed": false,
+  "siegel_high_independence_implemented": false,
+  "finite_transformation4_only": true,
+  "subset": {
+    "transformation3": {
+      "method": "transformation3",
+      "keys": 8192,
+      "bucket_bits": 10,
+      "distribution": "uniform",
+      "seeds": 5,
+      "median_collision_keys": 8190,
+      "median_over_threshold_keys": 373,
+      "median_max_bucket_load": 18,
+      "median_hash_ns_per_key": 1.92206,
+      "metadata_bytes": 1024,
+      "b_lt_n": 1
+    },
+    "transformation4": {
+      "method": "transformation4",
+      "keys": 8192,
+      "bucket_bits": 10,
+      "distribution": "uniform",
+      "seeds": 5,
+      "median_collision_keys": 8190,
+      "median_over_threshold_keys": 350,
+      "median_max_bucket_load": 17,
+      "median_hash_ns_per_key": 4.36252,
+      "metadata_bytes": 1536,
+      "b_lt_n": 1
+    }
+  }
+}
