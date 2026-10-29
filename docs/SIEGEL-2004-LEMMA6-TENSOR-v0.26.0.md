@@ -35,3 +35,22 @@ python3 -m unittest discover -s tests -p test_siegel_tensor_report.py -v
 The cloud workflow also runs ASan/UBSan, saves raw evidence and environment fingerprints, and commits results only after strict checks pass.
 
 **Still outstanding**: Siegel's full large-universe explicit neighbor generator, word-RAM time/storage analysis, DMPP06 high-probability quotient hashing and its complete tertiary dictionary, STOC 2025 Partner Hashing. This finite Lemma-6 module must not enter formal HF-Score.
+
+## Independent GitHub Actions verification for v0.26.0
+
+[Cloud run 40850221365](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40850221365) completed successfully. AMD EPYC 7763 virtual CPU; Ubuntu 24.04; GCC 13.3.0. Exactly **100 observations, 50 checksum-identical matched pairs, 10 summary groups, five paired seeds**. The cloud certification across all pairs performed **8,155,270 finite subset checks**; the C++ deterministic randomized/full-domain test separately checks **4,893,162** subsets.
+
+| u | d | power | Factorized edge payload (B) | Expanded edge payload (B) | Common product random table (B) | Factorized ns/op | Expanded ns/op |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 3 | 2 | 24 | 288 | 512 | 23.0441 | 6.61105 |
+| 6 | 3 | 2 | 36 | 648 | 1,152 | 23.3291 | 6.59209 |
+| 8 | 3 | 2 | 48 | 1,152 | 2,048 | 23.1376 | 6.57219 |
+| 4 | 3 | 3 | 24 | 3,456 | 4,096 | 60.1305 | 15.1394 |
+| 6 | 3 | 3 | 36 | 11,664 | 13,824 | 60.0498 | 15.4299 |
+
+Times are medians across five seeds; neither measurement includes graph search or exhaustive certification. Edge payload lower bounds omit allocator overhead and retained base random table memory. The **324× edge payload reduction** in u=6,d=3,p=3 must not be described as a 324× total-memory reduction. Seeded PRNG words make the engineering benchmark deterministic, not mathematical independence.
+
+[Raw cloud data](../results/v0.26.0-siegel-tensor/raw.csv) · [summary](../results/v0.26.0-siegel-tensor/summary.csv) · [strict audit](../results/v0.26.0-siegel-tensor/audit.json) · [provenance](../results/v0.26.0-siegel-tensor/environment.txt) · [SHA-256](../results/v0.26.0-siegel-tensor/sha256.txt).
+
+![Actual cloud time ratio](../figures/v0.26.0-siegel-tensor-latency.svg)
+![Actual cloud stored-edge payload ratio](../figures/v0.26.0-siegel-tensor-adjacency.svg)

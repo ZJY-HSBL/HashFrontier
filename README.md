@@ -1,5 +1,21 @@
 # HashFrontier
 
+## v0.26.0 | Siegel 2004 Lemma 6 乘积图有限忠实机制
+
+本轮复现 [Siegel 2004 Lemma 6](https://doi.org/10.1137/S0097539701386216) 中的有限 **Tensor／Cartesian product 邻接构造**。由已通过 k-peelable 检查的小图生成二次／三次幂乘积图，新增 **按需求邻接** 和 **显式完全展开** 两种严格配对实现。GitHub Actions [100/100 条真实数据、50/50 配对](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40850221365) 审计通过，检索结果的 checksum 逐对一致；C++ 本地测试还穷举核查了 **4,893,162 个键子集**，ASan/UBSan 通过。
+
+云端 AMD EPYC 7763、GCC 13.3：基本图 u=6、d=3、乘积 p=3 时，分解邻接与显式邻接的边**载荷**分别为 **36 B 与 11,664 B**（324 倍差异），运行时中位延迟分别为 **60.05 与 15.43 ns/op**。另外两者都共享 **13,824 B 的乘积右侧随机表**；边载荷数字**不是进程总内存**，而分解版本仍含未计入表格的基础图 vector 开销和其旧随机表。此配置按载荷加共同表值计算的比例仅约 1.84 倍，远小于 324 倍。
+
+**边界：** 这里是有限图乘积机制，不是 Siegel 所述的完整渐近构造；基础图依赖随机搜索，临时认证过程展开乘积图；SplitMix64 重现实验不等于理论要求的独立均匀表抽样。尚未实现完整 DMPP06 / Partner Hashing，不计算 HF-Score。
+
+[论文逐项复现说明](docs/SIEGEL-2004-LEMMA6-TENSOR-v0.26.0.md) · [真实原始 CSV](results/v0.26.0-siegel-tensor/raw.csv) · [云端数据审计](results/v0.26.0-siegel-tensor/audit.json)
+
+![Siegel finite tensor real cloud latency](figures/v0.26.0-siegel-tensor-latency.svg)
+
+![Siegel finite tensor adjacency payload ratio](figures/v0.26.0-siegel-tensor-adjacency.svg)
+
+---
+
 ## v0.25.0 | Siegel 2004 Lemma 2.6 有限图精确证书与 XOR 随机表
 
 依据 Siegel *On Universal Classes of Extremely Random Constant-Time Hash Functions*（SIAM J. Comput. 2004，Lemma 2.6）新增 **k-peelable 图 + 随机表 XOR 求值**的有限规模忠实机制验证。穷举验证 4,416,204 个非空键子集都存在 unique neighbor；另对一个小图枚举所有随机表位赋值，精确验证至多三个键的输出联合均匀性。

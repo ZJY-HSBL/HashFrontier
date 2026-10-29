@@ -23,6 +23,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_dmpp06_poly_report.py" -v
           python3 -m unittest discover -s tests -p "test_dmpp06_group_report.py" -v
           python3 -m unittest discover -s tests -p "test_siegel_finite_report.py" -v
+          python3 -m unittest discover -s tests -p "test_siegel_tensor_report.py" -v
           python3 scripts/verify_l3_plan.py
           python3 -m unittest discover -s tests -p "test_reproduction_protocol.py" -v
       - name: Publish tagged source and evidence
@@ -34,6 +35,7 @@ jobs:
             echo "Release $tag exists; not overwriting immutable evidence."
           else
             case "$tag" in
+            v0.26.0) assets=(results/v0.26.0-siegel-tensor/raw.csv results/v0.26.0-siegel-tensor/summary.csv results/v0.26.0-siegel-tensor/audit.json results/v0.26.0-siegel-tensor/environment.txt results/v0.26.0-siegel-tensor/sha256.txt results/v0.26.0-siegel-tensor/tests.log figures/v0.26.0-siegel-tensor-latency.svg figures/v0.26.0-siegel-tensor-adjacency.svg docs/SIEGEL-2004-LEMMA6-TENSOR-v0.26.0.md); title="Siegel 2004 Lemma 6 finite tensor-product on-demand adjacency 100 cloud measurements (not full construction)" ;;
             v0.25.0) assets=(results/v0.25.0-siegel-finite/raw.csv results/v0.25.0-siegel-finite/summary.csv results/v0.25.0-siegel-finite/audit.json results/v0.25.0-siegel-finite/environment.txt results/v0.25.0-siegel-finite/sha256.txt results/v0.25.0-siegel-finite/tests.log figures/v0.25.0-siegel-finite-hash.svg figures/v0.25.0-siegel-finite-memory.svg docs/SIEGEL-2004-LEMMA2.6-FINITE-v0.25.0.md); title="Siegel 2004 Lemma 2.6 finite k-peelable XOR graph exact certificate and 40 genuine cloud trials (partial)" ;;
             v0.24.0) assets=(results/v0.24.0-dmpp06-group/raw.csv results/v0.24.0-dmpp06-group/summary.csv results/v0.24.0-dmpp06-group/audit.json results/v0.24.0-dmpp06-group/environment.txt results/v0.24.0-dmpp06-group/sha256.txt results/v0.24.0-dmpp06-group/tests.log figures/v0.24.0-dmpp06-group-collisions.svg figures/v0.24.0-dmpp06-group-latency.svg docs/STOC25-DMPP06-TRANSFORMATION4-v0.24.0.md); title="LATIN 2006 DMPP06 finite Transformation 4 300-case cloud paired verification (partial)" ;;
             v0.23.0) assets=(results/v0.23.0-dmpp06-poly/raw.csv results/v0.23.0-dmpp06-poly/summary.csv results/v0.23.0-dmpp06-poly/audit.json results/v0.23.0-dmpp06-poly/environment.txt results/v0.23.0-dmpp06-poly/sha256.txt results/v0.23.0-dmpp06-poly/tests.log figures/v0.23.0-dmpp06-poly-collisions.svg figures/v0.23.0-dmpp06-poly-hash-cost.svg docs/STOC25-DMPP06-GF256-v0.23.0.md); title="LATIN 2006 DMPP06 finite GF256 k-wise row shifts and column field-affine real 240-run cloud verification" ;;
