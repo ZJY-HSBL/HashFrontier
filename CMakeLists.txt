@@ -117,3 +117,8 @@ add_test(NAME dmpp06_three_tier_stable_code_differential COMMAND hf_test_dmpp06_
 add_executable(hf_test_dmpp06_column tests/test_dmpp06_column_quotient.cpp)
 target_link_libraries(hf_test_dmpp06_column PRIVATE hashfrontier)
 add_test(NAME dmpp06_finite_column_quotient_bijection COMMAND hf_test_dmpp06_column)
+
+# DMPP06 §2.2 polynomial finite model (not Siegel family).
+add_executable(hf_test_dmpp06_polynomial_quotient tests/test_dmpp06_polynomial_quotient.cpp)
+target_link_libraries(hf_test_dmpp06_polynomial_quotient PRIVATE hashfrontier)
+add_test(NAME dmpp06_polynomial_GF256_exhaustive COMMAND hf_test_dmpp06_polynomial_quotient)
