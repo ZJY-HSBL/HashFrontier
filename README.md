@@ -1,5 +1,21 @@
 # HashFrontier
 
+## v0.24.0 | DMPP06 §2.2 Transformation 4 有限分组排列
+
+按照 LATIN 2006 原论文 **b<n** 分支，实现每组共享的随机一级 Tile 排列，并保持列及 Tile 内残余偏移不变，支持完整逆映射。**13,893,153 项排列/双向恢复检查通过**；GitHub Actions [300/300 组真实云端实测](https://github.com/ZJY-HSBL/HashFrontier/actions/runs/40845661999) 已审计并归档，其中 **240 条属于严格的 b<n** 配置。环境：AMD EPYC 7763、Ubuntu 24.04、GCC 13.3.0。
+
+随机输入、8192 键、1024 桶、5 种子中位数：Transformation 3 → 4 的超阈值数量 **373 → 350**，哈希耗时 **1.922 → 4.363 ns/key**，元数据 **1024 → 1536 B**。这既不是全参数配置的普遍提升，也不是论文 Theorem 5 的概率证明。云端测得的容量超额元素数不等于前几版完整散列表的插入拒绝次数。
+
+**保留边界：** 这是有限 16 位域的 Transformation 4 机制复现，仍没有实现 Siegel 高独立性族、原论文真实渐近缩放、完整紧凑动态字典或 STOC25 Partner Hashing，不计算 HF-Score。
+
+[完整复现报告](docs/STOC25-DMPP06-TRANSFORMATION4-v0.24.0.md) · [300 条原始数据](results/v0.24.0-dmpp06-group/raw.csv) · [云端审计](results/v0.24.0-dmpp06-group/audit.json)
+
+![Actual grouped permutation overflow](figures/v0.24.0-dmpp06-group-collisions.svg)
+
+![Actual grouped permutation evaluation cost](figures/v0.24.0-dmpp06-group-latency.svg)
+
+---
+
 ## v0.23.0 | DMPP06 §2.2 有限域多项式移位与双独立列置换
 
 已使用 GF(256) 的 k 次系数多项式（k=2/8/16）代替逐行显式移位表，并使用 GF(256) 有限域仿射双独立置换代替 v0.22 的模 256 奇数仿射置换。**GitHub Actions 独立实测 240/240 组有效、48 个统计配置、5 个随机种子；完整 16 位域双向排列与差分测试通过。** 使用 AMD EPYC 9V74、Ubuntu 24.04、GCC 13.3.0。
